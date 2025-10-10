@@ -117,4 +117,19 @@
   body {
     @apply bg-background text-foreground;
   }
+  h2 {
+    @apply text-xl;
+  }
+  h5 {
+    @apply text-base;
+  }
+  h6 {
+    @apply text-xs;
+  }
+  p {
+    @apply text-sm;
+  }
+  svg.lucide {
+    @apply stroke-[1px];
+  }
 }
