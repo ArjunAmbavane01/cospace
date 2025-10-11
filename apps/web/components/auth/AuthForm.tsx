@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
 import { ArrowLeft, Users } from "lucide-react";
+import { toast } from "sonner";
 
 interface AuthFormProps {
     mode: "signin" | "signup";
@@ -17,7 +18,15 @@ interface AuthFormProps {
 export default function AuthForm({ mode }: AuthFormProps) {
 
     const router = useRouter();
-    const { loading: authLoading, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+    const { loading: authLoading, loadingGoogle: googleAuthLoading, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+
+    const handleGoogleAuth = async () => {
+        try {
+            await signInWithGoogle();
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Something went wrong")
+        }
+    }
 
     return (
         <div className='flex justify-center items-center h-screen w-full bg-background'>
@@ -33,7 +42,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     </div>
                     <span className="transition-all duration-200">Go Back</span>
                 </Button>
-                <div className="col-span-1 flex flex-col justify-center items-center gap-5 px-10 h-[550px] w-full text-center rounded-lg">
+                <div className="col-span-1 flex flex-col justify-center items-center gap-5 p-10 h-[550px] w-full text-center rounded-lg">
                     <div className="flex flex-col items-center gap-3">
                         <div className="flex justify-center items-center size-10 bg-accent rounded-lg">
                             <Users className="size-5" />
@@ -56,8 +65,8 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         </div>
                     </div>
                     {mode === "signup" ?
-                        <SignUpForm authLoading={authLoading} signUpWithEmail={signUpWithEmail} /> :
-                        <SignInForm authLoading={authLoading} signInWithEmail={signInWithEmail} />
+                        <SignUpForm authLoading={authLoading} googleAuthLoading={googleAuthLoading} signUpWithEmail={signUpWithEmail} /> :
+                        <SignInForm authLoading={authLoading} googleAuthLoading={googleAuthLoading} signInWithEmail={signInWithEmail} />
                     }
                     <Separator className="my-2 relative">
                         <h6 className="text-muted-foreground bg-background px-3 absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]">
@@ -66,15 +75,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     </Separator>
                     <div className="w-full">
                         <Button
-                            onClick={signInWithGoogle}
+                            onClick={handleGoogleAuth}
                             variant={"outline"}
                             size={"lg"}
                             disabled={authLoading}
                             className="flex items-center gap-3 w-full">
-                            {authLoading ?
-                                <Spinner /> :
-                                <Image src={"/assets/logo/google-logo.svg"} alt={"Google logo"} width={20} height={20} className="size-4" />
-                            }
+                            <Image src={"/assets/logo/google-logo.svg"} alt={"Google logo"} width={20} height={20} className="size-4" />
                             Google
                         </Button>
                     </div>

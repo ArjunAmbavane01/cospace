@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
+import { toast } from "sonner";
 
 interface SignInFormProps {
     authLoading: boolean;
+    googleAuthLoading: boolean;
     signInWithEmail: (email: string, password: string) => Promise<void>;
 }
 
-export default function SignInForm({ authLoading, signInWithEmail }: SignInFormProps) {
+export default function SignInForm({ authLoading, googleAuthLoading, signInWithEmail }: SignInFormProps) {
 
     const form = useForm<z.infer<typeof signInFormSchema>>({
         resolver: zodResolver(signInFormSchema),
@@ -25,9 +27,12 @@ export default function SignInForm({ authLoading, signInWithEmail }: SignInFormP
         }
     })
 
-    const onSubmit = (data: z.infer<typeof signInFormSchema>) => {
-        console.log(data)
-        signInWithEmail(data.email, data.password)
+    const onSubmit = async (data: z.infer<typeof signInFormSchema>) => {
+        try {
+            signInWithEmail(data.email, data.password)
+        } catch (err: unknown) {
+            toast.error(err instanceof Error ? err.message : "Something went wrong");
+        }
     }
 
     return (
@@ -61,7 +66,8 @@ export default function SignInForm({ authLoading, signInWithEmail }: SignInFormP
                 </div>
                 <div className="space-y-2 w-full">
                     <Button
-                        disabled={authLoading}
+                        disabled={authLoading || googleAuthLoading}
+
                         className="w-full"
                         type="submit"
                     >

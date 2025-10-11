@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
+import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from "@/components/icons";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -32,6 +34,22 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
+          <Toaster
+            duration={3000}
+            toastOptions={{
+              classNames: {
+                toast: "!bg-background !border-border !items-center !gap-2",
+                title: "!text-foreground !text-sm",
+                description: "!text-muted-foreground",
+              },
+            }}
+            icons={{
+              success: <SuccessIcon />,
+              info: <InfoIcon />,
+              warning: <WarningIcon />,
+              error: <ErrorIcon />,
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
