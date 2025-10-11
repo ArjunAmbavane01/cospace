@@ -4,11 +4,11 @@ import { redirect } from 'next/navigation'
 import Dashboard from './_components/Dashboard'
 
 export default async function page() {
-    const session = await auth.api.getSession({
+    const userSession = await auth.api.getSession({
         headers: await headers()
     })
-    if (!session) redirect("/signin")
+    if (!userSession) redirect("/signin")
     return (
-        <Dashboard />
+        <Dashboard user={userSession.user} />
     )
 }

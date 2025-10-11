@@ -123,14 +123,20 @@
   h2 {
     @apply text-xl;
   }
-  h5 {
+  h3 {
+    @apply text-lg;
+  }
+  h4 {
     @apply text-base;
+  }
+  h5 {
+    @apply text-sm;
   }
   h6 {
     @apply text-xs;
   }
   p {
-    @apply text-sm;
+    @apply text-muted-foreground text-sm;
   }
   svg.lucide {
     @apply stroke-[1px];

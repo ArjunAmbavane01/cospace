@@ -1,15 +1,20 @@
-"use client"
-import { Button } from "@/components/ui/button";
-import useAuth from "hooks/useAuth";
+import Navbar from "@/components/navbar/Navbar";
+import type { User } from "better-auth";
+import ArenaList from "./ArenaList";
+import DashboardHeader from "./DashboardHeader";
 
+interface DashboardProps {
+    user: User;
+}
 
-export default function Dashboard() {
-    const { logout } = useAuth();
-
+export default function Dashboard({ user }: DashboardProps) {
     return (
-        <div className='p-3 bg-red-400'>
-            Dashboard
-            <Button onClick={logout}>Log out</Button>
+        <div className='pt-24 bg-background w-full min-h-screen relative'>
+            <Navbar user={user} />
+            <div className="space-y-10">
+                <DashboardHeader />
+            <ArenaList />
+            </div>
         </div>
     )
 }

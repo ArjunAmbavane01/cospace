@@ -1,6 +1,14 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    transpilePackages:["@repo/db"]
+    images: {
+        remotePatterns: [
+            {
+                protocol: "https",
+                hostname: "lh3.googleusercontent.com"
+            }
+        ]
+    },
+    transpilePackages: ["@repo/db"]
 };
 
 export default nextConfig;
