@@ -1,0 +1,30 @@
+import { relations } from "drizzle-orm";
+import { pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { user } from "../auth.ts";
+import { messageGroups } from "../messageGroup.ts";
+
+export const usersToMessageGroups = pgTable(
+    "users_to_message_groups",
+    {
+        userId: text("user_id")
+            .notNull()
+            .references(() => user.id),
+        messageGroupId: text("message_group_id")
+            .notNull()
+            .references(() => messageGroups.id),
+    },
+    (t) => [
+        primaryKey({ columns: [t.userId, t.messageGroupId] })
+    ]
+)
+
+export const usersToMessageGroupsRelations = relations(usersToMessageGroups, ({ one }) => ({
+    messageGroup: one(messageGroups, {
+        fields: [usersToMessageGroups.messageGroupId],
+        references: [messageGroups.id]
+    }),
+    user: one(user, {
+        fields: [usersToMessageGroups.userId],
+        references: [user.id]
+    })
+}))
