@@ -9,7 +9,7 @@ interface NavbarProps {
 
 export default async function Navbar({ user }: NavbarProps) {
   return (
-    <nav className='absolute top-0 inset-x-0 w-full bg-background backdrop-blur-sm border-b'>
+    <nav className='absolute top-0 inset-x-0 w-full bg-sidebar backdrop-blur-sm border-b'>
       <div className='flex justify-between items-center h-16 w-full max-w-7xl mx-auto'>
         <h3>CoSpace</h3>
         <div className='flex items-center gap-5'>
