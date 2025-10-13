@@ -79,9 +79,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
                             variant={"outline"}
                             size={"lg"}
                             disabled={authLoading}
-                            className="flex items-center gap-3 w-full">
+                            className="w-full"
+                        >
                             <Image src={"/assets/logo/google-logo.svg"} alt={"Google logo"} width={20} height={20} className="size-4" />
-                            Google
+                            {googleAuthLoading ? <Spinner /> : "Google"}
                         </Button>
                     </div>
                 </div>

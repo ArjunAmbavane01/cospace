@@ -87,7 +87,7 @@ export default function SignUpForm({ authLoading, googleAuthLoading, signUpWithE
                     </Button>
                     <p>
                         <span className="text-muted-foreground">Already have an account? </span>
-                        <Link href={"/signin"} className="cursor-pointer hover:underline">Log in</Link>
+                        <Link href={"/signin"} className="font-medium text-primary cursor-pointer hover:underline">Log in</Link>
                     </p>
                 </div>
             </form>

@@ -1,7 +1,7 @@
-import Navbar from "@/components/navbar/Navbar";
 import type { User } from "better-auth";
 import ArenaList from "./ArenaList";
 import HubHeader from "./HubHeader";
+import Navbar from "@/components/navbar/Navbar";
 
 interface HubDashboardProps {
     user: User;
@@ -10,10 +10,10 @@ interface HubDashboardProps {
 export default function HubDashboard({ user }: HubDashboardProps) {
     return (
         <div className='pt-24 bg-background w-full min-h-screen relative'>
-            <Navbar user={user} />
+            <Navbar userName={user.name} userImage={user.image} />
             <div className="space-y-10">
-                <HubHeader />
-                <ArenaList />
+                <HubHeader userName={user.name} userId={user.id} />
+                <ArenaList userId={user.id} />
             </div>
         </div>
     )

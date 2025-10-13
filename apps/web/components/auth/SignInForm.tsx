@@ -75,7 +75,7 @@ export default function SignInForm({ authLoading, googleAuthLoading, signInWithE
                     </Button>
                     <p>
                         <span className="text-muted-foreground">New to CoSpace? </span>
-                        <Link href={"/signup"} className="cursor-pointer hover:underline">Sign up</Link>
+                        <Link href={"/signup"} className="font-medium text-primary cursor-pointer hover:underline">Sign up</Link>
                     </p>
                 </div>
             </form>
