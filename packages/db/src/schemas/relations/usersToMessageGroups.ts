@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 import { user } from "../auth.ts";
 import { messageGroups } from "../messageGroup.ts";
 
@@ -9,7 +9,7 @@ export const usersToMessageGroups = pgTable(
         userId: text("user_id")
             .notNull()
             .references(() => user.id),
-        messageGroupId: text("message_group_id")
+        messageGroupId: integer("message_group_id")
             .notNull()
             .references(() => messageGroups.id),
     },

@@ -1,10 +1,13 @@
-import { drizzle, NeonHttpDatabase } from 'drizzle-orm/neon-http';
 import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
+import * as schema from "./schemas/index.ts";
 
 const sql = neon(process.env.DATABASE_URL!);
 
-const globalForDb = global as unknown as { drizzle: NeonHttpDatabase };
+const globalForDB = global as typeof globalThis & {
+    db: ReturnType<typeof drizzle<typeof schema>>;
+}
 
-export const db = globalForDb.drizzle || drizzle({ client: sql });
+export const db = globalForDB.db || drizzle({ client: sql, schema });
 
-if (process.env.NODE_ENV !== "production") globalForDb.drizzle = db;
+if (process.env.NODE_ENV === "production") globalForDB.db = db;
