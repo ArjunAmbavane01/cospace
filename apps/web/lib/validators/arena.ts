@@ -6,6 +6,13 @@ export const arenaSchema = z.object({
     slug: z.string().min(1, "Arena slug must have at least 1 character").max(120, "Arena slug cannot be longer than 120 characters"),
     adminId: z.string(),
     createdAt: z.date(),
+    admin: z.object({
+        name: z.string()
+    }),
+    usersToArenas: z.object({
+        userId: z.string(),
+        arenaId: z.number(),
+    }).array(),
 })
 
 export type Arena = z.infer<typeof arenaSchema>;

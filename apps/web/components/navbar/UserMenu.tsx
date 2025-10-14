@@ -2,19 +2,19 @@
 
 import Image from "next/image";
 import useAuth from "hooks/useAuth";
+import { User } from "better-auth";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
 import { Kbd } from "@/components/ui/kbd";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, UserCircle2 } from "lucide-react";
 
 interface UserMenuProps {
-    userName: string;
-    userImage: string | undefined | null;
+    user: User
 }
 
-export default function UserMenu({ userName, userImage }: UserMenuProps) {
-
+export default function UserMenu({ user }: UserMenuProps) {
     const { logout } = useAuth();
+    const { name: userName,image:userImage } = user;
     const userInitials = userName.split(" ").map(w => w[0]).join("");
 
     return (

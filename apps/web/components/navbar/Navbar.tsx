@@ -1,3 +1,4 @@
+import { User } from 'better-auth';
 import UserMenu from './UserMenu'
 import { ModeToggle } from '@/components/mode-toggle';
 import { InputGroup, InputGroupAddon, InputGroupInput, } from "@/components/ui/input-group"
@@ -5,11 +6,10 @@ import { Kbd } from '@/components/ui/kbd';
 import { SearchIcon } from 'lucide-react';
 
 interface NavbarProps {
-  userName: string;
-  userImage: string | undefined | null;
+  user: User
 }
 
-export default async function Navbar({ userName, userImage }: NavbarProps) {
+export default async function Navbar({ user }: NavbarProps) {
   return (
     <nav className='absolute top-0 inset-x-0 w-full bg-sidebar backdrop-blur-sm border-b'>
       <div className='flex justify-between items-center h-16 w-full max-w-7xl mx-auto'>
@@ -30,7 +30,7 @@ export default async function Navbar({ userName, userImage }: NavbarProps) {
             <ModeToggle />
           </div>
           <div className='h-[50%] w-0.5 rounded-full bg-muted' />
-          <UserMenu userName={userName} userImage={userImage} />
+          <UserMenu user={user} />
         </div>
       </div>
     </nav>

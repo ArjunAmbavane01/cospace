@@ -15,7 +15,11 @@ export const usersRelations = relations(user, ({ many }) => ({
 }))
 
 // Arena Relations
-export const arenasRelations = relations(arenas, ({ many }) => ({
+export const arenasRelations = relations(arenas, ({ one, many }) => ({
+    admin: one(user, {
+        fields: [arenas.adminId],
+        references: [user.id],
+    }),
     // arena can be in many users
     usersToArenas: many(usersToArenas),
     // arena can be in many message groups

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { ThemeProvider } from "@/components/theme-provider"
 import "./globals.css";
+import Provider from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from "@/components/icons";
 
@@ -27,12 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
+        <Provider>
           {children}
           <Toaster
             duration={3000}
@@ -50,7 +45,7 @@ export default function RootLayout({
               error: <ErrorIcon />,
             }}
           />
-        </ThemeProvider>
+        </Provider>
       </body>
     </html>
   );

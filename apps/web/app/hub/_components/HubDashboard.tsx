@@ -1,7 +1,7 @@
 import type { User } from "better-auth";
-import ArenaList from "./ArenaList";
-import HubHeader from "./HubHeader";
 import Navbar from "@/components/navbar/Navbar";
+import HubHeader from "./HubHeader";
+import ArenaList from "./ArenaList";
 
 interface HubDashboardProps {
     user: User;
@@ -10,10 +10,15 @@ interface HubDashboardProps {
 export default function HubDashboard({ user }: HubDashboardProps) {
     return (
         <div className='pt-24 bg-background w-full min-h-screen relative'>
-            <Navbar userName={user.name} userImage={user.image} />
+            <Navbar user={user} />
             <div className="space-y-10">
-                <HubHeader userName={user.name} userId={user.id} />
-                <ArenaList userId={user.id} />
+                <HubHeader user={user} />
+                <div className="flex flex-col gap-5 w-full max-w-7xl mx-auto">
+                    <div className="flex gap-20 items-center">
+                        <h3>Your Arenas</h3>
+                    </div>
+                    <ArenaList userId={user.id} />
+                </div>
             </div>
         </div>
     )
