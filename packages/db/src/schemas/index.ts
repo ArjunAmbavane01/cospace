@@ -1,9 +1,9 @@
-export * from "./auth.ts";
-export * from "./arena.ts";
-export * from "./messageGroup.ts";
-export * from "./message.ts";
+export * from "./auth";
+export * from "./arena";
+export * from "./messageGroup";
+export * from "./message";
 
 // relations
-export * from "./relations/index.ts"
-export * from "./relations/usersToArenas.ts"
-export * from "./relations/usersToMessageGroups.ts"
+export * from "./relations/index"
+export * from "./relations/usersToArenas"
+export * from "./relations/usersToMessageGroups"

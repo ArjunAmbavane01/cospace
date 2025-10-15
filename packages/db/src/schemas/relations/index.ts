@@ -1,10 +1,10 @@
 import { relations } from "drizzle-orm";
-import { user } from "../auth.ts";
-import { arenas } from "../arena.ts";
-import { messageGroups } from "../messageGroup.ts";
-import { messages } from "../message.ts";
-import { usersToArenas } from "./usersToArenas.ts";
-import { usersToMessageGroups } from "./usersToMessageGroups.ts";
+import { user } from "../auth";
+import { arenas } from "../arena";
+import { messageGroups } from "../messageGroup";
+import { messages } from "../message";
+import { usersToArenas } from "./usersToArenas";
+import { usersToMessageGroups } from "./usersToMessageGroups";
 
 // User Relations
 export const usersRelations = relations(user, ({ many }) => ({

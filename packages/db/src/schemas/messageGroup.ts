@@ -1,5 +1,5 @@
 import { pgTable, timestamp, serial, integer, uuid } from "drizzle-orm/pg-core";
-import { arenas } from "./arena.ts";
+import { arenas } from "./arena";
 
 export const messageGroups = pgTable("message_groups", {
     id: serial().primaryKey(),

@@ -1,6 +1,6 @@
 import { pgTable, text, timestamp, serial, varchar, integer } from "drizzle-orm/pg-core";
-import { user } from "./auth.ts";
-import { messageGroups } from "./messageGroup.ts";
+import { user } from "./auth";
+import { messageGroups } from "./messageGroup";
 
 export const messages = pgTable("messages", {
     id: serial().primaryKey(),

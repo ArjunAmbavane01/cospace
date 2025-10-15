@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 
-export default function CustomButton({ children }: React.ComponentProps<"button">) {
+export default function CustomButton() {
     return (
         <div className="p-0.5 bg-foreground/10 group rounded-2xl">
             <div className='p-0.5 bg-gradient-to-t from-blue-500 to-blue-300 hover:bg-blue-400 border-2 border-blue-800 rounded-xl group-hover:bg-blue-400'>

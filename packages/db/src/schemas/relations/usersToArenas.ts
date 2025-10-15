@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
-import { arenas } from "../arena.ts";
-import { user } from "../auth.ts";
+import { arenas } from "../arena";
+import { user } from "../auth";
 
 export const usersToArenas = pgTable(
     "users_to_arenas",

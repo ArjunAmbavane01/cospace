@@ -1,7 +1,7 @@
 import { relations } from "drizzle-orm";
 import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
-import { user } from "../auth.ts";
-import { messageGroups } from "../messageGroup.ts";
+import { user } from "../auth";
+import { messageGroups } from "../messageGroup";
 
 export const usersToMessageGroups = pgTable(
     "users_to_message_groups",

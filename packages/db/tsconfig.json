@@ -4,11 +4,8 @@
         "outDir": "./dist",
         "declaration": true,
         "declarationMap": true,
-        "noEmit": true,
-        "allowImportingTsExtensions": true,
-        "types": [
-            "node"
-        ]
+        "module": "Preserve",
+        "moduleResolution": "Bundler"
     },
     "include": [
         "src/**/*",
