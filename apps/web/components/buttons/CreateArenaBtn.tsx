@@ -42,6 +42,7 @@ export default function CreateArenaBtn({ user }: CreateArenaBtnProps) {
     const { mutate: addArenaMutation, isPending } = useMutation({
         mutationFn: (data: createArenaFormData) => createArena(data.arenaName, userId, userName),
         onSuccess: (res) => {
+            console.log("here")
             if (res.type === "success" && res.arena) {
                 const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
                 queryClient.setQueryData(["arenas", userId], [res.arena, ...existingArenas]);
@@ -50,6 +51,8 @@ export default function CreateArenaBtn({ user }: CreateArenaBtnProps) {
                 form.reset();
                 router.push(`/arena/${res.arena.slug}`);
 
+            } else if (res.type === "error") {
+                toast.error(res.message);
             }
         },
         onError: (err) => {
@@ -59,7 +62,6 @@ export default function CreateArenaBtn({ user }: CreateArenaBtnProps) {
 
     const onSubmit = (data: createArenaFormData) => {
         addArenaMutation(data);
-
     }
 
     const handleModalClose = () => setModalOpen((c) => !c);
