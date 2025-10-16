@@ -1,5 +1,8 @@
 import { User } from "better-auth";
 import CreateArenaBtn from "@/components/buttons/CreateArenaBtn";
+import { InputGroup, InputGroupAddon, InputGroupInput, } from "@/components/ui/input-group"
+import { Kbd } from '@/components/ui/kbd';
+import { SearchIcon } from 'lucide-react';
 
 interface HubHeaderProps {
     user: User;
@@ -8,16 +11,28 @@ interface HubHeaderProps {
 export default async function HubHeader({ user }: HubHeaderProps) {
     const { name: userName } = user
     return (
-        <div className=' w-full max-w-7xl mx-auto py-5'>
-            <div className="flex items-center justify-between p-8 bg-muted rounded-2xl">
-                <div className='flex flex-col gap-2'>
-                    <h1>
+        <div className='flex flex-col gap-8 py-5 pt-10'>
+            <div className='flex flex-col gap-2'>
+                <h1>
+                    Your Arenas
+                </h1>
+                {/* <h1>
                         Welcome back, {userName.split(" ")[0]}👋
-                    </h1>
-                    <p>
-                        Manage your arenas and connect with your team
-                    </p>
-                </div>
+                    </h1> */}
+                <p>
+                    Manage your arenas and connect with your team
+                </p>
+            </div>
+            <div className="flex justify-between">
+                <InputGroup className="w-md">
+                    <InputGroupInput placeholder="Search arenas" />
+                    <InputGroupAddon>
+                        <SearchIcon />
+                    </InputGroupAddon>
+                    <InputGroupAddon align={"inline-end"}>
+                        <Kbd>⌘</Kbd><Kbd>K</Kbd>
+                    </InputGroupAddon>
+                </InputGroup>
                 <CreateArenaBtn user={user} />
             </div>
         </div>

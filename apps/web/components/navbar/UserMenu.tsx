@@ -7,6 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Kbd } from "@/components/ui/kbd";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, UserCircle2 } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface UserMenuProps {
     user: User
@@ -14,21 +15,26 @@ interface UserMenuProps {
 
 export default function UserMenu({ user }: UserMenuProps) {
     const { logout } = useAuth();
-    const { name: userName,image:userImage } = user;
+    const { name: userName, image: userImage } = user;
     const userInitials = userName.split(" ").map(w => w[0]).join("");
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="flex justify-center items-center size-9 rounded-full border cursor-pointer hover:opacity-90 transition-opacity duration-200 overflow-hidden">
-                {
-                    userImage ?
-                        <Image src={userImage} alt="User image" width={40} height={40} className="size-full" />
-                        :
-                        <Avatar className="size-full rounded-full">
-                            <AvatarImage src={userImage ?? undefined} alt="User image" />
-                            <AvatarFallback>{userInitials}</AvatarFallback>
-                        </Avatar>
-                }
+            <DropdownMenuTrigger asChild>
+                <Button size={"lg"} variant={"ghost"}>
+                    <div className="flex justify-center items-center size-7 rounded-full border cursor-pointer hover:opacity-90 transition-opacity duration-200 overflow-hidden">
+                        {
+                            userImage ?
+                                <Image src={userImage} alt="User image" width={40} height={40} className="size-full" />
+                                :
+                                <Avatar className="size-full rounded-full">
+                                    <AvatarImage src={userImage ?? undefined} alt="User image" />
+                                    <AvatarFallback>{userInitials}</AvatarFallback>
+                                </Avatar>
+                        }
+                    </div>
+                    {user.name}
+                </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuItem className="flex items-center gap-8">

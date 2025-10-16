@@ -11,14 +11,9 @@ export default function HubDashboard({ user }: HubDashboardProps) {
     return (
         <div className='pt-24 bg-background w-full min-h-screen relative'>
             <Navbar user={user} />
-            <div className="space-y-10">
+            <div className="flex flex-col gap-5 w-full max-w-7xl mx-auto space-y-10">
                 <HubHeader user={user} />
-                <div className="flex flex-col gap-5 w-full max-w-7xl mx-auto">
-                    <div className="flex gap-20 items-center">
-                        <h3>Your Arenas</h3>
-                    </div>
-                    <ArenaList userId={user.id} />
-                </div>
+                <ArenaList userId={user.id} />
             </div>
         </div>
     )
