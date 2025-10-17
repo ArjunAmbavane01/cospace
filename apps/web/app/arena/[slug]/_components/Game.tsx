@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { InitGame } from '@/components/game/main';
 import { Engine } from 'excalibur';
+import { InitGame } from '@/components/game/main';
 
 export default function ExcaliburGame() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -10,11 +10,17 @@ export default function ExcaliburGame() {
 
     useEffect(() => {
         if (!canvasRef.current || gameRef.current) return;
+
         const initGame = async () => {
-            gameRef.current = await InitGame(canvasRef.current!)
-            gameRef.current.start();
+            try {
+                gameRef.current = await InitGame(canvasRef.current!);
+                gameRef.current.start();
+            } catch (error) {
+                console.error("Failed to create arena:", error);
+            }
         }
         initGame();
+
         return () => {
             gameRef.current?.stop();
             gameRef.current = null;
