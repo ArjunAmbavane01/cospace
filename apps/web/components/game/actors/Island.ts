@@ -1,4 +1,4 @@
-import { Actor, vec, type Engine, ImageSource, Sprite, CollisionType, GraphicsGroup, Vector } from "excalibur";
+import { Actor, vec, type Engine, ImageSource, Sprite, CollisionType,} from "excalibur";
 
 export class Island extends Actor {
     private baseLayer?: Sprite;
@@ -6,7 +6,7 @@ export class Island extends Actor {
     private mapWidth: number;
     private mapHeight: number;
 
-    constructor(screenWidth: number, screenHeight: number) {
+    constructor() {
         super({
             pos: vec(0, 0),
             anchor: vec(0, 0),
@@ -14,23 +14,22 @@ export class Island extends Actor {
             z: 0,
         });
 
+        // temp assignment
         this.mapWidth = 1000;
         this.mapHeight = 1000;
     }
 
-    async onInitialize(engine: Engine): Promise<void> {
-        // Load base
-        const baseImage = new ImageSource('/assets/map/island-base.png');
+    async onInitialize(): Promise<void> {
+        // load base layer
+        const baseImage = new ImageSource('/assets/maps/island-base.png');
         await baseImage.load();
         this.mapWidth = baseImage.width;
         this.mapHeight = baseImage.height;
-
         this.baseLayer = baseImage.toSprite();
 
         // load foreground layer
-        const foregroundImage = new ImageSource('/assets/map/island-foreground.png');
+        const foregroundImage = new ImageSource('/assets/maps/island-foreground.png');
         await foregroundImage.load();
-
         this.foregroundLayer = foregroundImage.toSprite();
 
         this.graphics.use(this.baseLayer);

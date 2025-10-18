@@ -87,7 +87,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     </div>
                 </div>
                 <div className="col-span-2 size-full border rounded-lg relative overflow-hidden">
-                    <Image src={"/assets/forest3.jpg"} alt="forest image" fill className="object-cover rounded-lg" />
+                    <Image src={"/assets/forest.jpg"} alt="forest image" fill className="object-cover rounded-lg" />
                 </div>
             </div>
         </div>
