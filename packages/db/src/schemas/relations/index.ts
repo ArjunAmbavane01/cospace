@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { user } from "../auth";
+import { session, user } from "../auth";
 import { arenas } from "../arena";
 import { messageGroups } from "../messageGroup";
 import { messages } from "../message";
@@ -46,3 +46,11 @@ export const messagesRelations = relations(messages, ({ one }) => ({
         references: [messageGroups.id],
     }),
 }));
+
+// Session Relations
+export const sessionRelations = relations(session, ({ one }) => ({
+    user: one(user, {
+        fields: [session.userId],
+        references: [user.id],
+    })
+}))

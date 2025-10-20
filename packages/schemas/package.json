@@ -11,5 +11,8 @@
   "license": "ISC",
   "dependencies": {
     "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*"
   }
 }
