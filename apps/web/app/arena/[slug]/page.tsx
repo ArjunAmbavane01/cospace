@@ -1,14 +1,15 @@
 'use client';
 
+import { use } from 'react';
 import dynamic from 'next/dynamic';
 
-const ExcaliburGame = dynamic(() => import('./_components/Game'), {
+const ArenaClient = dynamic(() => import('./_components/ArenaClient'), {
     ssr: false,
-    loading: () => <div>Loading game...</div>
+    loading: () => <div>Loading arena...</div>
 });
 
-export default function Page() {
-    return (
-        <ExcaliburGame />
-    );
+export default function ArenaPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = use(params)
+
+    return <ArenaClient slug={slug} />
 }

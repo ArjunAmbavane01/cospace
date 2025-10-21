@@ -1,8 +1,12 @@
-import { Actor, vec, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas, Engine } from "excalibur";
+import { Actor, vec, Keys, Engine, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas } from "excalibur";
+import { Socket } from "socket.io-client";
+import { User } from "better-auth";
 import { PlayerDirection } from "@/lib/validators/game";
 
-export class Character extends Actor {
-    private speed: number = 80;
+export class MainCharacter extends Actor {
+    private socket: Socket;
+    private user: User;
+    private speed: number = 280;
     private spriteSheet?: SpriteSheet;
     private walkUpAnim?: Animation;
     private walkLeftAnim?: Animation;
@@ -13,7 +17,7 @@ export class Character extends Actor {
     private playerName: string;
     private nameActor?: Actor;
 
-    constructor(playerName: string) {
+    constructor(socket: Socket, user: User) {
         super({
             pos: vec(0, 0),
             anchor: vec(0.5, 1),
@@ -22,7 +26,9 @@ export class Character extends Actor {
             z: 50,
             collisionType: CollisionType.Active,
         });
-        this.playerName = playerName
+        this.socket = socket;
+        this.user = user;
+        this.playerName = "You";
     }
 
     async onInitialize(): Promise<void> {
@@ -50,56 +56,20 @@ export class Character extends Actor {
         this.graphics.use(this.idleAnim);
 
         this.createNameLabel();
-    }
-    
-    onPreUpdate(engine: Engine): void {
-        let velocity = vec(0, 0);
+        setInterval(() => this.sendPlayerCoordinates(), 50);
 
-        if (this.currentDirection === 'up') {
-            velocity.y = -1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [8 * 9], 100);
-        }
-        if (this.currentDirection === 'down') {
-            velocity.y = 1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [10 * 9], 100);
-        }
-        if (this.currentDirection === 'left') {
-            velocity.x = -1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [9 * 9], 100);
-        }
-        if (this.currentDirection === 'right') {
-            velocity.x = 1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [11 * 9], 100);
-        }
-
-        if (velocity.x !== 0 && velocity.y !== 0) {
-            velocity = velocity.normalize();
-        }
-
-        this.vel = velocity.scale(this.speed);
-
-        if (velocity.x !== 0 || velocity.y !== 0) {
-            switch (this.currentDirection) {
-                case 'up':
-                    if (this.walkUpAnim) this.graphics.use(this.walkUpAnim);
-                    break;
-                case 'down':
-                    if (this.walkDownAnim) this.graphics.use(this.walkDownAnim);
-                    break;
-                case 'left':
-                    if (this.walkLeftAnim) this.graphics.use(this.walkLeftAnim);
-                    break;
-                case 'right':
-                    if (this.walkRightAnim) this.graphics.use(this.walkRightAnim);
-                    break;
-            }
-        } else {
-            if (this.idleAnim) this.graphics.use(this.idleAnim);
-        }
     }
 
-    setPlayerDirection(dir: PlayerDirection): void {
-        this.currentDirection = dir;
+    private sendPlayerCoordinates(): void {
+        const playerPos = {
+            x: this.pos.x,
+            y: this.pos.y,
+            direction: this.currentDirection,
+        }
+        this.socket.emit("player-pos", {
+            userId: this.user.id,
+            playerPos
+        });
     }
 
     private createNameLabel(): void {
@@ -139,5 +109,56 @@ export class Character extends Actor {
 
         this.nameActor.graphics.use(nameCanvas);
         this.addChild(this.nameActor);
+    }
+
+    onPreUpdate(engine: Engine): void {
+        const keyboard = engine.input.keyboard;
+        let velocity = vec(0, 0);
+
+        if (keyboard.isHeld(Keys.W) || keyboard.isHeld(Keys.Up)) {
+            velocity.y = -1;
+            this.currentDirection = 'up';
+            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [8 * 9], 100);
+        }
+        if (keyboard.isHeld(Keys.S) || keyboard.isHeld(Keys.Down)) {
+            velocity.y = 1;
+            this.currentDirection = 'down';
+            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [10 * 9], 100);
+        }
+        if (keyboard.isHeld(Keys.A) || keyboard.isHeld(Keys.Left)) {
+            velocity.x = -1;
+            this.currentDirection = 'left';
+            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [9 * 9], 100);
+        }
+        if (keyboard.isHeld(Keys.D) || keyboard.isHeld(Keys.Right)) {
+            velocity.x = 1;
+            this.currentDirection = 'right';
+            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [11 * 9], 100);
+        }
+
+        if (velocity.x !== 0 && velocity.y !== 0) {
+            velocity = velocity.normalize();
+        }
+
+        this.vel = velocity.scale(this.speed);
+
+        if (velocity.x !== 0 || velocity.y !== 0) {
+            switch (this.currentDirection) {
+                case 'up':
+                    if (this.walkUpAnim) this.graphics.use(this.walkUpAnim);
+                    break;
+                case 'down':
+                    if (this.walkDownAnim) this.graphics.use(this.walkDownAnim);
+                    break;
+                case 'left':
+                    if (this.walkLeftAnim) this.graphics.use(this.walkLeftAnim);
+                    break;
+                case 'right':
+                    if (this.walkRightAnim) this.graphics.use(this.walkRightAnim);
+                    break;
+            }
+        } else {
+            if (this.idleAnim) this.graphics.use(this.idleAnim);
+        }
     }
 }

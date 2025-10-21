@@ -1,4 +1,4 @@
-import { Actor, vec, type Engine, ImageSource, Sprite, CollisionType,} from "excalibur";
+import { Actor, vec, ImageSource, Sprite, CollisionType,} from "excalibur";
 
 export class Island extends Actor {
     private baseLayer?: Sprite;
