@@ -10,6 +10,11 @@ import { Socket } from "socket.io-client";
 import { User } from "better-auth";
 import { ArenaUser } from "@/lib/validators/game";
 
+interface ProximityUser {
+    userId: string;
+    distance: number;
+}
+
 export const USER_PROXIMITY_EVENT = 'user-proximity';
 
 export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefObject<ArenaUser[]>, socket: Socket, user: User) => {
@@ -41,6 +46,9 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     );
     game.add(collisionLayer);
 
+    // Store characters with ID
+    const otherCharacters = new Map<string, Character>();
+
     socket.on("player-pos", (data) => {
         const { userId, playerPos } = data;
         const Character = otherCharacters.get(userId);
@@ -54,9 +62,6 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     const mainCharacter = new MainCharacter(socket, user);
     mainCharacter.pos = vec(island.getMapWidth() / 2 - 100, island.getMapHeight() / 2 + 100);
     game.add(mainCharacter);
-
-    // Store characters with ID
-    const otherCharacters = new Map<string, Character>();
 
     // Proximity detection settings
     const PROXIMITY_RADIUS = 200; // pixels
@@ -93,38 +98,35 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
 
     // proximity detection
     const checkProximity = () => {
-        let closestUser: { userId: string; distance: number } | null = null;
+        let closestDistance = PROXIMITY_RADIUS + 1; // start from beyond proximity
+        let closestUserId: string | null = null;
 
         otherCharacters.forEach((character, userId) => {
             const distance = mainCharacter.pos.distance(character.pos);
 
-            if (distance <= PROXIMITY_RADIUS) {
-                if (!closestUser || distance < closestUser.distance) {
-                    closestUser = { userId, distance };
-                }
+            if (distance <= PROXIMITY_RADIUS && distance < closestDistance) {
+                closestDistance = distance;
+                closestUserId = userId;
             }
         });
 
-        // Emit event if we found a nearby user and it's different from last time
-        if (closestUser && closestUser.userId !== lastProximityUserId) {
-            lastProximityUserId = closestUser.userId;
+        if (closestUserId !== null && closestUserId !== lastProximityUserId) {
+            lastProximityUserId = closestUserId;
 
-            // Dispatch custom window event
             window.dispatchEvent(new CustomEvent(USER_PROXIMITY_EVENT, {
                 detail: {
-                    userId: closestUser.userId,
-                    distance: closestUser.distance
+                    userId: closestUserId,
+                    distance: closestDistance
                 }
             }));
-        } else if (!closestUser && lastProximityUserId) {
-            // User left proximity
+        } else if (closestUserId === null && lastProximityUserId) {
+            // Users left proximity
             lastProximityUserId = null;
             window.dispatchEvent(new CustomEvent(USER_PROXIMITY_EVENT, {
                 detail: { userId: null }
             }));
         }
     };
-
     // Set up periodic checks
     const userCheckInterval = setInterval(checkForNewUsers, 1000);
     const proximityCheckInterval = setInterval(checkProximity, CHECK_INTERVAL);
