@@ -27,6 +27,7 @@ const useAuth = () => {
         })
         setLoading(false);
         if (error) throw new Error(error.message);
+        router.push("/hub");
     }, []);
 
     const signUpWithEmail = useCallback(async (name: string, email: string, password: string) => {
@@ -39,6 +40,7 @@ const useAuth = () => {
         })
         setLoading(false);
         if (error) throw new Error(error.message);
+        router.push("/hub");
     }, []);
 
     const logout = useCallback(async () => {

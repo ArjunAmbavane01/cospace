@@ -42,12 +42,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     </div>
                     <span className="transition-all duration-200">Go Back</span>
                 </Button>
-                <div className="col-span-1 flex flex-col justify-center items-center gap-5 p-10 h-[550px] w-full text-center rounded-lg">
+                <div className="col-span-1 flex flex-col justify-center items-center gap-6 p-10 h-[550px] w-full rounded-lg">
                     <div className="flex flex-col items-center gap-3">
                         <div className="flex justify-center items-center size-10 bg-accent rounded-lg">
                             <Users className="size-5" />
                         </div>
-                        <div className="flex flex-col items-center gap-1.5">
+                        <div className="flex flex-col items-center gap-1.5 text-center">
                             <h2>
                                 {
                                     mode === "signup" ?
@@ -55,35 +55,37 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                         "Welcome back to CoSpace"
                                 }
                             </h2>
-                            <h6 className="text-muted-foreground text-balance">
+                            {/* <h6 className="text-muted-foreground text-balance">
                                 {
                                     mode === "signup" ?
                                         "Set up your workspace and start collaborating in your virtual office." :
                                         "Reconnect with your team and jump right back into your virtual space."
                                 }
-                            </h6>
+                            </h6> */}
                         </div>
                     </div>
                     {mode === "signup" ?
                         <SignUpForm authLoading={authLoading} googleAuthLoading={googleAuthLoading} signUpWithEmail={signUpWithEmail} /> :
                         <SignInForm authLoading={authLoading} googleAuthLoading={googleAuthLoading} signInWithEmail={signInWithEmail} />
                     }
-                    <Separator className="my-2 relative">
-                        <h6 className="text-muted-foreground bg-background px-3 absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]">
-                            OR
-                        </h6>
-                    </Separator>
-                    <div className="w-full">
-                        <Button
-                            onClick={handleGoogleAuth}
-                            variant={"outline"}
-                            size={"lg"}
-                            disabled={authLoading}
-                            className="w-full"
-                        >
-                            <Image src={"/assets/logo/google-logo.svg"} alt={"Google logo"} width={20} height={20} className="size-4" />
-                            {googleAuthLoading ? <Spinner /> : "Google"}
-                        </Button>
+                    <div className="w-full flex flex-col gap-5">
+                        <Separator className="my-2 relative">
+                            <h6 className="text-muted-foreground bg-background px-3 absolute top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%]">
+                                OR
+                            </h6>
+                        </Separator>
+                        <div className="w-full">
+                            <Button
+                                onClick={handleGoogleAuth}
+                                variant={"outline"}
+                                size={"lg"}
+                                disabled={authLoading}
+                                className="w-full"
+                            >
+                                <Image src={"/assets/logo/google-logo.svg"} alt={"Google logo"} width={20} height={20} className="size-4" />
+                                {googleAuthLoading ? <Spinner /> : "Google"}
+                            </Button>
+                        </div>
                     </div>
                 </div>
                 <div className="col-span-2 size-full border rounded-lg relative overflow-hidden">

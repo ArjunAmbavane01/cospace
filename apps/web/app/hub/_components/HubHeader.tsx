@@ -1,5 +1,5 @@
 import { User } from "better-auth";
-import CreateArenaBtn from "@/components/buttons/CreateArenaBtn";
+import CreateArenaForm from "@/components/forms/CreateArenaForm";
 import { InputGroup, InputGroupAddon, InputGroupInput, } from "@/components/ui/input-group"
 import { Kbd } from '@/components/ui/kbd';
 import { SearchIcon } from 'lucide-react';
@@ -33,7 +33,7 @@ export default async function HubHeader({ user }: HubHeaderProps) {
                         <Kbd>⌘</Kbd><Kbd>K</Kbd>
                     </InputGroupAddon>
                 </InputGroup>
-                <CreateArenaBtn user={user} />
+                <CreateArenaForm user={user} />
             </div>
         </div>
     )

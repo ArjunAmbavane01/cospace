@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 export const signUpFormSchema = z.object({
-    name: z.string("Name must have at least 1 character").min(1, "Name must have at least 1 character").max(50, "Name cannot be longer than 50 characters"),
+    name: z.string().min(1, "Name must have at least 1 character").max(50, "Name cannot be longer than 50 characters"),
     email: z.email("Enter a valid email"),
     password: z
         .string()
