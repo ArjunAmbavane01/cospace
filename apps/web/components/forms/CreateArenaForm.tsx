@@ -94,7 +94,6 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
                                             field.state.meta.isTouched && !field.state.meta.isValid
                                         return (
                                             <Field data-invalid={isInvalid}>
-                                                {/* <FieldLabel htmlFor={field.name}>Arena Name</FieldLabel> */}
                                                 <AnimatedInput
                                                     id={field.name}
                                                     name={field.name}

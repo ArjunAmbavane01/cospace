@@ -33,9 +33,16 @@ export default function RootLayout({
             duration={3000}
             toastOptions={{
               classNames: {
-                toast: "!bg-background !border-border !items-center !gap-2",
-                title: "!text-foreground !text-sm",
-                description: "!text-muted-foreground",
+                description: 'group-[.toast]:text-muted-foreground',
+                actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+                cancelButton: 'group-[.toast]:bg-white group-[.toast]:text-black',
+                error:
+                  'group toast !border-red-100 !bg-red-50 dark:!border-red-900 dark:!bg-red-950 !text-foreground !text-sm !shadow-lg',
+                success:
+                  'group toast !border-emerald-200 !bg-emerald-50 dark:!bg-emerald-950 dark:!border-emerald-900 !text-foreground !text-sm !shadow-lg',
+                warning:
+                  'group toast !bg-yellow !text-yellow-600 dark:!text-foreground !shadow-lg !text-sm',
+                info: 'group toast !bg-blue !text-blue-600 dark:!text-foreground !shadow-lg !text-sm',
               },
             }}
             icons={{
