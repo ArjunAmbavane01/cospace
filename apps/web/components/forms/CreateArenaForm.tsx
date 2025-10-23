@@ -3,20 +3,19 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from "@tanstack/react-form"
-import { createArena } from 'server/actions/arena/createArena';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { createArena } from 'server/actions/arena/createArena';
 import { createArenaFormSchema } from '@/lib/validators/createArena';
 import { Arena } from '@/lib/validators/arena';
 import { User } from 'better-auth';
 import z from 'zod';
 import { toast } from 'sonner';
+import AnimatedInput from '../AnimatedInput';
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Spinner } from '@/components/ui/spinner';
-import { Field, FieldError, FieldGroup, FieldLabel, } from "@/components/ui/field"
+import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Plus } from 'lucide-react';
-import AnimatedInput from '../AnimatedInput';
 
 interface CreateArenaFormProps {
     user: User;
@@ -53,10 +52,7 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
                 form.reset();
                 handleModalClose();
                 router.push(`/arena/${res.arena.slug}`);
-
-            } else if (res.type === "error") {
-                toast.error(res.message);
-            }
+            } else if (res.type === "error") toast.error(res.message);
         },
         onError: (err) => {
             toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");

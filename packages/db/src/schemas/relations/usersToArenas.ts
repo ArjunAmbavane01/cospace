@@ -8,10 +8,10 @@ export const usersToArenas = pgTable(
     {
         userId: text("user_id")
             .notNull()
-            .references(() => user.id),
+            .references(() => user.id, { onDelete: "cascade" }),
         arenaId: integer("arena_id")
             .notNull()
-            .references(() => arenas.id),
+            .references(() => arenas.id, { onDelete: "cascade" }),
     },
     (t) => [
         primaryKey({ columns: [t.userId, t.arenaId] })

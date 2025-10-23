@@ -1,16 +1,16 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence } from "motion/react";
+import { useQuery } from "@tanstack/react-query";
+import { getArenas } from "server/actions/arena/getArenas";
 import type { User } from "better-auth";
+import { AnimatePresence } from "motion/react";
 import HubHeader from "./HubHeader";
 import ArenaList from "./ArenaList";
+import ArenaCardSkeleton from "./ArenaCardSkeleton";
 import Navbar from "@/components/navbar/Navbar";
 import WelcomeUserToast from "@/components/toast/WelcomeUserToast";
-
-import { getUserArenas } from "server/actions/arena/getUserArenas";
-import { useQuery } from "@tanstack/react-query";
-import ArenaCardSkeleton from "./ArenaCardSkeleton";
+import { toast } from "sonner";
 
 interface HubDashboardProps {
     user: User;
@@ -23,7 +23,11 @@ export default function HubDashboard({ user }: HubDashboardProps) {
 
     const { data: userArenas, isLoading, isError } = useQuery({
         queryKey: ["arenas", user.id],
-        queryFn: () => getUserArenas(user.id),
+        queryFn: async () => {
+            const res = await getArenas(user.id);
+            if (res.type === "success") return res.userArenas
+            else if (res.type === "error") toast.error(res.message)
+        },
         staleTime: 60 * 1000 // 60 seconds
     })
 

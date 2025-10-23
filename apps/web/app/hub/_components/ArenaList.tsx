@@ -34,7 +34,7 @@ export default function ArenaList({ filteredArenas, searchQuery, isError }: Aren
     return (
         <div className="grid grid-cols-4 gap-x-24 gap-y-14">
             {filteredArenas?.map((arena, idx) => {
-                return <ArenaCard arena={arena} key={idx} />
+                return <ArenaCard arena={arena} key={arena.slug} />
             })}
         </div>
     )

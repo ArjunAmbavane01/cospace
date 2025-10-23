@@ -1,7 +1,6 @@
 import { z } from "zod";
 
 export const arenaSchema = z.object({
-    id: z.number(),
     name: z.string().min(1, "Arena name must have at least 1 character").max(100, "Arena name cannot be longer than 100 characters"),
     slug: z.string().min(1, "Arena slug must have at least 1 character").max(120, "Arena slug cannot be longer than 120 characters"),
     adminId: z.string(),
@@ -11,7 +10,6 @@ export const arenaSchema = z.object({
     }),
     usersToArenas: z.object({
         userId: z.string(),
-        arenaId: z.number(),
     }).array(),
 })
 
