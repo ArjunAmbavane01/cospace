@@ -22,7 +22,7 @@ export default function UserMenu({ user }: UserMenuProps) {
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
                 <Button size={"lg"} variant={"ghost"}>
-                    <div className="flex justify-center items-center size-7 rounded-full border cursor-pointer hover:opacity-90 transition-opacity duration-200 overflow-hidden">
+                    <div className="flex justify-center items-center size-7 rounded-full overflow-hidden">
                         {
                             userImage ?
                                 <Image src={userImage} alt="User image" width={40} height={40} className="size-full" />
@@ -36,8 +36,8 @@ export default function UserMenu({ user }: UserMenuProps) {
                     {user.name}
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent>
-                <DropdownMenuItem className="flex items-center gap-8">
+            <DropdownMenuContent className="w-44">
+                <DropdownMenuItem className="flex items-center justify-between gap-8">
                     <div className="flex items-center gap-2">
                         <UserCircle2 className="size-4" />
                         Profile

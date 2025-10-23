@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { AlertCircle, CircleCheck, CircleAlert, TriangleAlert, CheckCircle, XCircle } from "lucide-react"
+import { AlertCircle, CircleAlert, CheckCircle, XCircle } from "lucide-react"
 
 interface IconProps {
   className?: string

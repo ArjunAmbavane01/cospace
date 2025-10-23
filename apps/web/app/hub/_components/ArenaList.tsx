@@ -33,15 +33,16 @@ export default function ArenaList({ userId }: ArenaListProps) {
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-4 gap-10">
+            <div className="grid grid-cols-4 gap-24">
                 {Array.from({ length: 4 }).map((_, idx) => {
                     return <ArenaCardSkeleton key={idx} />
                 })}
             </div>
         )
     }
+
     return (
-        <div className="grid grid-cols-4 gap-10">
+        <div className="grid grid-cols-4 gap-x-24 gap-y-14">
             {isError ? (
                 <div className="text-destructive text-center">
                     Failed to load your arenas. Please try again later.

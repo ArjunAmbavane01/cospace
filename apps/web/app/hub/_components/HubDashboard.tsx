@@ -9,7 +9,7 @@ interface HubDashboardProps {
 
 export default function HubDashboard({ user }: HubDashboardProps) {
     return (
-        <div className='pt-24 bg-background w-full min-h-screen relative'>
+        <div className='py-24 bg-background w-full min-h-screen relative'>
             <Navbar user={user} />
             <div className="flex flex-col gap-5 w-full max-w-7xl mx-auto space-y-10">
                 <HubHeader user={user} />
