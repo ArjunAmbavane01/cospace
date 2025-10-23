@@ -1,0 +1,38 @@
+import { and, eq } from "drizzle-orm";
+import { db } from "../../client";
+import { arenas } from "../../schemas";
+
+export const deleteArena = async (arenaSlug: string, userId: string) => {
+    try {
+        // check who is trying to delete arena
+        const arenaRecord = await db
+            .select({ adminId: arenas.adminId, arenaId: arenas.id })
+            .from(arenas)
+            .where(eq(arenas.slug, arenaSlug));
+
+        if (!arenaRecord[0]) throw new Error("Arena does not exists");
+        const { arenaId, adminId } = arenaRecord[0];
+
+        // if user is trying to delete arena, block them 
+        if (adminId !== userId) throw new Error("Only admin can delete this arena");
+
+        // admin is deleting the arena, delete arena
+        const deletedArenas = await db.delete(arenas)
+            .where(and(eq(arenas.id, arenaId), eq(arenas.adminId, userId)))
+            .returning();
+        if (!deletedArenas[0]) throw new Error("Failed to delete arena");
+
+        const message = "Arena deleted successfully";
+        return {
+            type: "success",
+            message,
+            arenaSlug: deletedArenas[0].slug
+        }
+    } catch (err) {
+        const message = err instanceof Error ? err.message : "Unexpected error occurred. Please try again"
+        return {
+            type: "error",
+            message
+        }
+    }
+}

@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { getArenas } from "server/actions/arena/getArenas";
+import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getArenas, deleteArena } from "server/actions/arena";
+import { Arena } from "@/lib/validators/arena";
 import type { User } from "better-auth";
 import { AnimatePresence } from "motion/react";
 import HubHeader from "./HubHeader";
@@ -11,6 +12,13 @@ import ArenaCardSkeleton from "./ArenaCardSkeleton";
 import Navbar from "@/components/navbar/Navbar";
 import WelcomeUserToast from "@/components/toast/WelcomeUserToast";
 import { toast } from "sonner";
+
+export type DeleteArenaMutation = UseMutateFunction<
+    { type: string; message: string; arenaSlug?: string },
+    Error,
+    string,
+    unknown
+>;
 
 interface HubDashboardProps {
     user: User;
@@ -21,14 +29,35 @@ export default function HubDashboard({ user }: HubDashboardProps) {
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [showWelcomeToast, setShowWelcomeToast] = useState<boolean>(false);
 
+    const userId = user.id
+    const queryClient = useQueryClient();
+
     const { data: userArenas, isLoading, isError } = useQuery({
-        queryKey: ["arenas", user.id],
+        queryKey: ["arenas", userId],
         queryFn: async () => {
-            const res = await getArenas(user.id);
+            const res = await getArenas(userId);
             if (res.type === "success") return res.userArenas
             else if (res.type === "error") toast.error(res.message)
         },
         staleTime: 60 * 1000 // 60 seconds
+    })
+
+    const { mutate: deleteArenaMutation, isPending } = useMutation({
+        mutationFn: (arenaSlug: string) => deleteArena(arenaSlug, userId),
+        onSuccess: (res) => {
+            if (res.type === "success") {
+                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
+                const remainingArenas = existingArenas.filter(arena => arena.slug !== res.arenaSlug);
+                queryClient.setQueryData(["arenas", userId], [...remainingArenas]);
+                toast.success(res.message);
+            } else if (res.type === "error") {
+                console.error(res.message);
+                toast.error(res.message)
+            };
+        },
+        onError: (err) => {
+            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+        },
     })
 
     const filteredArenas = useMemo(() => (userArenas?.filter((arena) => {
@@ -57,7 +86,13 @@ export default function HubDashboard({ user }: HubDashboardProps) {
                                 return <ArenaCardSkeleton key={idx} />
                             })}
                         </div>
-                    ) : <ArenaList filteredArenas={filteredArenas} searchQuery={searchQuery} isError={isError} />
+                    ) : <ArenaList
+                        filteredArenas={filteredArenas}
+                        searchQuery={searchQuery}
+                        isError={isError}
+                        deleteArena={deleteArenaMutation}
+                        isDeletePending={isPending}
+                    />
                 }
             </div>
             <AnimatePresence>

@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createArena } from 'server/actions/arena';
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createArena } from 'server/actions/arena/createArena';
 import { createArenaFormSchema } from '@/lib/validators/createArena';
 import { Arena } from '@/lib/validators/arena';
 import { User } from 'better-auth';

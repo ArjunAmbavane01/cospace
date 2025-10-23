@@ -1,12 +1,15 @@
 import { Arena } from "@/lib/validators/arena";
+import { DeleteArenaMutation } from "./HubDashboard";
 import ArenaCard from "./ArenaCard";
 interface ArenaListProps {
     filteredArenas: Arena[];
     searchQuery: string;
     isError: boolean;
+    deleteArena: DeleteArenaMutation;
+    isDeletePending: boolean;
 }
 
-export default function ArenaList({ filteredArenas, searchQuery, isError }: ArenaListProps) {
+export default function ArenaList({ filteredArenas, searchQuery, isError, deleteArena, isDeletePending }: ArenaListProps) {
     if (isError) {
         return (
             <div className="text-destructive text-center p-20 border border-dashed rounded-xl">
@@ -34,7 +37,12 @@ export default function ArenaList({ filteredArenas, searchQuery, isError }: Aren
     return (
         <div className="grid grid-cols-4 gap-x-24 gap-y-14">
             {filteredArenas?.map((arena, idx) => {
-                return <ArenaCard arena={arena} key={arena.slug} />
+                return <ArenaCard
+                    key={arena.slug}
+                    arena={arena}
+                    deleteArena={deleteArena}
+                    isDeletePending={isDeletePending}
+                />
             })}
         </div>
     )

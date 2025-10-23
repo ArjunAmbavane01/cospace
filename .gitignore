@@ -40,3 +40,5 @@ yarn-error.log*
 
 # Drizzle
 /packages/db/drizzle/meta/
+/packages/db/drizzle/*.sql
+

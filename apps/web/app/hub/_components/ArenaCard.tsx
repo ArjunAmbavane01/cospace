@@ -3,21 +3,24 @@
 import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion } from "motion/react";
 import { formatDate } from "@/lib/formatDate";
 import { Arena } from "@/lib/validators/arena";
+import { AnimatePresence, motion } from "motion/react";
+import { DeleteArenaMutation } from "./HubDashboard";
+import ArenaDeleteBtn from "./ArenaDeleteBtn";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger, AlertDialogFooter, AlertDialogHeader } from "@/components/ui/alert-dialog";
-import { Check, ChevronUp, Link, Share2, SquarePenIcon, Trash2Icon, Users2, XCircle } from "lucide-react";
 import { IoEnterOutline } from "react-icons/io5";
+import { Check, ChevronUp, Share2, SquarePenIcon, Users2, XCircle } from "lucide-react";
 
 interface ArenaCardProps {
-    arena: Arena
+    arena: Arena;
+    deleteArena: DeleteArenaMutation;
+    isDeletePending: boolean;
 }
 
-export default function ArenaCard({ arena }: ArenaCardProps) {
+export default function ArenaCard({ arena, deleteArena, isDeletePending }: ArenaCardProps) {
 
     const [openInfo, setopenInfo] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
@@ -154,31 +157,11 @@ export default function ArenaCard({ arena }: ArenaCardProps) {
                                 <SquarePenIcon />
                                 Edit
                             </Button>
-                            <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                    <Button variant="outline" className="flex-1 hover:text-destructive/90">
-                                        <Trash2Icon />
-                                        Delete
-                                    </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <AlertDialogHeader>
-                                        <AlertDialogTitle>Delete Arena</AlertDialogTitle>
-                                        <AlertDialogDescription>
-                                            This action is irreversible. Deleting this arena will remove all associated users, data, and settings.
-                                        </AlertDialogDescription>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter>
-                                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                        <AlertDialogAction asChild>
-                                            <Button variant={"destructive"}>
-                                                <Trash2Icon />
-                                                Delete
-                                            </Button>
-                                        </AlertDialogAction>
-                                    </AlertDialogFooter>
-                                </AlertDialogContent>
-                            </AlertDialog>
+                            <ArenaDeleteBtn
+                                arenaSlug={arena.slug}
+                                deleteArena={deleteArena}
+                                isDeletePending={isDeletePending}
+                            />
                         </ButtonGroup>
                     </motion.div>
                 )}
