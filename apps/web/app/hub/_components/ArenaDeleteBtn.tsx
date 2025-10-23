@@ -1,16 +1,16 @@
 "use client"
 
 import { useState } from "react";
-import { DeleteArenaMutation } from "./HubDashboard";
+import { ArenaMutation } from "./HubDashboard";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger, AlertDialogFooter, AlertDialogHeader } from "@/components/ui/alert-dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Trash2Icon } from "lucide-react";
 import { Spinner } from "@/components/ui/spinner";
+import { Trash2Icon } from "lucide-react";
 
 interface ArenaDeleteBtnProps {
     arenaSlug: string;
-    deleteArena: DeleteArenaMutation;
+    deleteArena: ArenaMutation;
     isDeletePending: boolean;
 }
 

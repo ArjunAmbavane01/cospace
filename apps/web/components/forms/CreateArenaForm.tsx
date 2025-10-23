@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createArena } from 'server/actions/arena';
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createArenaFormSchema } from '@/lib/validators/createArena';
+import { createArenaFormSchema } from '@/lib/validators/arena';
 import { Arena } from '@/lib/validators/arena';
 import { User } from 'better-auth';
 import z from 'zod';

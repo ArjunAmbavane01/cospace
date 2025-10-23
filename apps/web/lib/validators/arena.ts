@@ -14,3 +14,16 @@ export const arenaSchema = z.object({
 })
 
 export type Arena = z.infer<typeof arenaSchema>;
+
+export const createArenaFormSchema = z.object({
+    arenaName: z.string().min(1, "Arena name must have at least 1 character").max(100, "Arena name cannot be longer than 100 characters")
+})
+
+export const joinArenaFormSchema = z.object({
+    inviteLink: z.
+        url()
+        .refine(
+            (url) => url.startsWith("http://localhost:3000/arena/"),
+            "Link must be a valid Cospace Arena link (http://localhost:3000/arena/...)"
+        ),
+})

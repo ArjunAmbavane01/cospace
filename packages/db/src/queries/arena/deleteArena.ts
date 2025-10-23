@@ -26,7 +26,7 @@ export const deleteArena = async (arenaSlug: string, userId: string) => {
         return {
             type: "success",
             message,
-            arenaSlug: deletedArenas[0].slug
+            arenaSlug
         }
     } catch (err) {
         const message = err instanceof Error ? err.message : "Unexpected error occurred. Please try again"

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getArenas, deleteArena } from "server/actions/arena";
+import { getArenas, deleteArena, joinArena, leaveArena } from "server/actions/arena";
 import { Arena } from "@/lib/validators/arena";
 import type { User } from "better-auth";
 import { AnimatePresence } from "motion/react";
@@ -13,7 +13,7 @@ import Navbar from "@/components/navbar/Navbar";
 import WelcomeUserToast from "@/components/toast/WelcomeUserToast";
 import { toast } from "sonner";
 
-export type DeleteArenaMutation = UseMutateFunction<
+export type ArenaMutation = UseMutateFunction<
     { type: string; message: string; arenaSlug?: string },
     Error,
     string,
@@ -42,8 +42,42 @@ export default function HubDashboard({ user }: HubDashboardProps) {
         staleTime: 60 * 1000 // 60 seconds
     })
 
-    const { mutate: deleteArenaMutation, isPending } = useMutation({
+    // delete arena mutation
+    const { mutate: deleteArenaMutation, isPending: isDeleting } = useMutation({
         mutationFn: (arenaSlug: string) => deleteArena(arenaSlug, userId),
+        onSuccess: (res) => {
+            if (res.type === "success") {
+                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
+                const remainingArenas = existingArenas.filter(arena => arena.slug !== res.arenaSlug);
+                queryClient.setQueryData(["arenas", userId], [...remainingArenas]);
+                toast.success(res.message);
+            } else if (res.type === "error") {
+                toast.error(res.message)
+            };
+        },
+        onError: (err) => {
+            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+        },
+    })
+
+    // join arena mutation
+    const { mutate: joinArenaMutation, isPending: isJoining } = useMutation({
+        mutationFn: (arenaSlug: string) => joinArena(arenaSlug, userId),
+        onSuccess: (res) => {
+            if (res.type === "success") {
+                toast.success(res.message);
+            } else if (res.type === "error") {
+                toast.error(res.message)
+            };
+        },
+        onError: (err) => {
+            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+        },
+    })
+
+    // leave arena mutation
+    const { mutate: leaveArenaMutation, isPending: isLeaving } = useMutation({
+        mutationFn: (arenaSlug: string) => leaveArena(arenaSlug, userId),
         onSuccess: (res) => {
             if (res.type === "success") {
                 const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
@@ -89,8 +123,11 @@ export default function HubDashboard({ user }: HubDashboardProps) {
                         filteredArenas={filteredArenas}
                         searchQuery={searchQuery}
                         isError={isError}
+                        isDeleting={isDeleting}
+                        isLeaving={isLeaving}
                         deleteArena={deleteArenaMutation}
-                        isDeletePending={isPending}
+                        leaveArena={leaveArenaMutation}
+                        joinArena={joinArenaMutation}
                     />
                 }
             </div>

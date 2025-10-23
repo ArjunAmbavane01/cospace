@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { formatDate } from "@/lib/formatDate";
 import { Arena } from "@/lib/validators/arena";
 import { AnimatePresence, motion } from "motion/react";
-import { DeleteArenaMutation } from "./HubDashboard";
+import { ArenaMutation } from "./HubDashboard";
 import ArenaDeleteBtn from "./ArenaDeleteBtn";
+import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { IoEnterOutline, IoLogOutOutline } from "react-icons/io5";
@@ -16,11 +17,21 @@ import { Check, ChevronUp, Share2, SquarePenIcon, Users2, XCircle } from "lucide
 
 interface ArenaCardProps {
     arena: Arena;
-    deleteArena: DeleteArenaMutation;
-    isDeletePending: boolean;
+    isDeleting: boolean;
+    isLeaving: boolean;
+    deleteArena: ArenaMutation;
+    leaveArena: ArenaMutation;
+    joinArena: ArenaMutation;
 }
 
-export default function ArenaCard({ arena, deleteArena, isDeletePending }: ArenaCardProps) {
+export default function ArenaCard({
+    arena,
+    isDeleting,
+    isLeaving,
+    deleteArena,
+    leaveArena,
+    joinArena
+}: ArenaCardProps) {
 
     const [openInfo, setopenInfo] = useState<boolean>(false);
     const [copied, setCopied] = useState<boolean>(false);
@@ -141,14 +152,25 @@ export default function ArenaCard({ arena, deleteArena, isDeletePending }: Arena
                                         <SquarePenIcon />
                                         Edit
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem>
-                                        <IoLogOutOutline />
-                                        Leave
+                                    <DropdownMenuItem onClick={() => leaveArena(arena.slug)}>
+                                        {
+                                            isLeaving ? (
+                                                <>
+                                                    <Spinner />
+                                                    Leaving
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <IoLogOutOutline />
+                                                    Leave
+                                                </>
+                                            )
+                                        }
                                     </DropdownMenuItem>
                                     <ArenaDeleteBtn
                                         arenaSlug={arena.slug}
                                         deleteArena={deleteArena}
-                                        isDeletePending={isDeletePending}
+                                        isDeletePending={isDeleting}
                                     />
                                 </DropdownMenuGroup>
                             </DropdownMenuContent>

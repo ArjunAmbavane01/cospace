@@ -1,15 +1,27 @@
 import { Arena } from "@/lib/validators/arena";
-import { DeleteArenaMutation } from "./HubDashboard";
+import { ArenaMutation } from "./HubDashboard";
 import ArenaCard from "./ArenaCard";
 interface ArenaListProps {
     filteredArenas: Arena[];
     searchQuery: string;
     isError: boolean;
-    deleteArena: DeleteArenaMutation;
-    isDeletePending: boolean;
+    isDeleting: boolean;
+    isLeaving: boolean;
+    deleteArena: ArenaMutation;
+    leaveArena: ArenaMutation;
+    joinArena: ArenaMutation;
 }
 
-export default function ArenaList({ filteredArenas, searchQuery, isError, deleteArena, isDeletePending }: ArenaListProps) {
+export default function ArenaList({
+    filteredArenas,
+    searchQuery,
+    isError,
+    isDeleting,
+    isLeaving,
+    deleteArena,
+    leaveArena,
+    joinArena
+}: ArenaListProps) {
     if (isError) {
         return (
             <div className="text-destructive text-center p-20 border border-dashed rounded-xl">
@@ -29,7 +41,10 @@ export default function ArenaList({ filteredArenas, searchQuery, isError, delete
         return (
             <div className="text-muted-foreground text-center col-span-4 p-20 border border-dashed rounded-xl">
                 <h4>
-                    You haven't created any arenas yet. Click "<span className="text-foreground">Create Arena</span>" to get started!
+                    No arenas yet.{" "}
+                    <span className="text-foreground">Create Arena</span> or{" "}
+                    <span className="text-foreground">join one</span>{" "}
+                    to get started!
                 </h4>
             </div>
         );
@@ -40,8 +55,11 @@ export default function ArenaList({ filteredArenas, searchQuery, isError, delete
                 return <ArenaCard
                     key={arena.slug}
                     arena={arena}
+                    isDeleting={isDeleting}
+                    isLeaving={isLeaving}
                     deleteArena={deleteArena}
-                    isDeletePending={isDeletePending}
+                    leaveArena={leaveArena}
+                    joinArena={joinArena}
                 />
             })}
         </div>

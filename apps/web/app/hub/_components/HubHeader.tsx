@@ -3,6 +3,7 @@
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
 import { User } from "better-auth";
 import CreateArenaForm from "@/components/forms/CreateArenaForm";
+import JoinArenaForm from "@/components/forms/JoinArenaForm";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { Kbd } from '@/components/ui/kbd';
 import { SearchIcon } from 'lucide-react';
@@ -13,6 +14,7 @@ interface HubHeaderProps {
 }
 
 export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
+
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
@@ -34,12 +36,12 @@ export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
                 <h1>
                     Your Arenas
                 </h1>
-                <p>
+                <h4 className="text-muted-foreground">
                     Manage your arenas and connect with your team
-                </p>
+                </h4>
             </div>
-            <div className="flex justify-between">
-                <InputGroup className="w-md">
+            <div className="flex items-center justify-between">
+                <InputGroup className="w-md border border-dashed">
                     <InputGroupInput
                         ref={inputRef}
                         placeholder="Search arenas"
@@ -52,7 +54,10 @@ export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
                         <Kbd>⌘</Kbd><Kbd>K</Kbd>
                     </InputGroupAddon>
                 </InputGroup>
-                <CreateArenaForm user={user} />
+                <div className="flex items-center gap-3">
+                    <CreateArenaForm user={user} />
+                    <JoinArenaForm user={user} />
+                </div>
             </div>
         </div>
     )
