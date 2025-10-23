@@ -16,16 +16,13 @@ export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     useEffect(() => {
-
         const handleSearchShortcut = (e: KeyboardEvent) => {
             if ((e.metaKey || e.ctrlKey) && e.key === "k") {
                 e.preventDefault();
                 inputRef.current?.focus()
             };
         }
-
         window.addEventListener("keydown", handleSearchShortcut);
-
         return () => {
             window.removeEventListener("keydown", handleSearchShortcut);
         }
@@ -46,7 +43,8 @@ export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
                     <InputGroupInput
                         ref={inputRef}
                         placeholder="Search arenas"
-                        onChange={(e) => (setSearchQuery(e.target.value.trim()))} />
+                        onChange={(e) => (setSearchQuery(e.target.value.trim()))}
+                    />
                     <InputGroupAddon>
                         <SearchIcon />
                     </InputGroupAddon>

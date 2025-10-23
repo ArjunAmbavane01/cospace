@@ -8,10 +8,10 @@ import { Arena } from "@/lib/validators/arena";
 import { AnimatePresence, motion } from "motion/react";
 import { DeleteArenaMutation } from "./HubDashboard";
 import ArenaDeleteBtn from "./ArenaDeleteBtn";
-import { Button } from "@/components/ui/button";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { IoEnterOutline } from "react-icons/io5";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { IoEnterOutline, IoLogOutOutline } from "react-icons/io5";
+import { CiMenuKebab } from "react-icons/ci";
 import { Check, ChevronUp, Share2, SquarePenIcon, Users2, XCircle } from "lucide-react";
 
 interface ArenaCardProps {
@@ -48,8 +48,44 @@ export default function ArenaCard({ arena, deleteArena, isDeletePending }: Arena
                 transition={{ type: "spring", stiffness: 200, damping: 16 }}
                 animate={{ y: openInfo ? "-8px" : 0 }}
                 onClick={() => router.push(`/arena/${arena.slug}`)}
-                className="h-44 rounded-xl border border-blue-800 group/image relative overflow-hidden z-10 cursor-pointer"
+                className="h-44 rounded-xl border-2 border-blue-400 group/image relative overflow-hidden z-10 cursor-pointer"
             >
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <motion.button
+                            onClick={handleCopyLink}
+                            className="absolute top-2 right-2 border border-accent rounded-full p-2 cursor-pointer hover:border-background bg-background hover:bg-accent transition-colors z-20"
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <AnimatePresence mode="wait">
+                                {copied ? (
+                                    <motion.div
+                                        key="check"
+                                        initial={{ scale: 0, rotate: -180 }}
+                                        animate={{ scale: 1, rotate: 0 }}
+                                        exit={{ scale: 0, rotate: 180 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <Check className="size-4 stroke-2 text-emerald-600" />
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key="share"
+                                        initial={{ scale: 0, rotate: 180 }}
+                                        animate={{ scale: 1, rotate: 0 }}
+                                        exit={{ scale: 0, rotate: -180 }}
+                                        transition={{ duration: 0.2 }}
+                                    >
+                                        <Share2 className="size-4" />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </motion.button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                        Share Link
+                    </TooltipContent>
+                </Tooltip>
                 {
                     !openInfo && (
                         <>
@@ -79,54 +115,44 @@ export default function ArenaCard({ arena, deleteArena, isDeletePending }: Arena
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="flex items-center justify-between h-14 p-3 w-full"
+                        className="flex items-center justify-between gap-3 h-14 p-3 w-full"
                     >
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <motion.button
-                                    onClick={handleCopyLink}
-                                    className="relative border border-muted-foreground rounded-full p-2 cursor-pointer hover:border-primary hover:bg-accent transition-colors"
-                                    whileTap={{ scale: 0.95 }}
-                                >
-                                    <AnimatePresence mode="wait">
-                                        {copied ? (
-                                            <motion.div
-                                                key="check"
-                                                initial={{ scale: 0, rotate: -180 }}
-                                                animate={{ scale: 1, rotate: 0 }}
-                                                exit={{ scale: 0, rotate: 180 }}
-                                                transition={{ duration: 0.2 }}
-                                            >
-                                                <Check className="size-4 stroke-2 text-emerald-600" />
-                                            </motion.div>
-                                        ) : (
-                                            <motion.div
-                                                key="share"
-                                                initial={{ scale: 0, rotate: 180 }}
-                                                animate={{ scale: 1, rotate: 0 }}
-                                                exit={{ scale: 0, rotate: -180 }}
-                                                transition={{ duration: 0.2 }}
-                                            >
-                                                <Share2 className="size-4" />
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </motion.button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Share Link
-                            </TooltipContent>
-                        </Tooltip>
-
-                        <div className="flex items-center justify-center text-center w-[60%] p-2 py-1 border border-primary border-dashed rounded-full">
-                            {arena.name}
-                        </div>
                         <div
                             className="border border-muted-foreground rounded-full p-2 cursor-pointer hover:bg-accent transition-colors"
                             onClick={() => setopenInfo(true)}
                         >
                             <ChevronUp className="size-4" />
                         </div>
+                        <div className="flex items-center justify-center text-center w-full  p-2 py-1 border border-primary border-dashed rounded-full">
+                            {arena.name}
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <div
+                                    className="border border-muted-foreground rounded-full p-2 cursor-pointer hover:bg-accent transition-colors"
+                                    onClick={() => setopenInfo(true)}
+                                >
+                                    <CiMenuKebab className="size-4" />
+                                </div>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="start">
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem>
+                                        <SquarePenIcon />
+                                        Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem>
+                                        <IoLogOutOutline />
+                                        Leave
+                                    </DropdownMenuItem>
+                                    <ArenaDeleteBtn
+                                        arenaSlug={arena.slug}
+                                        deleteArena={deleteArena}
+                                        isDeletePending={isDeletePending}
+                                    />
+                                </DropdownMenuGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </motion.div>
                 ) : (
                     <motion.div
@@ -152,17 +178,6 @@ export default function ArenaCard({ arena, deleteArena, isDeletePending }: Arena
                                 <p>{adminUser.name}</p>
                             </div>
                         </div>
-                        <ButtonGroup className="w-full">
-                            <Button variant='outline' className="flex-1">
-                                <SquarePenIcon />
-                                Edit
-                            </Button>
-                            <ArenaDeleteBtn
-                                arenaSlug={arena.slug}
-                                deleteArena={deleteArena}
-                                isDeletePending={isDeletePending}
-                            />
-                        </ButtonGroup>
                     </motion.div>
                 )}
             </AnimatePresence>

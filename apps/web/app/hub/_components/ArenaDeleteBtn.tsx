@@ -1,9 +1,12 @@
 "use client"
 
+import { useState } from "react";
 import { DeleteArenaMutation } from "./HubDashboard";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger, AlertDialogFooter, AlertDialogHeader } from "@/components/ui/alert-dialog";
+import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Trash2Icon } from "lucide-react";
+import { Spinner } from "@/components/ui/spinner";
 
 interface ArenaDeleteBtnProps {
     arenaSlug: string;
@@ -12,13 +15,22 @@ interface ArenaDeleteBtnProps {
 }
 
 export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeletePending }: ArenaDeleteBtnProps) {
+
+    const [open, setOpen] = useState<boolean>(false);
+
     return (
-        <AlertDialog>
+        <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button variant="outline" className="flex-1 hover:text-destructive/90">
+                <DropdownMenuItem
+                    onClick={(e) => {
+                        e.preventDefault();
+                        setOpen(true);
+                    }}
+                    className="hover:!text-destructive"
+                >
                     <Trash2Icon />
                     Delete
-                </Button>
+                </DropdownMenuItem>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
@@ -34,8 +46,19 @@ export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeletePending
                             variant={"destructive"}
                             onClick={() => deleteArena(arenaSlug)}
                         >
-                            <Trash2Icon />
-                            Delete
+                            {
+                                isDeletePending ? (
+                                    <>
+                                        <Spinner />
+                                        Deleting
+                                    </>
+                                ) : (
+                                    <>
+                                        <Trash2Icon />
+                                        Delete
+                                    </>
+                                )
+                            }
                         </Button>
                     </AlertDialogAction>
                 </AlertDialogFooter>

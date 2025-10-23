@@ -51,7 +51,6 @@ export default function HubDashboard({ user }: HubDashboardProps) {
                 queryClient.setQueryData(["arenas", userId], [...remainingArenas]);
                 toast.success(res.message);
             } else if (res.type === "error") {
-                console.error(res.message);
                 toast.error(res.message)
             };
         },
