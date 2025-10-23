@@ -68,7 +68,11 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
     return (
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
             <DialogTrigger asChild>
-                <Button size={"lg"}>
+                <Button
+                    variant={"3d"}
+                    size={"lg"}
+                    className='relative'
+                >
                     <Plus className='stroke-2' />
                     <h4>
                         Create Arena
@@ -125,8 +129,8 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
                         >
                             {isPending ? (
                                 <span className='flex items-center gap-1'>
-                                    Creating
                                     <Spinner />
+                                    Creating
                                 </span>
                             ) : "Create Arena"}
                         </Button>

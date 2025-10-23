@@ -6,7 +6,7 @@ interface NavbarProps {
   user: User
 }
 
-export default async function Navbar({ user }: NavbarProps) {
+export default function Navbar({ user }: NavbarProps) {
   return (
     <nav className='fixed top-5 inset-x-0 w-full max-w-7xl mx-auto px-5 bg-sidebar/80 backdrop-blur-md border rounded-lg z-50'>
       <div className='flex justify-between items-center h-16 w-full max-w-7xl mx-auto'>

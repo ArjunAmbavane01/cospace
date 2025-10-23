@@ -82,7 +82,7 @@ export default function ArenaCard({ arena }: ArenaCardProps) {
                             <TooltipTrigger asChild>
                                 <motion.button
                                     onClick={handleCopyLink}
-                                    className="relative border border-muted-foreground rounded-full p-2 cursor-pointer hover:border-primary transition-colors"
+                                    className="relative border border-muted-foreground rounded-full p-2 cursor-pointer hover:border-primary hover:bg-accent transition-colors"
                                     whileTap={{ scale: 0.95 }}
                                 >
                                     <AnimatePresence mode="wait">
@@ -119,7 +119,7 @@ export default function ArenaCard({ arena }: ArenaCardProps) {
                             {arena.name}
                         </div>
                         <div
-                            className="border border-muted-foreground rounded-full p-2 cursor-pointer hover:bg-accent"
+                            className="border border-muted-foreground rounded-full p-2 cursor-pointer hover:bg-accent transition-colors"
                             onClick={() => setopenInfo(true)}
                         >
                             <ChevronUp className="size-4" />
