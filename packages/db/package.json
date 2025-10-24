@@ -17,6 +17,12 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio"
   },
+  "turbo": {
+    "env": [
+      "DATABASE_URL"
+    ],
+    "outputs": []
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

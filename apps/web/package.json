@@ -10,6 +10,19 @@
     "lint": "next lint --max-warnings 0",
     "check-types": "tsc --noEmit"
   },
+  "turbo": {
+    "env": [
+      "GOOGLE_CLIENT_ID",
+      "GOOGLE_CLIENT_SECRET",
+      "BETTER_AUTH_URL",
+      "BETTER_AUTH_SECRET",
+      "DATABASE_URL"
+    ],
+    "outputs": [
+      ".next/**",
+      "!.next/cache/**"
+    ]
+  },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.15",

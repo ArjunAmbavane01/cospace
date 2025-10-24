@@ -9,6 +9,17 @@
     "start": "tsx --env-file=.env src/index.ts",
     "dev": "tsx watch --env-file=.env src/index.ts"
   },
+  "turbo": {
+     "env": [
+      "DATABASE_URL",
+      "UPSTASH_REDIS_REST_URL",
+      "UPSTASH_REDIS_REST_TOKEN",
+      "WS_PORT"
+    ],
+    "outputs": [
+      "dist/**"
+    ]
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
