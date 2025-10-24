@@ -10,12 +10,8 @@ import { Socket } from "socket.io-client";
 import { User } from "better-auth";
 import { ArenaUser } from "@/lib/validators/game";
 
-interface ProximityUser {
-    userId: string;
-    distance: number;
-}
-
 export const USER_PROXIMITY_EVENT = 'user-proximity';
+export const USER_LEFT_PROXIMITY_EVENT = 'user-left-proximity';
 
 export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefObject<ArenaUser[]>, socket: Socket, user: User) => {
     // create engine
@@ -30,7 +26,6 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     const island = new Island();
     await island.onInitialize();
     game.add(island);
-
 
     // calculate scale between original and current island
     const scaleFactor = island.getMapWidth() / ORIGINAL_MAP_WIDTH_PX;
@@ -47,11 +42,11 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     game.add(collisionLayer);
 
     // Store characters with ID
-    const otherCharacters = new Map<string, Character>();
+    const otherUsers = new Map<string, ArenaUser>();
 
     socket.on("player-pos", (data) => {
         const { userId, playerPos } = data;
-        const character = otherCharacters.get(userId);
+        const character = otherUsers.get(userId)?.character;
         if (!character) return;
         character.setCurrentDirection(playerPos.direction);
         character.setIsMoving(playerPos.isMoving);
@@ -66,31 +61,33 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     // Proximity detection settings
     const PROXIMITY_RADIUS = 200; // pixels
     const CHECK_INTERVAL = 500; // ms
-    let lastProximityUserId: string | null = null;
+    const usersInProximity = new Set<string>();
 
     // create character for other users
     const createUserCharacter = (user: ArenaUser) => {
-        if (otherCharacters.has(user.userId)) return;
+        if (otherUsers.has(user.userId)) return;
 
-        const character = new Character(user.userName);
+        const character = new Character(user);
         const randomX = island.getMapWidth() / 2 - 100;
         const randomY = island.getMapHeight() / 2 + 100;
         character.pos = vec(randomX, randomY);
-        character.name = user.userId;
-
-        otherCharacters.set(user.userId, character);
+        const newUser = {
+            ...user,
+            character,
+        }
+        otherUsers.set(user.userId, newUser);
         game.add(character);
     };
 
     // init characters for existing users
     if (usersRef.current) usersRef.current.forEach(user => createUserCharacter(user));
 
-    // check for new users joining
+    // check for newly joined users
     const checkForNewUsers = () => {
         if (!usersRef.current) return;
 
         usersRef.current.forEach(user => {
-            if (!otherCharacters.has(user.userId)) {
+            if (!otherUsers.has(user.userId)) {
                 createUserCharacter(user);
             }
         });
@@ -98,37 +95,31 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
 
     // proximity detection
     const checkProximity = () => {
-        let closestDistance = PROXIMITY_RADIUS + 1; // start from beyond proximity
-        let closestUserId: string | null = null;
+        otherUsers.forEach((user) => {
+            if (!user.character) return;
+            const distance = mainCharacter.pos.distance(user.character.pos);
+            const isNearby = distance <= PROXIMITY_RADIUS;
 
-        otherCharacters.forEach((character, userId) => {
-            const distance = mainCharacter.pos.distance(character.pos);
-
-            if (distance <= PROXIMITY_RADIUS && distance < closestDistance) {
-                closestDistance = distance;
-                closestUserId = userId;
+            // check is any new user in proximity
+            if (isNearby && !usersInProximity.has(user.userId)) {
+                usersInProximity.add(user.userId);
+                window.dispatchEvent(new CustomEvent(USER_PROXIMITY_EVENT, {
+                    detail: {
+                        user
+                    }
+                }));
+            } else if (!isNearby && usersInProximity.has(user.userId)) {
+                usersInProximity.delete(user.userId);
+                 window.dispatchEvent(new CustomEvent(USER_LEFT_PROXIMITY_EVENT, {
+                    detail: {
+                        userId: user.userId,
+                    }
+                }));
             }
         });
-
-        if (closestUserId !== null && closestUserId !== lastProximityUserId) {
-            lastProximityUserId = closestUserId;
-
-            window.dispatchEvent(new CustomEvent(USER_PROXIMITY_EVENT, {
-                detail: {
-                    userId: closestUserId,
-                    distance: closestDistance
-                }
-            }));
-        } else if (closestUserId === null && lastProximityUserId) {
-            // Users left proximity
-            lastProximityUserId = null;
-            window.dispatchEvent(new CustomEvent(USER_PROXIMITY_EVENT, {
-                detail: { userId: null }
-            }));
-        }
     };
     // Set up periodic checks
-    const userCheckInterval = setInterval(checkForNewUsers, 1000);
+    const userCheckInterval = setInterval(checkForNewUsers, 300);
     const proximityCheckInterval = setInterval(checkProximity, CHECK_INTERVAL);
 
     // Cleanup on game stop

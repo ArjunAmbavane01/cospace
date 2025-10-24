@@ -33,6 +33,7 @@ try {
                 return {
                     userId: roomUser.data.userId,
                     userName: roomUser.data.userName,
+                    userImage: roomUser.data.userImage,
                     lastOnline: "online"
                 }
             })
@@ -43,7 +44,8 @@ try {
 
             socket.to(socket.data.arenaSlug).emit("user-joined", {
                 userId: socket.data.userId,
-                userName: socket.data.userName
+                userName: socket.data.userName,
+                userImage: socket.data.userImage
             })
 
             socket.on("player-pos", (data) => {

@@ -5,7 +5,9 @@ import { PlayerDirection } from "@/lib/validators/game";
 
 export class MainCharacter extends Actor {
     private socket: Socket;
-    private user: User;
+    private userName: string;
+    private userId: string;
+    private userImage: string | undefined | null;
     private speed: number = 280;
     private spriteSheet?: SpriteSheet;
     private walkUpAnim?: Animation;
@@ -31,7 +33,9 @@ export class MainCharacter extends Actor {
             collisionType: CollisionType.Active,
         });
         this.socket = socket;
-        this.user = user;
+        this.userName = user.name;
+        this.userId = user.id;
+        this.userImage = user.image;
         this.playerName = "You";
     }
 
@@ -76,7 +80,7 @@ export class MainCharacter extends Actor {
             isMoving: this.isMoving,
         }
         this.socket.emit("player-pos", {
-            userId: this.user.id,
+            userId: this.userId,
             playerPos
         });
     }

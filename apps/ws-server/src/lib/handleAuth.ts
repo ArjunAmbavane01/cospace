@@ -21,6 +21,7 @@ export const handleAuth = async (socket: Socket, next: (err?: ExtendedError) => 
             socket.data.arenaSlug = arenaSlug;
             socket.data.userId = user.userId;
             socket.data.userName = user.user.name;
+            socket.data.userImage = user.user.image;
             socket.join(arenaSlug);
             next();
         }

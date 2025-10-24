@@ -64,7 +64,7 @@ export default function ArenaClient({ slug }: { slug: string }) {
         }
     }, [slug])
 
-    if (!socket) {
+    if (!socket || !user) {
         return <div className='flex justify-center items-center absolute inset-0 bg-black/80'>
             Loading Arena...
         </div>
@@ -72,8 +72,8 @@ export default function ArenaClient({ slug }: { slug: string }) {
 
     return (
         <>
-            <ArenaCanvas slug={slug} usersRef={usersRef} socket={socket} user={user!} />
-            <CanvasOverlay />
+            <ArenaCanvas slug={slug} usersRef={usersRef} socket={socket} user={user} />
+            <CanvasOverlay adminUser={user}/>
         </>
     );
 }

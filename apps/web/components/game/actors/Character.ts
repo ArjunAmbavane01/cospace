@@ -1,9 +1,11 @@
 import { Actor, vec, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas, Engine } from "excalibur";
-import { PlayerDirection } from "@/lib/validators/game";
+import { ArenaUser, PlayerDirection } from "@/lib/validators/game";
 
 export class Character extends Actor {
-    private speed: number = 80;
     private spriteSheet?: SpriteSheet;
+    private userName: string;
+    private userId: string;
+    private userImage: string | null | undefined;
     private walkUpAnim?: Animation;
     private walkLeftAnim?: Animation;
     private walkDownAnim?: Animation;
@@ -13,12 +15,10 @@ export class Character extends Actor {
     private idleLeftAnim?: Animation;
     private idleRightAnim?: Animation;
     private currentDirection: PlayerDirection = "down";
-    private playerName: string;
     private nameActor?: Actor;
     private isMoving = false;
-    private currentGraphic?: Animation;
 
-    constructor(playerName: string) {
+    constructor(user: ArenaUser) {
         super({
             pos: vec(0, 0),
             anchor: vec(0.5, 1),
@@ -27,7 +27,9 @@ export class Character extends Actor {
             z: 50,
             collisionType: CollisionType.Active,
         });
-        this.playerName = playerName
+        this.userId = user.userId;
+        this.userName = user.userName;
+        this.userImage = user.userImage;
     }
 
     async onInitialize(): Promise<void> {
@@ -58,7 +60,6 @@ export class Character extends Actor {
         this.idleLeftAnim = Animation.fromSpriteSheet(spriteSheet, [9 * 9], 100);
         this.idleRightAnim = Animation.fromSpriteSheet(spriteSheet, [11 * 9], 100);
 
-        this.currentGraphic = this.idleDownAnim;
         this.graphics.use(this.idleDownAnim);
         this.createNameLabel();
     }
@@ -112,7 +113,7 @@ export class Character extends Actor {
         const fontSize = 14;
         const textHeight = 20;
 
-        const textWidth = this.playerName.length * (fontSize * 0.6);
+        const textWidth = this.userName.length * (fontSize * 0.6);
         const boxWidth = textWidth + padding * 2;
         const boxHeight = textHeight + padding;
 
@@ -131,7 +132,7 @@ export class Character extends Actor {
                 ctx.font = `${fontSize}px Arial`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText(this.playerName, boxWidth / 2, boxHeight / 2);
+                ctx.fillText(this.userName, boxWidth / 2, boxHeight / 2);
             }
         });
 
