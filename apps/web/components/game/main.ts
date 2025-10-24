@@ -51,11 +51,11 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
 
     socket.on("player-pos", (data) => {
         const { userId, playerPos } = data;
-        const Character = otherCharacters.get(userId);
-        if (!Character) return;
-        console.log(playerPos.direction)
-        Character.setPlayerDirection(playerPos.direction);
-        Character.pos = vec(playerPos.x, playerPos.y);
+        const character = otherCharacters.get(userId);
+        if (!character) return;
+        character.setCurrentDirection(playerPos.direction);
+        character.setIsMoving(playerPos.isMoving);
+        character.pos = vec(playerPos.x, playerPos.y);
     })
 
     // create main character

@@ -10,9 +10,9 @@ const buttonVariants = cva(baseStyles, {
   variants: {
     variant: {
       default:
-        "bg-primary text-primary btn-inner-shadow hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3 inset-shadow-indigo-500",
+        "bg-primary text-primary-foreground btn-inner-shadow hover:bg-primary/90 h-9 px-4 py-2 has-[>svg]:px-3 inset-shadow-indigo-500",
       destructive:
-        "bg-destructive text-primary hover:bg-destructive dark:bg-destructive/70 dark:hover:bg-destructive/90 btn-inner-shadow tracking-wide",
+        "bg-destructive !text-primary hover:bg-destructive dark:bg-destructive/70 dark:hover:bg-destructive/90 btn-inner-shadow tracking-wide",
       outline:
         "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
       secondary:

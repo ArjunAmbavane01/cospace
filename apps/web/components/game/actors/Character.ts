@@ -8,10 +8,15 @@ export class Character extends Actor {
     private walkLeftAnim?: Animation;
     private walkDownAnim?: Animation;
     private walkRightAnim?: Animation;
-    private idleAnim?: Animation;
+    private idleUpAnim?: Animation;
+    private idleDownAnim?: Animation;
+    private idleLeftAnim?: Animation;
+    private idleRightAnim?: Animation;
     private currentDirection: PlayerDirection = "down";
     private playerName: string;
     private nameActor?: Actor;
+    private isMoving = false;
+    private currentGraphic?: Animation;
 
     constructor(playerName: string) {
         super({
@@ -41,44 +46,27 @@ export class Character extends Actor {
 
         this.spriteSheet = spriteSheet;
 
+        // create walking animations
         this.walkUpAnim = Animation.fromSpriteSheet(spriteSheet, range(8 * 9, 8 * 9 + 8), 100);
         this.walkLeftAnim = Animation.fromSpriteSheet(spriteSheet, range(9 * 9, 9 * 9 + 8), 100);
         this.walkDownAnim = Animation.fromSpriteSheet(spriteSheet, range(10 * 9, 10 * 9 + 8), 100);
         this.walkRightAnim = Animation.fromSpriteSheet(spriteSheet, range(11 * 9, 11 * 9 + 8), 100);
 
-        this.idleAnim = Animation.fromSpriteSheet(spriteSheet, [10 * 9], 100);
-        this.graphics.use(this.idleAnim);
+        // create idle animations
+        this.idleUpAnim = Animation.fromSpriteSheet(spriteSheet, [8 * 9], 100);
+        this.idleDownAnim = Animation.fromSpriteSheet(spriteSheet, [10 * 9], 100);
+        this.idleLeftAnim = Animation.fromSpriteSheet(spriteSheet, [9 * 9], 100);
+        this.idleRightAnim = Animation.fromSpriteSheet(spriteSheet, [11 * 9], 100);
 
+        this.currentGraphic = this.idleDownAnim;
+        this.graphics.use(this.idleDownAnim);
         this.createNameLabel();
     }
-    
+
     onPreUpdate(engine: Engine): void {
-        let velocity = vec(0, 0);
+        if (!this.spriteSheet) return;
 
-        if (this.currentDirection === 'up') {
-            velocity.y = -1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [8 * 9], 100);
-        }
-        if (this.currentDirection === 'down') {
-            velocity.y = 1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [10 * 9], 100);
-        }
-        if (this.currentDirection === 'left') {
-            velocity.x = -1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [9 * 9], 100);
-        }
-        if (this.currentDirection === 'right') {
-            velocity.x = 1;
-            this.idleAnim = Animation.fromSpriteSheet(this.spriteSheet!, [11 * 9], 100);
-        }
-
-        if (velocity.x !== 0 && velocity.y !== 0) {
-            velocity = velocity.normalize();
-        }
-
-        this.vel = velocity.scale(this.speed);
-
-        if (velocity.x !== 0 || velocity.y !== 0) {
+        if (this.isMoving) {
             switch (this.currentDirection) {
                 case 'up':
                     if (this.walkUpAnim) this.graphics.use(this.walkUpAnim);
@@ -94,12 +82,29 @@ export class Character extends Actor {
                     break;
             }
         } else {
-            if (this.idleAnim) this.graphics.use(this.idleAnim);
+            switch (this.currentDirection) {
+                case 'up':
+                    if (this.idleUpAnim) this.graphics.use(this.idleUpAnim);
+                    break;
+                case 'down':
+                    if (this.idleDownAnim) this.graphics.use(this.idleDownAnim);
+                    break;
+                case 'left':
+                    if (this.idleLeftAnim) this.graphics.use(this.idleLeftAnim);
+                    break;
+                case 'right':
+                    if (this.idleRightAnim) this.graphics.use(this.idleRightAnim);
+                    break;
+            }
         }
     }
 
-    setPlayerDirection(dir: PlayerDirection): void {
+    setCurrentDirection(dir: PlayerDirection): void {
         this.currentDirection = dir;
+    }
+
+    setIsMoving(moving: boolean): void {
+        this.isMoving = moving;
     }
 
     private createNameLabel(): void {
