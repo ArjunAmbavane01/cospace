@@ -1,15 +1,11 @@
-'use client';
+import { validateArenaSlug } from 'server/actions/arena';
+import ArenaClientWrapper from './_components/ArenaClientWrapper';
+import ArenaNotFound from './_components/ArenaNotFound';
 
-import { use } from 'react';
-import dynamic from 'next/dynamic';
+export default async function ArenaPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
+    const isSlugValid = await validateArenaSlug(slug);
 
-const ArenaClient = dynamic(() => import('./_components/ArenaClient'), {
-    ssr: false,
-    loading: () => <div>Loading arena...</div>
-});
-
-export default function ArenaPage({ params }: { params: Promise<{ slug: string }> }) {
-    const { slug } = use(params)
-
-    return <ArenaClient slug={slug} />
+    if (isSlugValid.type === "error") return <ArenaNotFound />
+    return <ArenaClientWrapper slug={slug} />
 }
