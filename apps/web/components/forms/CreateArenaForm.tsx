@@ -16,6 +16,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Plus } from 'lucide-react';
+import { BsPlusCircleDotted } from "react-icons/bs";
 
 interface CreateArenaFormProps {
     user: User;
@@ -69,13 +70,13 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
                     size={"lg"}
                     className='relative'
                 >
-                    <Plus className='stroke-2' />
+                    <BsPlusCircleDotted className='stroke-1.5' />
                     <h4>
                         Create Arena
                     </h4>
                 </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent showCloseButton={false}>
                 <DialogHeader>
                     <DialogTitle>Create Arena</DialogTitle>
                     <div className='py-5'>
@@ -117,20 +118,29 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
                     </div>
                 </DialogHeader>
                 <DialogFooter>
-                    <Field orientation="horizontal">
-                        <Button
-                            disabled={isPending}
-                            type="submit"
-                            form="create-arena-form"
-                        >
-                            {isPending ? (
-                                <span className='flex items-center gap-1'>
-                                    <Spinner />
-                                    Creating
-                                </span>
-                            ) : "Create Arena"}
-                        </Button>
-                    </Field>
+                    <Button
+                        disabled={isPending}
+                        type="submit"
+                        form="create-arena-form"
+                    >
+                        {isPending ? (
+                            <span className='flex items-center gap-1'>
+                                <Spinner />
+                                Creating
+                            </span>
+                        ) :
+                            <>
+                                <BsPlusCircleDotted className='stroke-1.5' />
+                                Create Arena
+                            </>
+                        }
+                    </Button>
+                    <Button
+                        variant={"ghost"}
+                        onClick={() => setModalOpen(false)}
+                    >
+                        Cancel
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

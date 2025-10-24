@@ -41,7 +41,7 @@ export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
                 </h4>
             </div>
             <div className="flex items-center justify-between">
-                <InputGroup className="w-md border border-dashed">
+                <InputGroup className="w-md border">
                     <InputGroupInput
                         ref={inputRef}
                         placeholder="Search arenas"

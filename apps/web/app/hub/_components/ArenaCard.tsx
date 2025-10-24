@@ -134,9 +134,10 @@ export default function ArenaCard({
                         >
                             <ChevronUp className="size-4" />
                         </div>
-                        <div className="flex items-center justify-center text-center w-full  p-2 py-1 border border-primary border-dashed rounded-full">
+                        <div className="flex items-center justify-center text-center w-full p-2 py-1 border border-primary border-dashed rounded-full inner-shadow bg-white/5">
                             {arena.name}
                         </div>
+
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <div

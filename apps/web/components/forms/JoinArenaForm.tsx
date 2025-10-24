@@ -39,8 +39,7 @@ export default function JoinArenaForm({ user }: JoinArenaFormProps) {
             <DialogTrigger asChild>
                 <Button
                     size="lg"
-                    variant="outline"
-                    className="!bg-accent border border-dashed hover:border-primary"
+                    variant="secondary"
                 >
                     Join Arena
                 </Button>

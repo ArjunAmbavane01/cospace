@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Hanken_Grotesk } from "next/font/google"
 import "./globals.css";
 import Provider from "./providers";
 import { Toaster } from "@/components/ui/sonner";
@@ -13,6 +14,10 @@ const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
 });
+const hankenGrotesk = Hanken_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-hanken-grotesk",
+})
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -26,7 +31,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      {/* <body className={`${geistMono.variable} ${geistSans.variable}`}> */}
+      <body className={hankenGrotesk.className}>
         <Provider>
           {children}
           <Toaster
