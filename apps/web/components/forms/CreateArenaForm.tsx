@@ -43,7 +43,7 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
     })
 
     const { mutate: addArenaMutation, isPending } = useMutation({
-        mutationFn: (data: createArenaFormData) => createArena(data.arenaName, userId, userName),
+        mutationFn: (data: createArenaFormData) => createArena(data.arenaName, userName),
         onSuccess: (res) => {
             if (res.type === "success" && res.arena) {
                 const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];

@@ -35,7 +35,7 @@ export default function HubDashboard({ user }: HubDashboardProps) {
     const { data: userArenas, isLoading, isError } = useQuery({
         queryKey: ["arenas", userId],
         queryFn: async () => {
-            const res = await getArenas(userId);
+            const res = await getArenas();
             if (res.type === "success") return res.userArenas
             else if (res.type === "error") toast.error(res.message)
         },
@@ -44,7 +44,7 @@ export default function HubDashboard({ user }: HubDashboardProps) {
 
     // delete arena mutation
     const { mutate: deleteArenaMutation, isPending: isDeleting } = useMutation({
-        mutationFn: (arenaSlug: string) => deleteArena(arenaSlug, userId),
+        mutationFn: (arenaSlug: string) => deleteArena(arenaSlug),
         onSuccess: (res) => {
             if (res.type === "success") {
                 const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
@@ -62,7 +62,7 @@ export default function HubDashboard({ user }: HubDashboardProps) {
 
     // join arena mutation
     const { mutate: joinArenaMutation, isPending: isJoining } = useMutation({
-        mutationFn: (arenaSlug: string) => joinArena(arenaSlug, userId),
+        mutationFn: (arenaSlug: string) => joinArena(arenaSlug),
         onSuccess: (res) => {
             if (res.type === "success") {
                 toast.success(res.message);
@@ -77,7 +77,7 @@ export default function HubDashboard({ user }: HubDashboardProps) {
 
     // leave arena mutation
     const { mutate: leaveArenaMutation, isPending: isLeaving } = useMutation({
-        mutationFn: (arenaSlug: string) => leaveArena(arenaSlug, userId),
+        mutationFn: (arenaSlug: string) => leaveArena(arenaSlug),
         onSuccess: (res) => {
             if (res.type === "success") {
                 const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
@@ -111,7 +111,11 @@ export default function HubDashboard({ user }: HubDashboardProps) {
         <div className='py-24 bg-background w-full min-h-screen relative'>
             <Navbar user={user} />
             <div className="flex flex-col gap-5 w-full max-w-7xl mx-auto space-y-10">
-                <HubHeader user={user} setSearchQuery={setSearchQuery} />
+                <HubHeader
+                    user={user}
+                    setSearchQuery={setSearchQuery}
+                    joinArena={joinArenaMutation}
+                />
                 {
                     isLoading ? (
                         <div className="grid grid-cols-4 gap-24">
@@ -127,7 +131,6 @@ export default function HubDashboard({ user }: HubDashboardProps) {
                         isLeaving={isLeaving}
                         deleteArena={deleteArenaMutation}
                         leaveArena={leaveArenaMutation}
-                        joinArena={joinArenaMutation}
                     />
                 }
             </div>

@@ -18,7 +18,7 @@ export const leaveArena = async (arenaSlug: string, userId: string) => {
 
         const message = "Successfully left the arena";
         return {
-            type: "success",
+            type: "success" as const,
             message,
             arenaSlug
         }
@@ -26,7 +26,7 @@ export const leaveArena = async (arenaSlug: string, userId: string) => {
         console.error(err);
         const message = err instanceof Error ? err.message : "Failed to leave arena. Please try again"
         return {
-            type: "error",
+            type: "error" as const,
             message
         }
     }

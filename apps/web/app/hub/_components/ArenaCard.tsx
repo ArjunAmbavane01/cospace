@@ -21,7 +21,6 @@ interface ArenaCardProps {
     isLeaving: boolean;
     deleteArena: ArenaMutation;
     leaveArena: ArenaMutation;
-    joinArena: ArenaMutation;
 }
 
 export default function ArenaCard({
@@ -30,7 +29,6 @@ export default function ArenaCard({
     isLeaving,
     deleteArena,
     leaveArena,
-    joinArena
 }: ArenaCardProps) {
 
     const [openInfo, setopenInfo] = useState<boolean>(false);

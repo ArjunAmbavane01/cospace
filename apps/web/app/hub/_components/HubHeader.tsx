@@ -7,13 +7,15 @@ import JoinArenaForm from "@/components/forms/JoinArenaForm";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { Kbd } from '@/components/ui/kbd';
 import { SearchIcon } from 'lucide-react';
+import { ArenaMutation } from "./HubDashboard";
 
 interface HubHeaderProps {
     user: User;
     setSearchQuery: Dispatch<SetStateAction<string>>;
+    joinArena: ArenaMutation;
 }
 
-export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
+export default function HubHeader({ user, setSearchQuery, joinArena }: HubHeaderProps) {
 
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -56,7 +58,7 @@ export default function HubHeader({ user, setSearchQuery }: HubHeaderProps) {
                 </InputGroup>
                 <div className="flex items-center gap-3">
                     <CreateArenaForm user={user} />
-                    <JoinArenaForm user={user} />
+                    <JoinArenaForm joinArena={joinArena} />
                 </div>
             </div>
         </div>

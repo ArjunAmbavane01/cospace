@@ -9,7 +9,6 @@ interface ArenaListProps {
     isLeaving: boolean;
     deleteArena: ArenaMutation;
     leaveArena: ArenaMutation;
-    joinArena: ArenaMutation;
 }
 
 export default function ArenaList({
@@ -20,7 +19,6 @@ export default function ArenaList({
     isLeaving,
     deleteArena,
     leaveArena,
-    joinArena
 }: ArenaListProps) {
     if (isError) {
         return (
@@ -32,7 +30,7 @@ export default function ArenaList({
     if (filteredArenas.length === 0 && searchQuery) {
         return (
             <div className="text-muted-foreground text-center col-span-4 p-20 border border-dashed rounded-xl">
-                No arenas found matching "{searchQuery}"
+                No arenas found matching &quot;{searchQuery}&quot;
             </div>
         );
     }
@@ -51,7 +49,7 @@ export default function ArenaList({
     }
     return (
         <div className="grid grid-cols-4 gap-x-24 gap-y-14">
-            {filteredArenas?.map((arena, idx) => {
+            {filteredArenas?.map((arena) => {
                 return <ArenaCard
                     key={arena.slug}
                     arena={arena}
@@ -59,7 +57,6 @@ export default function ArenaList({
                     isLeaving={isLeaving}
                     deleteArena={deleteArena}
                     leaveArena={leaveArena}
-                    joinArena={joinArena}
                 />
             })}
         </div>

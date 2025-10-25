@@ -8,14 +8,14 @@ export const validateArenaSlug = async (arenaSlug: string) => {
         if (!arena) throw new Error("Arena does not exists");
         const message = "Arena exists";
         return {
-            type: "success",
+            type: "success" as const,
             message,
         }
     } catch (err) {
         console.error(err);
         const message = err instanceof Error ? err.message : "Failed to fetch arena. Please try again"
         return {
-            type: "error",
+            type: "error" as const,
             message
         }
     }

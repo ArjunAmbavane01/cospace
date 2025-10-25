@@ -17,15 +17,17 @@ export const getArenas = async (userId: string) => {
                 },
             },
         })
+        const message = "Successfully fetch user arenas";
         return {
-            type: "success",
+            type: "success" as const,
+            message,
             userArenas: userArenas.map(ua => ua.arena),
         }
     } catch (err) {
         console.error(err);
         const message = err instanceof Error ? err.message : "Unexpected error occurred. Please try again"
         return {
-            type: "error",
+            type: "error" as const,
             message
         }
     }
