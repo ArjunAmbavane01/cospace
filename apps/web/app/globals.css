@@ -132,7 +132,7 @@
     @apply text-lg;
   }
   h4 {
-    @apply text-base;
+    @apply text-base text-muted-foreground;
   }
   h5 {
     @apply text-sm;

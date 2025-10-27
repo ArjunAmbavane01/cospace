@@ -64,7 +64,7 @@ export class Character extends Actor {
         this.createNameLabel();
     }
 
-    onPreUpdate(engine: Engine): void {
+    onPreUpdate(): void {
         if (!this.spriteSheet) return;
 
         if (this.isMoving) {

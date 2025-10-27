@@ -8,7 +8,7 @@ export const verifyAuth = async () => {
     const userSession = await auth.api.getSession({
         headers: await headers()
     });
-    const userId = userSession?.user.id;
-    if (!userId) redirect("/signin");
-    return userId;
+    const user = userSession?.user;
+    if (!user) redirect("/signin");
+    return user;
 }

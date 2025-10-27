@@ -18,7 +18,7 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     const game = new Engine({
         canvasElement,
         pixelRatio: 1,
-        displayMode: DisplayMode.FitScreenAndFill,
+        displayMode: DisplayMode.FitContainerAndFill,
         backgroundColor: Color.fromHex('#6CB4EE'),
     });
 

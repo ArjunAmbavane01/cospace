@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from "@tanstack/react-form"
 import { joinArenaFormSchema } from '@/lib/validators/arena';
-import { User } from 'better-auth';
+import { ArenaMutation } from 'app/hub/_components/HubDashboard';
 import AnimatedInput from '../AnimatedInput';
 import { Button } from "@/components/ui/button"
 import { Spinner } from '@/components/ui/spinner';
@@ -12,13 +12,13 @@ import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
 interface JoinArenaFormProps {
-    user: User;
+    joinArena: ArenaMutation;
+    isJoining: boolean;
 }
 
-export default function JoinArenaForm({ user }: JoinArenaFormProps) {
+export default function JoinArenaForm({ joinArena, isJoining }: JoinArenaFormProps) {
 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const [isJoining, setIsJoining] = useState<boolean>(false);
     const router = useRouter();
 
     const form = useForm({
@@ -29,7 +29,9 @@ export default function JoinArenaForm({ user }: JoinArenaFormProps) {
             onSubmit: joinArenaFormSchema,
         },
         onSubmit: ({ value }) => {
-            setIsJoining(true);
+            const slug = value.inviteLink.split("http://localhost:3000/arena/")[1];
+            if (!slug) return;
+            joinArena(slug);
             router.push(value.inviteLink);
         }
     })
@@ -75,7 +77,7 @@ export default function JoinArenaForm({ user }: JoinArenaFormProps) {
                                                     autoComplete="off"
                                                 />
                                                 {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors.slice(0,1)} />
+                                                    <FieldError errors={field.state.meta.errors.slice(0, 1)} />
                                                 )}
                                             </Field>
                                         )

@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createArena } from 'server/actions/arena';
+import useAuthStore from 'store/authStore';
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createArenaFormSchema } from '@/lib/validators/arena';
 import { Arena } from '@/lib/validators/arena';
-import { User } from 'better-auth';
 import z from 'zod';
 import { toast } from 'sonner';
 import AnimatedInput from '../AnimatedInput';
@@ -15,22 +15,17 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from '@/components/ui/spinner';
 import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { Plus } from 'lucide-react';
-import { BsPlusCircleDotted } from "react-icons/bs";
-
-interface CreateArenaFormProps {
-    user: User;
-}
+import { FiPlus } from "react-icons/fi";
 
 type createArenaFormData = z.infer<typeof createArenaFormSchema>;
 
-export default function CreateArenaForm({ user }: CreateArenaFormProps) {
+export default function CreateArenaForm() {
 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const router = useRouter();
 
+    const router = useRouter();
     const queryClient = useQueryClient();
-    const { id: userId, name: userName } = user;
+    const { user } = useAuthStore();
 
     const form = useForm({
         defaultValues: {
@@ -42,12 +37,12 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
         onSubmit: ({ value }) => addArenaMutation(value)
     })
 
-    const { mutate: addArenaMutation, isPending } = useMutation({
-        mutationFn: (data: createArenaFormData) => createArena(data.arenaName, userName),
+    const { mutate: addArenaMutation, isPending: isCreating } = useMutation({
+        mutationFn: (data: createArenaFormData) => createArena(data.arenaName),
         onSuccess: (res) => {
             if (res.type === "success" && res.arena) {
-                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
-                queryClient.setQueryData(["arenas", userId], [res.arena, ...existingArenas]);
+                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", user?.id]) || [];
+                queryClient.setQueryData(["arenas", user?.id], [res.arena, ...existingArenas]);
                 toast.success(res.message);
                 setModalOpen(false);
                 form.reset();
@@ -68,12 +63,10 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
                 <Button
                     variant={"3d"}
                     size={"lg"}
-                    className='relative'
+                    className='text-base'
                 >
-                    <BsPlusCircleDotted className='stroke-1.5' />
-                    <h4>
-                        Create Arena
-                    </h4>
+                    <FiPlus />
+                    Create Arena
                 </Button>
             </DialogTrigger>
             <DialogContent showCloseButton={false}>
@@ -119,18 +112,18 @@ export default function CreateArenaForm({ user }: CreateArenaFormProps) {
                 </DialogHeader>
                 <DialogFooter>
                     <Button
-                        disabled={isPending}
+                        disabled={isCreating}
                         type="submit"
                         form="create-arena-form"
                     >
-                        {isPending ? (
+                        {isCreating ? (
                             <span className='flex items-center gap-1'>
                                 <Spinner />
                                 Creating
                             </span>
                         ) :
                             <>
-                                <BsPlusCircleDotted className='stroke-1.5' />
+                                <FiPlus />
                                 Create Arena
                             </>
                         }

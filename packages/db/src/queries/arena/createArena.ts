@@ -7,7 +7,7 @@ const getSuffix = () => Math.random().toString(36).slice(2, 12);
 export const createArena = async (inputArenaName: string, userId: string, userName: string) => {
     try {
 
-        if (!inputArenaName.trim()) return { type: "error", message: "Arena name cannot be empty" };
+        if (!inputArenaName.trim()) throw new Error("Arena name cannot be empty");
 
         const arenaName = inputArenaName.trim();
         let arenaSlug = slugify(inputArenaName, { lower: true, trim: true, strict: true })
@@ -34,7 +34,7 @@ export const createArena = async (inputArenaName: string, userId: string, userNa
 
             if (!createdArena) throw new Error("Failed to create arena")
 
-            const [utaRow] = await tx
+            const utaRow = await tx
                 .insert(usersToArenas)
                 .values({
                     userId,

@@ -1,15 +1,14 @@
 'use client';
 
-import { X } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { motion, Variants } from 'motion/react';
+import { X } from 'lucide-react';
 
 interface WelcomePopupProps {
   userName: string;
   onClose: () => void;
 }
 
-// Define animation variants for the popup
 const toastVariants: Variants  = {
   hidden: {
     opacity: 0,
@@ -44,7 +43,6 @@ const toastVariants: Variants  = {
 };
 
 export default function WelcomePopup({ userName, onClose }: WelcomePopupProps) {
-  // Set up the auto-dismiss timer
   useEffect(() => {
     const timer = setTimeout(() => {
       onClose();
@@ -59,7 +57,7 @@ export default function WelcomePopup({ userName, onClose }: WelcomePopupProps) {
     <motion.div
       variants={toastVariants}
       initial="hidden"
-      animate={['visible', 'wobble']} // Apply both animations in sequence
+      animate={['visible', 'wobble']}
       exit="exit"
       className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center tracking-wide min-w-72 p-4 border rounded-lg shadow-lg bg-background"
     >
@@ -69,7 +67,7 @@ export default function WelcomePopup({ userName, onClose }: WelcomePopupProps) {
       >
         <X className="size-4" />
       </button>
-      <h4 className="pr-6">Welcome back, {firstName}👋</h4>
+      <h3 className="pr-6">Welcome back, {firstName}👋</h3>
     </motion.div>
   );
 }

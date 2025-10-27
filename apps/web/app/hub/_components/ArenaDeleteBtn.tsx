@@ -11,10 +11,10 @@ import { Trash2Icon } from "lucide-react";
 interface ArenaDeleteBtnProps {
     arenaSlug: string;
     deleteArena: ArenaMutation;
-    isDeletePending: boolean;
+    isDeleting: boolean;
 }
 
-export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeletePending }: ArenaDeleteBtnProps) {
+export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeleting }: ArenaDeleteBtnProps) {
 
     const [open, setOpen] = useState<boolean>(false);
 
@@ -47,7 +47,7 @@ export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeletePending
                             onClick={() => deleteArena(arenaSlug)}
                         >
                             {
-                                isDeletePending ? (
+                                isDeleting ? (
                                     <>
                                         <Spinner />
                                         Deleting

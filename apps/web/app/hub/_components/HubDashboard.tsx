@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getArenas, deleteArena, joinArena, leaveArena } from "server/actions/arena";
+import useAuthStore from "store/authStore";
 import { Arena } from "@/lib/validators/arena";
 import type { User } from "better-auth";
 import { AnimatePresence } from "motion/react";
@@ -21,17 +22,18 @@ export type ArenaMutation = UseMutateFunction<
 >;
 
 interface HubDashboardProps {
-    user: User;
+    sessionUser: User;
 }
 
-export default function HubDashboard({ user }: HubDashboardProps) {
+export default function HubDashboard({ sessionUser }: HubDashboardProps) {
 
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [showWelcomeToast, setShowWelcomeToast] = useState<boolean>(false);
 
-    const userId = user.id
+    const { user, setUser } = useAuthStore();
     const queryClient = useQueryClient();
 
+    const userId = sessionUser.id;
     const { data: userArenas, isLoading, isError } = useQuery({
         queryKey: ["arenas", userId],
         queryFn: async () => {
@@ -107,14 +109,18 @@ export default function HubDashboard({ user }: HubDashboardProps) {
         }
     }, []);
 
+    useEffect(() => {
+        if (!user) setUser(sessionUser)
+    }, [user, sessionUser])
+
     return (
         <div className='py-24 bg-background w-full min-h-screen relative'>
-            <Navbar user={user} />
+            <Navbar />
             <div className="flex flex-col gap-5 w-full max-w-7xl mx-auto space-y-10">
                 <HubHeader
-                    user={user}
                     setSearchQuery={setSearchQuery}
                     joinArena={joinArenaMutation}
+                    isJoining={isJoining}
                 />
                 {
                     isLoading ? (

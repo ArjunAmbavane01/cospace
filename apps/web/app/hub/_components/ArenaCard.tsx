@@ -8,12 +8,13 @@ import { Arena } from "@/lib/validators/arena";
 import { AnimatePresence, motion } from "motion/react";
 import { ArenaMutation } from "./HubDashboard";
 import ArenaDeleteBtn from "./ArenaDeleteBtn";
+import ArenaEditBtn from "./ArenaEditBtn";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { IoEnterOutline, IoLogOutOutline } from "react-icons/io5";
 import { CiMenuKebab } from "react-icons/ci";
-import { Check, ChevronUp, Share2, SquarePenIcon, Users2, XCircle } from "lucide-react";
+import { Check, ChevronUp, Share2, Users2, XCircle } from "lucide-react";
 
 interface ArenaCardProps {
     arena: Arena;
@@ -59,45 +60,45 @@ export default function ArenaCard({
                 onClick={() => router.push(`/arena/${arena.slug}`)}
                 className="h-44 rounded-xl border-2 border-blue-400 group/image relative overflow-hidden z-10 cursor-pointer"
             >
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <motion.button
-                            onClick={handleCopyLink}
-                            className="absolute top-2 right-2 border border-accent rounded-full p-2 cursor-pointer hover:border-background bg-background hover:bg-accent transition-colors z-20"
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            <AnimatePresence mode="wait">
-                                {copied ? (
-                                    <motion.div
-                                        key="check"
-                                        initial={{ scale: 0, rotate: -180 }}
-                                        animate={{ scale: 1, rotate: 0 }}
-                                        exit={{ scale: 0, rotate: 180 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <Check className="size-4 stroke-2 text-emerald-600" />
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        key="share"
-                                        initial={{ scale: 0, rotate: 180 }}
-                                        animate={{ scale: 1, rotate: 0 }}
-                                        exit={{ scale: 0, rotate: -180 }}
-                                        transition={{ duration: 0.2 }}
-                                    >
-                                        <Share2 className="size-4" />
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </motion.button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        Share Link
-                    </TooltipContent>
-                </Tooltip>
                 {
                     !openInfo && (
                         <>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <motion.button
+                                        onClick={handleCopyLink}
+                                        className="absolute top-2 right-2 border border-accent rounded-full p-2 cursor-pointer hover:border-background bg-background hover:bg-accent transition-colors z-20"
+                                        whileTap={{ scale: 0.95 }}
+                                    >
+                                        <AnimatePresence mode="wait">
+                                            {copied ? (
+                                                <motion.div
+                                                    key="check"
+                                                    initial={{ scale: 0, rotate: -180 }}
+                                                    animate={{ scale: 1, rotate: 0 }}
+                                                    exit={{ scale: 0, rotate: 180 }}
+                                                    transition={{ duration: 0.2 }}
+                                                >
+                                                    <Check className="size-4 stroke-2 text-emerald-600" />
+                                                </motion.div>
+                                            ) : (
+                                                <motion.div
+                                                    key="share"
+                                                    initial={{ scale: 0, rotate: 180 }}
+                                                    animate={{ scale: 1, rotate: 0 }}
+                                                    exit={{ scale: 0, rotate: -180 }}
+                                                    transition={{ duration: 0.2 }}
+                                                >
+                                                    <Share2 className="size-4" />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </motion.button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    Share Link
+                                </TooltipContent>
+                            </Tooltip>
                             <div className="absolute top-2 left-2 flex items-center gap-2 p-1 px-2 bg-background pointer-events-none rounded-full opacity-0 group-hover/image:opacity-100 transition-opacity z-20">
                                 <Users2 size={12} />
                                 <h6>{usersCount || 0}</h6>
@@ -147,10 +148,7 @@ export default function ArenaCard({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start">
                                 <DropdownMenuGroup>
-                                    <DropdownMenuItem>
-                                        <SquarePenIcon />
-                                        Edit
-                                    </DropdownMenuItem>
+                                    <ArenaEditBtn arenaSlug={arena.slug} arena={arena} />
                                     <DropdownMenuItem onClick={() => leaveArena(arena.slug)}>
                                         {
                                             isLeaving ? (
@@ -169,7 +167,7 @@ export default function ArenaCard({
                                     <ArenaDeleteBtn
                                         arenaSlug={arena.slug}
                                         deleteArena={deleteArena}
-                                        isDeletePending={isDeleting}
+                                        isDeleting={isDeleting}
                                     />
                                 </DropdownMenuGroup>
                             </DropdownMenuContent>

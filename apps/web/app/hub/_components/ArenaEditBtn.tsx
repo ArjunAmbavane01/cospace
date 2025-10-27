@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { editArena } from "server/actions/arena";
 import { Arena, editArenaFormSchema } from "@/lib/validators/arena";
+import useAuthStore from "store/authStore";
 import { useForm } from "@tanstack/react-form";
 import z from 'zod';
 import { toast } from 'sonner';
@@ -17,18 +18,20 @@ import { SquarePenIcon, Trash2Icon } from "lucide-react";
 
 interface ArenaEditBtnProps {
     arenaSlug: string;
+    arena: Arena;
 }
 
 type editArenaFormData = z.infer<typeof editArenaFormSchema>;
 
-export default function ArenaEditBtn({ arenaSlug }: ArenaEditBtnProps) {
+export default function ArenaEditBtn({ arenaSlug, arena }: ArenaEditBtnProps) {
 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const queryClient = useQueryClient();
+    const { user } = useAuthStore();
 
     const form = useForm({
         defaultValues: {
-            arenaName: ""
+            arenaName: arena.name
         },
         validators: {
             onSubmit: editArenaFormSchema,
@@ -36,19 +39,18 @@ export default function ArenaEditBtn({ arenaSlug }: ArenaEditBtnProps) {
         onSubmit: ({ value }) => editArenaMutation(value)
     })
 
-
     // edit arena mutation
     const { mutate: editArenaMutation, isPending: isEditing } = useMutation({
         mutationFn: (data: editArenaFormData) => editArena(data.arenaName, arenaSlug),
         onSuccess: (res) => {
             if (res.type === "success") {
                 const updatedArenaDetails = res.newArenaDetails;
-                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
-                const updatedArenas = existingArenas.map(arena=>{
-                    if(arena.slug === arenaSlug) arena.name = updatedArenaDetails.name;
-                    return arena;
-                })
-                queryClient.setQueryData(["arenas", userId], [...updatedArenas]);
+                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", user?.id]) || [];
+                const updatedArenas = existingArenas.map(a =>
+                    a.slug === arenaSlug ? { ...a, name: updatedArenaDetails.name } : a
+                )
+                queryClient.setQueryData(["arenas", user?.id], [...updatedArenas]);
+                setModalOpen(false);
                 toast.success(res.message);
             } else if (res.type === "error") {
                 toast.error(res.message)
@@ -77,7 +79,7 @@ export default function ArenaEditBtn({ arenaSlug }: ArenaEditBtnProps) {
                     <DialogTitle>Edit Arena</DialogTitle>
                     <div className='py-5'>
                         <form
-                            id="create-arena-form"
+                            id="edit-arena-form"
                             onSubmit={(e) => {
                                 e.preventDefault()
                                 form.handleSubmit()
@@ -115,7 +117,7 @@ export default function ArenaEditBtn({ arenaSlug }: ArenaEditBtnProps) {
                 </DialogHeader>
                 <DialogFooter>
                     <Button
-                       disabled={isEditing}
+                        disabled={isEditing}
                         type="submit"
                         form="edit-arena-form"
                     >
@@ -127,7 +129,7 @@ export default function ArenaEditBtn({ arenaSlug }: ArenaEditBtnProps) {
                                 </>
                             ) : (
                                 <>
-                                    <Trash2Icon />
+                                    <SquarePenIcon />
                                     Edit
                                 </>
                             )

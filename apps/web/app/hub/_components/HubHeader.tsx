@@ -1,7 +1,6 @@
 "use client"
 
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import { User } from "better-auth";
 import CreateArenaForm from "@/components/forms/CreateArenaForm";
 import JoinArenaForm from "@/components/forms/JoinArenaForm";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
@@ -10,12 +9,12 @@ import { SearchIcon } from 'lucide-react';
 import { ArenaMutation } from "./HubDashboard";
 
 interface HubHeaderProps {
-    user: User;
     setSearchQuery: Dispatch<SetStateAction<string>>;
     joinArena: ArenaMutation;
+    isJoining: boolean;
 }
 
-export default function HubHeader({ user, setSearchQuery, joinArena }: HubHeaderProps) {
+export default function HubHeader({  setSearchQuery, joinArena, isJoining }: HubHeaderProps) {
 
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -38,7 +37,7 @@ export default function HubHeader({ user, setSearchQuery, joinArena }: HubHeader
                 <h1>
                     Your Arenas
                 </h1>
-                <h4 className="text-muted-foreground">
+                <h4>
                     Manage your arenas and connect with your team
                 </h4>
             </div>
@@ -57,8 +56,8 @@ export default function HubHeader({ user, setSearchQuery, joinArena }: HubHeader
                     </InputGroupAddon>
                 </InputGroup>
                 <div className="flex items-center gap-3">
-                    <CreateArenaForm user={user} />
-                    <JoinArenaForm joinArena={joinArena} />
+                    <CreateArenaForm  />
+                    <JoinArenaForm joinArena={joinArena} isJoining={isJoining} />
                 </div>
             </div>
         </div>

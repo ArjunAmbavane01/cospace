@@ -17,11 +17,10 @@ export default function ArenaNotFound() {
                             ERROR
                         </p>
                     </div>
-                    <h1 className="text-5xl md:text-7xl font-light leading-tight">
+                    <h1 className="text-5xl md:text-7xl font-light">
                         Arena Not Found
                     </h1>
-                    
-                    <h4 className="text-muted-foreground">
+                    <h4 className="max-w-lg">
                         The arena link you entered is invalid. Please check the link or create a new arena.
                     </h4>
                     <Button
