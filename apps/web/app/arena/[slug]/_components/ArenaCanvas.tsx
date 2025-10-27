@@ -37,7 +37,7 @@ export default function ArenaCanvas({ slug, usersRef, socket, user }: ArenaCanva
         };
     }, [slug, socket]);
 
-    return <div className='fixed inset-0 p-5 box-border'>
-        <canvas ref={canvasRef} className='rounded-lg'/>
-    </div>;
+    return (
+        <canvas ref={canvasRef} className='rounded-xl' />
+    )
 }

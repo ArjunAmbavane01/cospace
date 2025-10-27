@@ -7,11 +7,13 @@ import { authClient } from '@/lib/auth-client';
 import { ArenaUser } from '@/lib/validators/game';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaCanvas from './ArenaCanvas';
+import ArenaSidebar from './ArenaSidebar';
 
 export default function ArenaClient({ slug }: { slug: string }) {
 
     const [socket, setSocket] = useState<Socket | null>(null);
     const [user, setUser] = useState<User | null>(null);
+    const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>([]);
 
     const usersRef = useRef<ArenaUser[]>([]);
 
@@ -41,11 +43,13 @@ export default function ArenaClient({ slug }: { slug: string }) {
                 ws.on("connect_error", (err) => console.log("Connection failed : ", err.message))
                 ws.on("user-joined", (user) => {
                     const prevUsers = usersRef.current;
+                    setArenaUsers(u => [...u, { ...user, lastOnline: "online" }])
                     usersRef.current = [...prevUsers, { ...user, lastOnline: "online" }]
                 })
                 ws.on("room-users", (data) => {
                     const { roomUsers } = data;
                     usersRef.current = roomUsers;
+                    setArenaUsers([...roomUsers]);
                 })
             } catch (err) {
                 setSocket(null);
@@ -72,8 +76,13 @@ export default function ArenaClient({ slug }: { slug: string }) {
 
     return (
         <>
-            <ArenaCanvas slug={slug} usersRef={usersRef} socket={socket} user={user} />
-            <CanvasOverlay adminUser={user}/>
+            <div className='flex gap-3 h-screen p-4 px-3'>
+                <ArenaSidebar usersRef={usersRef} arenaUsers={arenaUsers} />
+                <div className='flex-1 relative'>
+                    <ArenaCanvas slug={slug} usersRef={usersRef} socket={socket} user={user} />
+                    <CanvasOverlay adminUser={user} />
+                </div>
+            </div>
         </>
     );
 }

@@ -18,7 +18,7 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     const game = new Engine({
         canvasElement,
         pixelRatio: 1,
-        displayMode: DisplayMode.FitContainerAndFill,
+        displayMode: DisplayMode.FillContainer,
         backgroundColor: Color.fromHex('#6CB4EE'),
     });
 
@@ -110,7 +110,7 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
                 }));
             } else if (!isNearby && usersInProximity.has(user.userId)) {
                 usersInProximity.delete(user.userId);
-                 window.dispatchEvent(new CustomEvent(USER_LEFT_PROXIMITY_EVENT, {
+                window.dispatchEvent(new CustomEvent(USER_LEFT_PROXIMITY_EVENT, {
                     detail: {
                         userId: user.userId,
                     }

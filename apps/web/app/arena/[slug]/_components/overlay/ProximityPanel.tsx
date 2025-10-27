@@ -35,7 +35,7 @@ export default function ProximityPanel({ adminUser }: ProximityPanelProps) {
         }
     }, [])
     return (
-        <div className='flex justify-center gap-10 absolute top-5 inset-x-0 mx-auto w-full opacity-95'>
+        <div className='flex justify-center gap-10 absolute top-3 inset-x-0 mx-auto w-full opacity-95'>
             {proximityUsers.length > 0 &&
                 <div className='flex gap-2 w-fit p-1 pb-5 rounded-xl bg-[#3f323e] border border-muted'>
                     <ProximityCard id={adminUser.id} name={adminUser.name} image={adminUser.image} />
