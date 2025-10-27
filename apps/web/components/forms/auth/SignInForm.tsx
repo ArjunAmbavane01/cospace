@@ -104,7 +104,7 @@ export default function SignInForm({ authLoading, googleAuthLoading, signInWithE
                             {authLoading ? <Spinner /> : "Continue"}
                         </Button>
                         <p className="text-center">
-                            <span className="text-muted-foreground">New to CoSpace? </span>
+                            <span>New to CoSpace? </span>
                             <Link href={"/signup"} className="font-medium text-primary cursor-pointer hover:underline">Sign up</Link>
                         </p>
                     </Field>

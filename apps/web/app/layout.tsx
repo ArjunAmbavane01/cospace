@@ -1,19 +1,10 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import { Hanken_Grotesk } from "next/font/google"
 import "./globals.css";
 import Provider from "./providers";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from "@/components/icons";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-});
 const hankenGrotesk = Hanken_Grotesk({
   subsets: ["latin"],
   variable: "--font-hanken-grotesk",
@@ -31,7 +22,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      {/* <body className={`${geistMono.variable} ${geistSans.variable}`}> */}
       <body className={hankenGrotesk.className}>
         <Provider>
           {children}

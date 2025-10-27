@@ -2,10 +2,10 @@
 
 import { RefObject, useEffect, useRef } from 'react';
 import { Engine } from 'excalibur';
+import { User } from 'better-auth';
 import { Socket } from 'socket.io-client';
 import { ArenaUser } from '@/lib/validators/game';
 import { InitGame } from '@/components/game/main';
-import { User } from 'better-auth';
 
 interface ArenaCanvasProps {
     slug: string;
@@ -37,5 +37,7 @@ export default function ArenaCanvas({ slug, usersRef, socket, user }: ArenaCanva
         };
     }, [slug, socket]);
 
-    return <canvas ref={canvasRef} />;
+    return <div className='fixed inset-0 p-5 box-border'>
+        <canvas ref={canvasRef} className='rounded-lg'/>
+    </div>;
 }

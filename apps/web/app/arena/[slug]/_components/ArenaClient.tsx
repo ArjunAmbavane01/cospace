@@ -2,10 +2,10 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
+import { User } from 'better-auth';
 import { authClient } from '@/lib/auth-client';
 import { ArenaUser } from '@/lib/validators/game';
 import CanvasOverlay from './CanvasOverlay';
-import { User } from 'better-auth';
 import ArenaCanvas from './ArenaCanvas';
 
 export default function ArenaClient({ slug }: { slug: string }) {

@@ -130,7 +130,7 @@ export default function SignUpForm({ authLoading, googleAuthLoading, signUpWithE
                             {authLoading ? <Spinner /> : "Continue"}
                         </Button>
                         <p className="text-center">
-                            <span className="text-muted-foreground">Already have an account? </span>
+                            <span>Already have an account? </span>
                             <Link href={"/signin"} className="font-medium text-primary cursor-pointer hover:underline">Log in</Link>
                         </p>
                     </Field>

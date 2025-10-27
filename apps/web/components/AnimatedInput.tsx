@@ -39,14 +39,14 @@ export default function AnimatedInput({
     labelClassName = "",
     icon,
 }: AnimatedInputProps) {
-    
+
     const [internalValue] = useState(defaultValue)
     const [isFocused, setIsFocused] = useState(false)
     const inputRef = useRef<HTMLInputElement>(null)
 
-    const isControlled = value !== undefined
-    const val = isControlled ? value : internalValue
-    const isFloating = !!val || isFocused
+    const isControlled = value !== undefined;
+    const val = isControlled ? value : internalValue;
+    const isFloating = !!val || isFocused;
 
     return (
         <div className={`relative flex items-center ${className}`}>

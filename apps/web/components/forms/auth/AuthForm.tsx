@@ -8,8 +8,8 @@ import SignUpForm from "./SignUpForm";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
-import { ArrowLeft, Users } from "lucide-react";
 import { toast } from "sonner";
+import { ArrowLeft, Users } from "lucide-react";
 
 interface AuthFormProps {
     mode: "signin" | "signup";
@@ -18,7 +18,13 @@ interface AuthFormProps {
 export default function AuthForm({ mode }: AuthFormProps) {
 
     const router = useRouter();
-    const { loading: authLoading, loadingGoogle: googleAuthLoading, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+    const {
+        loading: authLoading,
+        loadingGoogle: googleAuthLoading,
+        signInWithGoogle,
+        signInWithEmail,
+        signUpWithEmail
+    } = useAuth();
 
     const handleGoogleAuth = async () => {
         try {
@@ -35,34 +41,25 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     variant={"ghost"}
                     size={"sm"}
                     onClick={() => router.push("/")}
-                    className="absolute top-3 left-3 flex items-center group transition-all duration-200"
+                    className="absolute top-3 left-3 group"
                 >
-                    <div className="w-0 overflow-hidden group-hover:w-4 transition-all duration-200 ease-in-out">
+                    <div className="w-0 group-hover:w-4 transition-all overflow-hidden">
                         <ArrowLeft />
                     </div>
-                    <span className="transition-all duration-200">Go Back</span>
+                    <span>Go Back</span>
                 </Button>
                 <div className="col-span-1 flex flex-col justify-center items-center gap-6 p-10 h-[550px] w-full rounded-lg">
                     <div className="flex flex-col items-center gap-3">
                         <div className="flex justify-center items-center size-10 bg-accent rounded-lg">
                             <Users className="size-5" />
                         </div>
-                        <div className="flex flex-col items-center gap-1.5 text-center">
-                            <h2>
-                                {
-                                    mode === "signup" ?
-                                        "Create your CoSpace account" :
-                                        "Welcome back to CoSpace"
-                                }
-                            </h2>
-                            {/* <h6 className="text-muted-foreground text-balance">
-                                {
-                                    mode === "signup" ?
-                                        "Set up your workspace and start collaborating in your virtual office." :
-                                        "Reconnect with your team and jump right back into your virtual space."
-                                }
-                            </h6> */}
-                        </div>
+                        <h2>
+                            {
+                                mode === "signup" ?
+                                    "Create your CoSpace account" :
+                                    "Welcome back to CoSpace"
+                            }
+                        </h2>
                     </div>
                     {mode === "signup" ?
                         <SignUpForm authLoading={authLoading} googleAuthLoading={googleAuthLoading} signUpWithEmail={signUpWithEmail} /> :
