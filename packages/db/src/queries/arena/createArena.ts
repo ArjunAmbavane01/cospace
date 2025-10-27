@@ -54,14 +54,14 @@ export const createArena = async (inputArenaName: string, userId: string, userNa
             admin: { name: userName }
         }
         return {
-            type: "success",
+            type: "success" as const,
             message,
             arena: newArena
         }
     } catch (err) {
         const message = err instanceof Error ? err.message : "Unexpected error occurred. Please try again"
         return {
-            type: "error",
+            type: "error" as const,
             message
         }
     }
