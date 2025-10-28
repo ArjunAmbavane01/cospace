@@ -2,7 +2,6 @@ import Image from 'next/image'
 import { IoMdMicOff } from "react-icons/io";
 
 interface ProximityCardProps {
-    id: string;
     name: string;
     image: string | null | undefined;
 }

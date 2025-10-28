@@ -59,7 +59,7 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     game.add(mainCharacter);
 
     // Proximity detection settings
-    const PROXIMITY_RADIUS = 200; // pixels
+    const PROXIMITY_RADIUS = 150; // pixels
     const CHECK_INTERVAL = 500; // ms
     const usersInProximity = new Set<string>();
 

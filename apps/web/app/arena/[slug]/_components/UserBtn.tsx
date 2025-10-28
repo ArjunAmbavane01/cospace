@@ -1,12 +1,14 @@
 import Image from "next/image";
 import { ArenaUser } from "@/lib/validators/game"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BsChat } from "react-icons/bs";
+import { Button } from "@/components/ui/button";
+import { Dispatch, SetStateAction } from "react";
 
 interface UserBtnProps {
   user: ArenaUser;
+  setOpenChat: Dispatch<SetStateAction<boolean>>;
 }
-export default function UserBtn({ user }: UserBtnProps) {
+export default function UserBtn({ user, setOpenChat }: UserBtnProps) {
   const userInitials = user?.userName.split(" ").map(w => w[0]).join("");
   return (
     <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition cursor-pointer group">
@@ -27,8 +29,10 @@ export default function UserBtn({ user }: UserBtnProps) {
         </div>
         {user.userName}
       </div>
-      <div className="hidden group-hover:flex transition-all">
-        <BsChat className="text-muted-foreground size-4" />
+      <div className="opacity-0 group-hover:opacity-100 transition-all">
+        <Button size={"sm"} variant={"outline"} onClick={() => setOpenChat(true)}>
+          Chat
+        </Button>
       </div>
     </div>
   )

@@ -114,6 +114,7 @@ export default function CreateArenaForm() {
                     <Button
                         disabled={isCreating}
                         type="submit"
+                        variant={"3d"}
                         form="create-arena-form"
                     >
                         {isCreating ? (

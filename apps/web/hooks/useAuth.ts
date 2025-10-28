@@ -7,7 +7,7 @@ const useAuth = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [loadingGoogle, setLoadingGoogle] = useState<boolean>(false);
     const router = useRouter();
-    const { setUser } = useAuthStore();
+    const { setUser, setToken } = useAuthStore();
 
     const signInWithGoogle = useCallback(async () => {
         setLoadingGoogle(true);
@@ -19,6 +19,7 @@ const useAuth = () => {
         if (data) {
             if ("user" in data) {
                 setUser(data.user);
+                setToken(data.token);
                 setLoadingGoogle(false);
                 router.push("/hub");
             } else if ("url" in data && data.url) {
@@ -43,6 +44,8 @@ const useAuth = () => {
         }
         if (data) {
             setUser(data.user)
+            setToken(data.token);
+
             setLoading(false);
             router.push("/hub");
         }
@@ -62,6 +65,7 @@ const useAuth = () => {
         }
         if (data) {
             setUser(data.user)
+            setToken(data.token);
             setLoading(false);
             router.push("/hub");
         }
@@ -76,6 +80,7 @@ const useAuth = () => {
             },
         });
         setUser(null);
+        setToken(null);
     }, []);
 
     return {
