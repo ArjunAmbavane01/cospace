@@ -1,35 +1,38 @@
-import { RefObject } from "react";
-import { ArenaUser } from "@/lib/validators/game";
-import UsersList from "./UsersList";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { Kbd } from "@/components/ui/kbd";
-import { SearchIcon } from "lucide-react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react"
+import { cn } from "@/lib/utils";
+import { Tabs } from "./ArenaClient";
+import { Settings } from "lucide-react"
+import { CiMap } from "react-icons/ci"
+import { PiChatsCircle } from "react-icons/pi";
 
 interface ArenaSidebarProps {
-    usersRef: RefObject<ArenaUser[]>;
-    arenaUsers:ArenaUser[]
+    activeTab: Tabs,
+    setActiveTab: Dispatch<SetStateAction<Tabs>>
 }
 
-export default function ArenaSidebar({ usersRef,arenaUsers }: ArenaSidebarProps) {
+export default function ArenaSidebar({ activeTab, setActiveTab }: ArenaSidebarProps) {
     return (
-        <div className="flex flex-col gap-8 w-72 p-3 bg-accent rounded-xl">
-            <div className="px-1">
-                <h3>
-                    Arjun
-                </h3>
-            </div>
-            <InputGroup className="border">
-                <InputGroupInput
-                    placeholder="Search people"
-                />
-                <InputGroupAddon>
-                    <SearchIcon />
-                </InputGroupAddon>
-                <InputGroupAddon align={"inline-end"}>
-                    <Kbd>Ctrl</Kbd><Kbd>F</Kbd>
-                </InputGroupAddon>
-            </InputGroup>
-            <UsersList usersRef={usersRef} arenaUsers={arenaUsers}/>
+        <div className="flex flex-col gap-3 w-fit px-2">
+            <NavItem title="map" activeTab={activeTab} setActiveTab={setActiveTab} icon={<CiMap className="size-6" />} />
+            <NavItem title="chat" activeTab={activeTab} setActiveTab={setActiveTab} icon={<PiChatsCircle className="size-6" />} />
+            <NavItem title="setting" activeTab={activeTab} setActiveTab={setActiveTab} icon={<Settings className="size-6" />} />
         </div>
     )
+}
+
+function NavItem({ title, icon, activeTab, setActiveTab }: {
+    title: Tabs,
+    icon: ReactNode,
+    activeTab: Tabs,
+    setActiveTab: Dispatch<SetStateAction<Tabs>>
+}) {
+    const isActive = title === activeTab;
+    return <div
+        onClick={() => setActiveTab(title)}
+        className={cn(
+            "flex justify-center items-center size-10 rounded-lg cursor-pointer transition",
+            isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+        )}>
+        {icon}
+    </div>
 }
