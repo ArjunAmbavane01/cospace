@@ -17,7 +17,7 @@ export const getArenas = async (userId: string) => {
                 },
             },
         })
-        const message = "Successfully fetch user arenas";
+        const message = "Successfully fetched user arenas";
         return {
             type: "success" as const,
             message,

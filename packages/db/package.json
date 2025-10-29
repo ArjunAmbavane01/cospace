@@ -7,7 +7,8 @@
   "exports": {
     "./client": "./src/client.ts",
     "./schema": "./src/schemas/index.ts",
-    "./queries/arena": "./src/queries/arena/index.ts"
+    "./queries/arena": "./src/queries/arena/index.ts",
+    "./queries/chat": "./src/queries/chat/index.ts"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -13,6 +13,6 @@ export const messages = pgTable("messages", {
     recieverId: text("reciever_id")
         .notNull()
         .references(() => user.id),
-    content: varchar("content", { length: 512 }),
+    content: varchar("content", { length: 512 }).notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 });
