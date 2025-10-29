@@ -2,13 +2,9 @@
 
 import { getChatGroups as getChatGroupsQuery } from "@repo/db/queries/chat";
 import { verifyAuth } from "./auth";
+import { GetChatMessagesResponse } from "@/lib/validators/actions";
 
-// export const getChatMessages = async (chatUserID: string) => {
-//     const { id: userId } = await verifyAuth();
-//     return await getChatMessagesQuery(userId, chatUserID);
-// }
-
-export const getChatGroups = async (arenaSlug: string) => {
+export const getChatGroups = async (arenaSlug: string): Promise<GetChatMessagesResponse> => {
     const { id: userId } = await verifyAuth();
-    return await getChatGroupsQuery(userId, arenaSlug);
+    return getChatGroupsQuery(userId, arenaSlug);
 }

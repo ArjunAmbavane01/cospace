@@ -6,35 +6,35 @@ import { CreateArenaResponse, DeleteArenaResponse, EditArenaResponse, GetArenasR
 
 export const createArena = async (inputArenaName: string):Promise<CreateArenaResponse> => {
     const { id: userId, name: userName } = await verifyAuth();
-    return await createArenaQuery(inputArenaName, userId, userName);
+    return createArenaQuery(inputArenaName, userId, userName);
 }
 
 export const deleteArena = async (arenaSlug: string): Promise<DeleteArenaResponse> => {
     const { id: userId } = await verifyAuth();
-    return await deleteArenaQuery(arenaSlug, userId);
+    return deleteArenaQuery(arenaSlug, userId);
 }
 
 export const getArenas = async (): Promise<GetArenasResponse> => {
     const { id: userId } = await verifyAuth();
-    return await getArenasQuery(userId);
+    return getArenasQuery(userId);
 }
 
 export const leaveArena = async (arenaSlug: string): Promise<LeaveArenaResponse> => {
     const { id: userId } = await verifyAuth();
-    return await leaveArenaQuery(arenaSlug, userId);
+    return leaveArenaQuery(arenaSlug, userId);
 }
 
 export const joinArena = async (arenaSlug: string): Promise<JoinArenaResponse> => {
     const { id: userId } = await verifyAuth();
-    return await joinArenaQuery(arenaSlug, userId);
+    return joinArenaQuery(arenaSlug, userId);
 }
 
 export const editArena = async (inputArenaName: string, arenaSlug: string): Promise<EditArenaResponse> => {
     const { id: userId } = await verifyAuth();
-    return await editArenaQuery(inputArenaName, arenaSlug, userId);
+    return editArenaQuery(inputArenaName, arenaSlug, userId);
 }
 
 export const validateArenaSlug = async (arenaSlug: string): Promise<ValidateArenaSlugResponse> => {
     await verifyAuth();
-    return await validateArenaSlugQuery(arenaSlug);
+    return validateArenaSlugQuery(arenaSlug);
 }

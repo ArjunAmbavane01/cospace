@@ -23,7 +23,7 @@ export const getChatGroups = async (userId: string, arenaSlug: string) => {
                     columns: { id: false },
                     with: {
                         messages: {
-                            columns: { content: true },
+                            columns: { content: true, createdAt: true },
                             orderBy: (msgs, { desc }) => [desc(msgs.createdAt)],
                             limit: 1,
 
