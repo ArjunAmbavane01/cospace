@@ -1,17 +1,17 @@
 import { Dispatch, SetStateAction } from "react";
 import Image from "next/image";
 import { ArenaUser } from "@/lib/validators/game"
-import { Tabs } from "../ArenaClient";
+import { cn } from "@/lib/utils";
+import { Tabs } from "../../ArenaLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
-interface UserBtnProps {
+interface UserRowProps {
   user: ArenaUser;
   setActiveTab: Dispatch<SetStateAction<Tabs>>;
   setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
-export default function UserBtn({ user, setActiveTab, setActiveChatUser }: UserBtnProps) {
+export default function UserRow({ user, setActiveTab, setActiveChatUser }: UserRowProps) {
   const userInitials = user?.userName.split(" ").map(w => w[0]).join("");
   return (
     <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition group">
@@ -21,7 +21,7 @@ export default function UserBtn({ user, setActiveTab, setActiveChatUser }: UserB
             <div className={cn(
               "absolute size-[9px] border bottom-0 right-0 rounded-full",
               user.lastOnline === "online" ? "bg-success" : "bg-muted-foreground"
-            )}/>
+            )} />
           </div>
           {
             user.userImage ?

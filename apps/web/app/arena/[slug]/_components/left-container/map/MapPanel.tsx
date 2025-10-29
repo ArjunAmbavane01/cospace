@@ -1,12 +1,12 @@
 import { Dispatch, SetStateAction } from "react";
-import { Tabs } from "../ArenaClient";
 import { User } from "better-auth";
 import { ArenaUser } from "@/lib/validators/game";
+import { Tabs } from "../../ArenaLayout";
 import UsersList from "./UsersList";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 
-interface ArenaSidebarProps {
+interface MapPanelProps {
     user: User
     arenaUsers: ArenaUser[]
     activeTab: Tabs;
@@ -14,7 +14,7 @@ interface ArenaSidebarProps {
     setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
 
-export default function ArenaSidePanel({ user, arenaUsers, activeTab, setActiveTab, setActiveChatUser }: ArenaSidebarProps) {
+export default function MapPanel({ user, arenaUsers, activeTab, setActiveTab, setActiveChatUser }: MapPanelProps) {
     const onlineUsers = arenaUsers.filter((user) => user.lastOnline === "online");
     const offlineUsers = arenaUsers.filter((user) => user.lastOnline !== "online");
     return (

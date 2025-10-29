@@ -1,14 +1,14 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 import { formatDate } from "@/lib/formatDate";
 import { cn } from "@/lib/utils";
 import { ChatGroup } from "@/lib/validators/chat"
-import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface ChatGroupBtnProps {
+interface ChatGroupItemProps {
     group: ChatGroup;
 }
 
-export default function ChatGroupBtn({ group }: ChatGroupBtnProps) {
+export default function ChatGroupItem({ group }: ChatGroupItemProps) {
     const { lastMessage, participants, updatedAt } = group;
     const user = participants[0];
     if (!user) return;

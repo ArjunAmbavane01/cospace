@@ -1,18 +1,18 @@
 import { Dispatch, SetStateAction } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { User } from "better-auth"
-import { toast } from "sonner";
 import { getChatGroups } from "server/actions/chat";
+import { User } from "better-auth"
 import { ArenaUser } from "@/lib/validators/game";
-import ChatGroupBtn from "./ChatGroupBtn";
+import ChatGroupItem from "./ChatGroupItem";
+import { toast } from "sonner";
 
-interface ArenaChatGroupsPanelProps {
+interface ChatGroupsPanelProps {
     user: User;
     slug: string;
     setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 
 }
-export default function ArenaChatGroupsPanel({ user, slug, setActiveChatUser }: ArenaChatGroupsPanelProps) {
+export default function ChatGroupsPanel({ user, slug, setActiveChatUser }: ChatGroupsPanelProps) {
     //fetch all chat groups user is part of 
     const { data: chatGroups, isLoading, isError } = useQuery({
         queryKey: ["chat-groups", user.id],
@@ -36,7 +36,7 @@ export default function ArenaChatGroupsPanel({ user, slug, setActiveChatUser }: 
     )
     return (
         <div className="flex flex-col gap-2">
-            {chatGroups.map(group => <ChatGroupBtn group={group} />)}
+            {chatGroups.map(group => <ChatGroupItem group={group} />)}
         </div>
     )
 }

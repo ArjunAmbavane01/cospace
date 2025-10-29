@@ -8,13 +8,11 @@ import { ArenaUser } from '@/lib/validators/game';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaCanvas from './ArenaCanvas';
 import ChatPanel from './overlay/ChatPanel';
-import ArenaSidebar from './left-panel/ArenaSidebar';
-import ArenaSidePanel from './left-panel/ArenaSidePanel';
-import ArenaLeftPanel from './left-panel/ArenaLeftPanel';
+import ArenaSidebarContainer from './ArenaSidebarContainer';
 
 export type Tabs = "map" | "chat" | "setting";
 
-export default function ArenaClient({ slug }: { slug: string }) {
+export default function ArenaLayout({ slug }: { slug: string }) {
 
     const [socket, setSocket] = useState<Socket | null>(null);
     const [user, setUser] = useState<User | null>(null);
@@ -90,20 +88,9 @@ export default function ArenaClient({ slug }: { slug: string }) {
     return (
         <>
             <div className='flex gap-2 h-screen py-4'>
-                <ArenaLeftPanel
+                <ArenaSidebarContainer
                     user={user}
                     slug={slug}
-                    arenaUsers={arenaUsers}
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    setActiveChatUser={setActiveChatUser}
-                />
-                <ArenaSidebar
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                />
-                <ArenaSidePanel
-                    user={user}
                     arenaUsers={arenaUsers}
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
