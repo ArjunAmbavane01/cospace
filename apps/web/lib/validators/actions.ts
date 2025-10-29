@@ -1,9 +1,11 @@
 import { Arena } from "./arena";
+import { ChatGroup } from "./chat";
 
 export type ActionResponse<T = void> =
     | { type: "success"; message: string } & T
     | { type: "error"; message: string };
 
+// arena actions
 export type GetArenasResponse = ActionResponse<{ userArenas: Arena[] }>;
 export type CreateArenaResponse = ActionResponse<{ arena: Arena }>;
 export type DeleteArenaResponse = ActionResponse<{ arenaSlug: string }>;
@@ -11,3 +13,6 @@ export type LeaveArenaResponse = ActionResponse<{ arenaSlug: string }>;
 export type JoinArenaResponse = ActionResponse<{ arenaSlug: string }>;
 export type EditArenaResponse = ActionResponse<{ newArenaDetails: { name: string } }>;
 export type ValidateArenaSlugResponse = ActionResponse;
+
+// chat actions
+export type GetChatMessagesResponse = ActionResponse<{ chatGroups: ChatGroup[] }>;

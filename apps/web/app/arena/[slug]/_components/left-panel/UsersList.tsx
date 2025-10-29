@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
+import { Tabs } from "../ArenaClient";
 import { ArenaUser } from "@/lib/validators/game";
 import UserBtn from "./UserBtn";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -7,11 +8,12 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface UsersListProps {
     arenaUsers: ArenaUser[];
-    setOpenChat: Dispatch<SetStateAction<boolean>>;
+    setActiveTab: Dispatch<SetStateAction<Tabs>>;
+    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
     type: "online" | "offline";
 }
 
-export default function UsersList({ arenaUsers, type, setOpenChat }: UsersListProps) {
+export default function UsersList({ arenaUsers, type, setActiveTab, setActiveChatUser }: UsersListProps) {
     const [showUsers, setShowUsers] = useState<boolean>(true);
     return (
         <Collapsible
@@ -35,7 +37,7 @@ export default function UsersList({ arenaUsers, type, setOpenChat }: UsersListPr
             </div>
             <CollapsibleContent>
                 {arenaUsers.map(user => {
-                    return <UserBtn key={user.userId} user={user} setOpenChat={setOpenChat} />
+                    return <UserBtn key={user.userId} user={user} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
                 })}
             </CollapsibleContent>
         </Collapsible>

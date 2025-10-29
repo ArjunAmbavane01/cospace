@@ -1,19 +1,20 @@
 import { Dispatch, SetStateAction } from "react";
-import useAuthStore from "store/authStore";
+import { Tabs } from "../ArenaClient";
 import { User } from "better-auth";
 import { ArenaUser } from "@/lib/validators/game";
 import UsersList from "./UsersList";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
 import { Kbd } from "@/components/ui/kbd";
-import { SearchIcon } from "lucide-react";
 
 interface ArenaSidebarProps {
     user: User
     arenaUsers: ArenaUser[]
-    setOpenChat: Dispatch<SetStateAction<boolean>>;
+    activeTab: Tabs;
+    setActiveTab: Dispatch<SetStateAction<Tabs>>;
+    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
 
-export default function ArenaSidePanel({ user, arenaUsers, setOpenChat }: ArenaSidebarProps) {
+export default function ArenaSidePanel({ user, arenaUsers, activeTab, setActiveTab, setActiveChatUser }: ArenaSidebarProps) {
     const onlineUsers = arenaUsers.filter((user) => user.lastOnline === "online");
     const offlineUsers = arenaUsers.filter((user) => user.lastOnline !== "online");
     return (
@@ -39,8 +40,8 @@ export default function ArenaSidePanel({ user, arenaUsers, setOpenChat }: ArenaS
                         </div>
                     ) : (
                         <>
-                            <UsersList type="online" arenaUsers={onlineUsers} setOpenChat={setOpenChat} />
-                            <UsersList type="offline" arenaUsers={offlineUsers} setOpenChat={setOpenChat} />
+                            <UsersList type="online" arenaUsers={onlineUsers} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
+                            <UsersList type="offline" arenaUsers={offlineUsers} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
                         </>
                     )
                 }

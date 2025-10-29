@@ -1,21 +1,27 @@
+import { Dispatch, SetStateAction } from "react";
 import Image from "next/image";
 import { ArenaUser } from "@/lib/validators/game"
+import { Tabs } from "../ArenaClient";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Dispatch, SetStateAction } from "react";
+import { cn } from "@/lib/utils";
 
 interface UserBtnProps {
   user: ArenaUser;
-  setOpenChat: Dispatch<SetStateAction<boolean>>;
+  setActiveTab: Dispatch<SetStateAction<Tabs>>;
+  setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
-export default function UserBtn({ user, setOpenChat }: UserBtnProps) {
+export default function UserBtn({ user, setActiveTab, setActiveChatUser }: UserBtnProps) {
   const userInitials = user?.userName.split(" ").map(w => w[0]).join("");
   return (
-    <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition cursor-pointer group">
+    <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition group">
       <div className="flex items-center gap-3">
         <div className="flex justify-center items-center size-7 relative">
           <div className="absolute size-2.5 bg-accent bottom-0 right-0 rounded-full">
-            <div className="absolute size-[9px] bg-success border bottom-0 right-0 rounded-full" />
+            <div className={cn(
+              "absolute size-[9px] border bottom-0 right-0 rounded-full",
+              user.lastOnline === "online" ? "bg-success" : "bg-muted-foreground"
+            )}/>
           </div>
           {
             user.userImage ?
@@ -30,7 +36,11 @@ export default function UserBtn({ user, setOpenChat }: UserBtnProps) {
         {user.userName}
       </div>
       <div className="opacity-0 group-hover:opacity-100 transition-all">
-        <Button size={"sm"} variant={"outline"} onClick={() => setOpenChat(true)}>
+        <Button size={"sm"} variant={"outline"} onClick={() => {
+          setActiveChatUser(user)
+          setActiveTab("chat")
+        }}
+        >
           Chat
         </Button>
       </div>

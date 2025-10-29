@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ArenaUser } from '@/lib/validators/game'
 import { User } from 'better-auth'
-import ProximityCard from '../ProximityCard'
+import ProximityCard from './ProximityCard'
 
 interface ProximityPanelProps {
     adminUser: User

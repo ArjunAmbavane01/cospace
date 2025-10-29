@@ -7,9 +7,10 @@ import { authClient } from '@/lib/auth-client';
 import { ArenaUser } from '@/lib/validators/game';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaCanvas from './ArenaCanvas';
-import ArenaSidePanel from './ArenaSidePanel';
 import ChatPanel from './overlay/ChatPanel';
-import ArenaSidebar from './ArenaSidebar';
+import ArenaSidebar from './left-panel/ArenaSidebar';
+import ArenaSidePanel from './left-panel/ArenaSidePanel';
+import ArenaLeftPanel from './left-panel/ArenaLeftPanel';
 
 export type Tabs = "map" | "chat" | "setting";
 
@@ -17,12 +18,16 @@ export default function ArenaClient({ slug }: { slug: string }) {
 
     const [socket, setSocket] = useState<Socket | null>(null);
     const [user, setUser] = useState<User | null>(null);
-    const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>([]);
-    const [openChat, setOpenChat] = useState<boolean>(false);
+    const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>([{
+        "userId": "8MiELjFPThRmZYOadfiRln7mmPOTZ6vI",
+        "userName": "Arjun Ambavane",
+        "userImage": "https://lh3.googleusercontent.com/a/ACg8ocI1WT32DhgXDzdH5Uw6WnJ7HJdlOh4Ctx0yJnmPfKcc-dWxMg=s96-c",
+        "lastOnline": "online"
+    }]);
     const [activeTab, setActiveTab] = useState<Tabs>("map");
+    const [activeChatUser, setActiveChatUser] = useState<ArenaUser | null>(null);
 
-
-
+    console.log(arenaUsers)
     const usersRef = useRef<ArenaUser[]>([]);
 
     useEffect(() => {
@@ -85,10 +90,27 @@ export default function ArenaClient({ slug }: { slug: string }) {
     return (
         <>
             <div className='flex gap-2 h-screen py-4'>
-                <ArenaSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-                <ArenaSidePanel user={user} arenaUsers={arenaUsers} setOpenChat={setOpenChat} />
+                <ArenaLeftPanel
+                    user={user}
+                    slug={slug}
+                    arenaUsers={arenaUsers}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    setActiveChatUser={setActiveChatUser}
+                />
+                <ArenaSidebar
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                />
+                <ArenaSidePanel
+                    user={user}
+                    arenaUsers={arenaUsers}
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    setActiveChatUser={setActiveChatUser}
+                />
                 <div className='flex-1 relative mx-3'>
-                    {openChat || activeTab === "chat" && <ChatPanel />}
+                    {activeTab === "chat" && <ChatPanel activeChatUser={activeChatUser} />}
                     <ArenaCanvas slug={slug} usersRef={usersRef} socket={socket} user={user} />
                     <CanvasOverlay adminUser={user} />
                 </div>
