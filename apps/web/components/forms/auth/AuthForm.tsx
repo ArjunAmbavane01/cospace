@@ -49,7 +49,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     <span>Go Back</span>
                 </Button>
                 <div className="col-span-1 flex flex-col justify-center items-center gap-6 p-10 h-[550px] w-full rounded-lg">
-                    <div className="flex flex-col items-center gap-3">
+                    <div className="flex flex-col items-center gap-3 text-center">
                         <div className="flex justify-center items-center size-10 bg-accent rounded-lg">
                             <Users className="size-5" />
                         </div>
@@ -71,18 +71,16 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                 OR
                             </h6>
                         </Separator>
-                        <div className="w-full">
-                            <Button
-                                onClick={handleGoogleAuth}
-                                variant={"outline"}
-                                size={"lg"}
-                                disabled={authLoading}
-                                className="w-full"
-                            >
-                                <Image src={"/assets/logo/google-logo.svg"} alt={"Google logo"} width={20} height={20} className="size-4" />
-                                {googleAuthLoading ? <Spinner /> : "Google"}
-                            </Button>
-                        </div>
+                        <Button
+                            onClick={handleGoogleAuth}
+                            variant={"outline"}
+                            size={"lg"}
+                            disabled={authLoading}
+                            className="w-full"
+                        >
+                            <Image src={"/assets/logo/google-logo.svg"} alt={"Google logo"} width={20} height={20} className="size-4" />
+                            {googleAuthLoading ? <Spinner /> : "Google"}
+                        </Button>
                     </div>
                 </div>
                 <div className="col-span-2 size-full border rounded-lg relative overflow-hidden">

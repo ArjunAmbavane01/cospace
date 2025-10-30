@@ -8,7 +8,7 @@ import { Arena } from "@/lib/validators/arena";
 import { AnimatePresence, motion } from "motion/react";
 import { ArenaMutation } from "./HubDashboard";
 import ArenaDeleteBtn from "./ArenaDeleteBtn";
-import ArenaEditBtn from "./ArenaEditBtn";
+import ArenaEditDialog from "./ArenaEditDialog";
 import { Spinner } from "@/components/ui/spinner";
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -39,7 +39,6 @@ export default function ArenaCard({
     const handleCopyLink = async (e: React.MouseEvent) => {
         e.stopPropagation();
         const arenaUrl = `${window.location.origin}/arena/${arena.slug}`;
-
         try {
             await navigator.clipboard.writeText(arenaUrl);
             setCopied(true);
@@ -148,7 +147,7 @@ export default function ArenaCard({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="start">
                                 <DropdownMenuGroup>
-                                    <ArenaEditBtn arenaSlug={arena.slug} arena={arena} />
+                                    <ArenaEditDialog arenaSlug={arena.slug} arena={arena} />
                                     <DropdownMenuItem onClick={() => leaveArena(arena.slug)}>
                                         {
                                             isLeaving ? (

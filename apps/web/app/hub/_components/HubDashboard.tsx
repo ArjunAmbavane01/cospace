@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getArenas, deleteArena, joinArena, leaveArena } from "server/actions/arena";
+import { getArenas, deleteArena, leaveArena } from "server/actions/arena";
+import { useRouter } from "next/navigation";
 import useAuthStore from "store/authStore";
-import { Arena } from "@/lib/validators/arena";
 import type { User } from "better-auth";
+import { Arena } from "@/lib/validators/arena";
 import { AnimatePresence } from "motion/react";
 import HubHeader from "./HubHeader";
 import ArenaList from "./ArenaList";
@@ -32,74 +33,104 @@ export default function HubDashboard({ sessionUser }: HubDashboardProps) {
 
     const { user, setUser } = useAuthStore();
     const queryClient = useQueryClient();
-
     const userId = sessionUser.id;
-    const { data: userArenas, isLoading, isError } = useQuery({
+
+    // get user arenas
+    const { data: userArenas, isLoading, isError, error } = useQuery({
         queryKey: ["arenas", userId],
         queryFn: async () => {
             const res = await getArenas();
-            if (res.type === "success") return res.userArenas
-            else if (res.type === "error") toast.error(res.message)
+            if (res.type === "error") throw new Error(res.message);
+            return res.userArenas;
         },
-        staleTime: 60 * 1000 // 60 seconds
+        staleTime: 5 * 60 * 1000, // 5 minutes
     })
 
     // delete arena mutation
     const { mutate: deleteArenaMutation, isPending: isDeleting } = useMutation({
-        mutationFn: (arenaSlug: string) => deleteArena(arenaSlug),
+        mutationFn: async (arenaSlug: string) => {
+            const res = await deleteArena(arenaSlug);
+            if (res.type === "error") throw new Error(res.message);
+            return res;
+        },
+        onMutate: async (arenaSlug) => {
+            // cancel outgoing refecthes
+            await queryClient.cancelQueries({ queryKey: ["arenas", userId] })
+            // save previous value
+            const previousArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]);
+            if (previousArenas) {
+                queryClient.setQueryData(
+                    ["arenas", userId],
+                    previousArenas.filter(a => a.slug !== arenaSlug)
+                );
+            }
+            return { previousArenas };
+        },
         onSuccess: (res) => {
-            if (res.type === "success") {
-                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
-                const remainingArenas = existingArenas.filter(arena => arena.slug !== res.arenaSlug);
-                queryClient.setQueryData(["arenas", userId], [...remainingArenas]);
-                toast.success(res.message);
-            } else if (res.type === "error") {
-                toast.error(res.message)
-            };
+            toast.success(res.message);
         },
-        onError: (err) => {
-            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+        onError: (err, _, context) => {
+            // restore previous state
+            if (context?.previousArenas) {
+                queryClient.setQueryData(
+                    ["arenas", userId],
+                    [context.previousArenas]
+                );
+            }
+            toast.error(err.message);
         },
-    })
-
-    // join arena mutation
-    const { mutate: joinArenaMutation, isPending: isJoining } = useMutation({
-        mutationFn: (arenaSlug: string) => joinArena(arenaSlug),
-        onSuccess: (res) => {
-            if (res.type === "success") {
-                toast.success(res.message);
-            } else if (res.type === "error") {
-                toast.error(res.message)
-            };
-        },
-        onError: (err) => {
-            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["arenas", userId] })
         },
     })
 
     // leave arena mutation
     const { mutate: leaveArenaMutation, isPending: isLeaving } = useMutation({
-        mutationFn: (arenaSlug: string) => leaveArena(arenaSlug),
+        mutationFn: async (arenaSlug: string) => {
+            const res = await leaveArena(arenaSlug);
+            if (res.type === "error") throw new Error(res.message);
+            return res;
+        },
+        onMutate: async (arenaSlug) => {
+            // cancel outgoing refecthes
+            await queryClient.cancelQueries({ queryKey: ["arenas", userId] })
+            // save previous value
+            const previousArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]);
+            if (previousArenas) {
+                queryClient.setQueryData(
+                    ["arenas", userId],
+                    previousArenas.filter(a => a.slug !== arenaSlug)
+                );
+            }
+            return { previousArenas };
+        },
         onSuccess: (res) => {
-            if (res.type === "success") {
-                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", userId]) || [];
-                const remainingArenas = existingArenas.filter(arena => arena.slug !== res.arenaSlug);
-                queryClient.setQueryData(["arenas", userId], [...remainingArenas]);
-                toast.success(res.message);
-            } else if (res.type === "error") {
-                toast.error(res.message)
-            };
+            toast.success(res.message);
         },
-        onError: (err) => {
-            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+        onError: (err, _, context) => {
+            // restore previous state
+            if (context?.previousArenas) {
+                queryClient.setQueryData(
+                    ["arenas", userId],
+                    [context.previousArenas]
+                );
+            }
+            toast.error(err.message);
         },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["arenas", userId] })
+        }
     })
 
-    const filteredArenas = useMemo(() => (userArenas?.filter((arena) => {
-        if (!userArenas) return []
-        return arena.name.toLowerCase().includes(searchQuery.toLowerCase());
-    }) || []), [searchQuery, userArenas])
+    const filteredArenas = useMemo(() => {
+        if (!userArenas) return [];
+        return userArenas.filter((arena) => {
+            if (!arena?.name) return false;
+            return arena.name.toLowerCase().includes(searchQuery.toLowerCase());
+        })
+    }, [searchQuery, userArenas])
 
+    // welcome toast effect
     useEffect(() => {
         const welcomeFlag = "hasShownHubWelcome";
         if (!sessionStorage.getItem(welcomeFlag)) {
@@ -109,19 +140,21 @@ export default function HubDashboard({ sessionUser }: HubDashboardProps) {
         }
     }, []);
 
+    // set user effect
     useEffect(() => {
         if (!user) setUser(sessionUser)
     }, [user, sessionUser])
+
+    // fetching error effect
+    useEffect(() => {
+        if (isError && error) toast.error(error.message)
+    }, [isError, error]);
 
     return (
         <div className='py-24 bg-background w-full min-h-screen relative'>
             <Navbar />
             <div className="flex flex-col gap-5 w-full max-w-7xl mx-auto space-y-10">
-                <HubHeader
-                    setSearchQuery={setSearchQuery}
-                    joinArena={joinArenaMutation}
-                    isJoining={isJoining}
-                />
+                <HubHeader setSearchQuery={setSearchQuery} />
                 {
                     isLoading ? (
                         <div className="grid grid-cols-4 gap-24">
@@ -142,9 +175,9 @@ export default function HubDashboard({ sessionUser }: HubDashboardProps) {
             </div>
             <AnimatePresence>
                 {
-                    showWelcomeToast &&
+                    showWelcomeToast && user &&
                     <WelcomeUserToast
-                        userName="Arjun"
+                        userName={user.name}
                         onClose={() => setShowWelcomeToast(false)}
                     />
                 }

@@ -1,8 +1,8 @@
 "use client"
 
 import { Dispatch, SetStateAction, useEffect, useRef } from "react";
-import CreateArenaDialog from "@/components/forms/CreateArenaDialog";
-import JoinArenaDialog from "@/components/forms/JoinArenaDialog";
+import CreateArenaDialog from "@/components/dialog/CreateArenaDialog";
+import JoinArenaDialog from "@/components/dialog/JoinArenaDialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { Kbd } from '@/components/ui/kbd';
 import { SearchIcon } from 'lucide-react';
@@ -10,11 +10,9 @@ import { ArenaMutation } from "./HubDashboard";
 
 interface HubHeaderProps {
     setSearchQuery: Dispatch<SetStateAction<string>>;
-    joinArena: ArenaMutation;
-    isJoining: boolean;
 }
 
-export default function HubHeader({ setSearchQuery, joinArena, isJoining }: HubHeaderProps) {
+export default function HubHeader({ setSearchQuery }: HubHeaderProps) {
 
     const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -57,7 +55,7 @@ export default function HubHeader({ setSearchQuery, joinArena, isJoining }: HubH
                 </InputGroup>
                 <div className="flex items-center gap-3">
                     <CreateArenaDialog />
-                    <JoinArenaDialog joinArena={joinArena} isJoining={isJoining} />
+                    <JoinArenaDialog />
                 </div>
             </div>
         </div>

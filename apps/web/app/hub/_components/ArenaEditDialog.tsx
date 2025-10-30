@@ -3,27 +3,27 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { editArena } from "server/actions/arena";
-import { Arena, editArenaFormSchema } from "@/lib/validators/arena";
 import useAuthStore from "store/authStore";
 import { useForm } from "@tanstack/react-form";
+import { Arena, editArenaFormSchema } from "@/lib/validators/arena";
 import z from 'zod';
-import { toast } from 'sonner';
 import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import AnimatedInput from "@/components/AnimatedInput";
-import { SquarePenIcon, Trash2Icon } from "lucide-react";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { toast } from 'sonner';
+import { SquarePenIcon } from "lucide-react";
 
-interface ArenaEditBtnProps {
+interface ArenaEditDialogProps {
     arenaSlug: string;
     arena: Arena;
 }
 
 type editArenaFormData = z.infer<typeof editArenaFormSchema>;
 
-export default function ArenaEditBtn({ arenaSlug, arena }: ArenaEditBtnProps) {
+export default function ArenaEditDialog({ arenaSlug, arena }: ArenaEditDialogProps) {
 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const queryClient = useQueryClient();
@@ -41,24 +41,38 @@ export default function ArenaEditBtn({ arenaSlug, arena }: ArenaEditBtnProps) {
 
     // edit arena mutation
     const { mutate: editArenaMutation, isPending: isEditing } = useMutation({
-        mutationFn: (data: editArenaFormData) => editArena(data.arenaName, arenaSlug),
+        mutationFn: async (data: editArenaFormData) => {
+            const res = await editArena(data.arenaName, arenaSlug);
+            if (res.type === "error") throw new Error(res.message);
+            return res;
+        },
+        onMutate: async (inputData) => {
+            await queryClient.cancelQueries({ queryKey: ["arenas", user?.id] })
+            const previousArenas = queryClient.getQueryData<Arena[]>(["arenas", user?.id]);
+            if (previousArenas) {
+                queryClient.setQueryData(
+                    ["arenas", user?.id],
+                    previousArenas.map(a =>
+                        a.slug === arenaSlug ? { ...a, name: inputData.arenaName } : a
+                    )
+                );
+
+            }
+            return { previousArenas }
+        },
         onSuccess: (res) => {
-            if (res.type === "success") {
-                const updatedArenaDetails = res.newArenaDetails;
-                const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", user?.id]) || [];
-                const updatedArenas = existingArenas.map(a =>
-                    a.slug === arenaSlug ? { ...a, name: updatedArenaDetails.name } : a
-                )
-                queryClient.setQueryData(["arenas", user?.id], [...updatedArenas]);
-                setModalOpen(false);
-                toast.success(res.message);
-            } else if (res.type === "error") {
-                toast.error(res.message)
-            };
+            setModalOpen(false);
+            toast.success(res.message);
         },
-        onError: (err) => {
-            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+        onError: (err, _, context) => {
+            if (context?.previousArenas) {
+                queryClient.setQueryData(["arenas", user?.id], context.previousArenas);
+            }
+            toast.error(err.message);
         },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["arenas", user?.id] })
+        }
     })
 
     return (

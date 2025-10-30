@@ -20,6 +20,7 @@ export default function ArenaList({
     deleteArena,
     leaveArena,
 }: ArenaListProps) {
+    
     if (isError) {
         return (
             <div className="text-destructive text-center p-20 border border-dashed rounded-xl">

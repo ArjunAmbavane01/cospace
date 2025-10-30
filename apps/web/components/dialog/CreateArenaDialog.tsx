@@ -2,56 +2,77 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { createArena } from 'server/actions/arena';
+import useAuthStore from 'store/authStore';
 import { useForm } from "@tanstack/react-form"
-import { JoinArenaDialogSchema } from '@/lib/validators/arena';
-import { ArenaMutation } from 'app/hub/_components/HubDashboard';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { CreateArenaDialogSchema } from '@/lib/validators/arena';
+import z from 'zod';
+import { toast } from 'sonner';
 import AnimatedInput from '../AnimatedInput';
 import { Button } from "@/components/ui/button"
 import { Spinner } from '@/components/ui/spinner';
 import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { FiPlus } from "react-icons/fi";
 
-interface JoinArenaDialogProps {
-    joinArena: ArenaMutation;
-    isJoining: boolean;
-}
+type CreateArenaDialogData = z.infer<typeof CreateArenaDialogSchema>;
 
-export default function JoinArenaDialog({ joinArena, isJoining }: JoinArenaDialogProps) {
+export default function CreateArenaDialog() {
 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
+
     const router = useRouter();
+    const queryClient = useQueryClient();
+    const { user } = useAuthStore();
 
     const form = useForm({
         defaultValues: {
-            inviteLink: ""
+            arenaName: ""
         },
         validators: {
-            onSubmit: JoinArenaDialogSchema,
+            onSubmit: CreateArenaDialogSchema,
         },
-        onSubmit: ({ value }) => {
-            const slug = value.inviteLink.split("http://localhost:3000/arena/")[1];
-            if (!slug) return;
-            joinArena(slug);
-            router.push(value.inviteLink);
-        }
+        onSubmit: ({ value }) => addArenaMutation(value)
+    })
+
+    // create arena mutation
+    const { mutate: addArenaMutation, isPending: isCreating } = useMutation({
+        mutationFn: async (data: CreateArenaDialogData) => {
+            const res = await createArena(data.arenaName);
+            if (res.type === "error") throw new Error(res.message);
+            return res;
+        },
+        onSuccess: (res) => {
+            queryClient.invalidateQueries({ queryKey: ["arenas", user?.id] })
+            toast.success(res.message);
+            setModalOpen(false);
+            form.reset();
+            router.push(`/arena/${res.arena.slug}`);
+        },
+        onError: (err) => {
+            toast.error(err.message);
+        },
     })
 
     return (
         <Dialog open={modalOpen} onOpenChange={setModalOpen}>
             <DialogTrigger asChild>
                 <Button
-                    size="lg"
-                    variant="secondary"
+                    variant={"3d"}
+                    size={"lg"}
+                    className='text-base'
                 >
-                    Join Arena
+                    <FiPlus />
+                    Create Arena
                 </Button>
             </DialogTrigger>
-            <DialogContent showCloseButton={false} className="sm:max-w-[425px]">
+            <DialogContent showCloseButton={false}>
                 <DialogHeader>
-                    <DialogTitle>Join Arena</DialogTitle>
-                    <div className='py-5 pt-8'>
+                    <DialogTitle>Create Arena</DialogTitle>
+                    <div className='py-5'>
                         <form
-                            id="join-arena-form"
+                            id="create-arena-form"
                             onSubmit={(e) => {
                                 e.preventDefault()
                                 form.handleSubmit()
@@ -59,7 +80,7 @@ export default function JoinArenaDialog({ joinArena, isJoining }: JoinArenaDialo
                         >
                             <FieldGroup>
                                 <form.Field
-                                    name="inviteLink"
+                                    name="arenaName"
                                     children={(field) => {
                                         const isInvalid =
                                             field.state.meta.isTouched && !field.state.meta.isValid
@@ -72,12 +93,12 @@ export default function JoinArenaDialog({ joinArena, isJoining }: JoinArenaDialo
                                                     onBlur={field.handleBlur}
                                                     onChange={(e) => field.handleChange(e.target.value)}
                                                     aria-invalid={isInvalid}
-                                                    label="Invite Link"
-                                                    placeholder="Invite Link"
+                                                    label="Arena Name"
+                                                    placeholder="Arena Name"
                                                     autoComplete="off"
                                                 />
                                                 {isInvalid && (
-                                                    <FieldError errors={field.state.meta.errors.slice(0, 1)} />
+                                                    <FieldError errors={field.state.meta.errors} />
                                                 )}
                                             </Field>
                                         )
@@ -87,19 +108,24 @@ export default function JoinArenaDialog({ joinArena, isJoining }: JoinArenaDialo
                         </form>
                     </div>
                 </DialogHeader>
-                <DialogFooter className="flex gap-3">
+                <DialogFooter>
                     <Button
-                        variant={"default"}
-                        disabled={isJoining}
+                        disabled={isCreating}
                         type="submit"
-                        form="join-arena-form"
+                        variant={"3d"}
+                        form="create-arena-form"
                     >
-                        {isJoining ? (
+                        {isCreating ? (
                             <span className='flex items-center gap-1'>
                                 <Spinner />
-                                Joining
+                                Creating
                             </span>
-                        ) : "Join Arena"}
+                        ) :
+                            <>
+                                <FiPlus />
+                                Create Arena
+                            </>
+                        }
                     </Button>
                     <Button
                         variant={"ghost"}
@@ -109,6 +135,6 @@ export default function JoinArenaDialog({ joinArena, isJoining }: JoinArenaDialo
                     </Button>
                 </DialogFooter>
             </DialogContent>
-        </Dialog >
+        </Dialog>
     )
 }

@@ -8,7 +8,5 @@ export default async function page() {
         headers: await headers()
     })
     if (!userSession) redirect("/signin")
-    return (
-        <HubDashboard sessionUser={userSession.user} />
-    )
+    return <HubDashboard sessionUser={userSession.user} />
 }

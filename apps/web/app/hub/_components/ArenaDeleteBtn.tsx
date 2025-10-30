@@ -26,9 +26,9 @@ export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeleting }: A
                         e.preventDefault();
                         setOpen(true);
                     }}
-                    className="hover:!text-destructive"
+                    className="hover:!text-destructive group"
                 >
-                    <Trash2Icon />
+                    <Trash2Icon className="group-hover:!text-destructive" />
                     Delete
                 </DropdownMenuItem>
             </AlertDialogTrigger>

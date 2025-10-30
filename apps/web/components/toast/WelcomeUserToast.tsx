@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion, Variants } from 'motion/react';
 import { X } from 'lucide-react';
 
@@ -59,7 +59,7 @@ export default function WelcomePopup({ userName, onClose }: WelcomePopupProps) {
       initial="hidden"
       animate={['visible', 'wobble']}
       exit="exit"
-      className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center tracking-wide min-w-72 p-4 border rounded-lg shadow-lg bg-background"
+      className="fixed top-5.5 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center tracking-wide min-w-72 p-4 border rounded-lg shadow-lg bg-background"
     >
       <button
         onClick={onClose}

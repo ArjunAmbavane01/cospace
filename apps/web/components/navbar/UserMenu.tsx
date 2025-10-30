@@ -6,12 +6,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Kbd } from "@/components/ui/kbd";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { LogOut, UserCircle2 } from "lucide-react";
+import { Spinner } from "../ui/spinner";
 
 export default function UserMenu() {
-    const { logout } = useAuth();
+    const { isLoggingOut, logout } = useAuth();
     const { user } = useAuthStore();
     if (!user) return <UserMenuSkeleton />;
-    const userInitials = user?.name.split(" ").map(w => w[0]).join("");
+    const userInitials = user.name.split(" ").map(w => w[0]).join("").slice(0,2);
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -44,8 +45,8 @@ export default function UserMenu() {
                     onClick={logout}
                     className="flex items-center gap-8 group">
                     <div className="flex items-center gap-2 group-hover:text-destructive">
-                        <LogOut className="size-4" />
-                        Log out
+                        <LogOut className="size-4 group-hover:text-destructive" />
+                        {isLoggingOut ? <Spinner /> : "Log out"}
                     </div>
                 </DropdownMenuItem>
             </DropdownMenuContent>
