@@ -1,4 +1,4 @@
-import { pgTable, timestamp, serial, integer, uuid } from "drizzle-orm/pg-core";
+import { pgTable, timestamp, serial, integer, uuid, index } from "drizzle-orm/pg-core";
 import { arenas } from "./arena";
 
 export const messageGroups = pgTable("message_groups", {
@@ -12,4 +12,6 @@ export const messageGroups = pgTable("message_groups", {
         .$onUpdate(() => /* @__PURE__ */ new Date())
         .defaultNow()
         .notNull(),
-});
+}, (t) => [
+    index("idx_arena_id").on(t.arenaId),
+]);

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { index, integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 import { user } from "../auth";
 import { messageGroups } from "../messageGroup";
 
@@ -14,7 +14,9 @@ export const usersToMessageGroups = pgTable(
             .references(() => messageGroups.id),
     },
     (t) => [
-        primaryKey({ columns: [t.userId, t.messageGroupId] })
+        primaryKey({ columns: [t.userId, t.messageGroupId] }),
+        index("idx_user_id").on(t.userId),
+        index("idx_message_group_id").on(t.messageGroupId)
     ]
 )
 

@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
+import { index, integer, pgTable, primaryKey, text } from "drizzle-orm/pg-core";
 import { arenas } from "../arena";
 import { user } from "../auth";
 
@@ -14,7 +14,9 @@ export const usersToArenas = pgTable(
             .references(() => arenas.id, { onDelete: "cascade" }),
     },
     (t) => [
-        primaryKey({ columns: [t.userId, t.arenaId] })
+        primaryKey({ columns: [t.userId, t.arenaId] }),
+        index("idx_uta_user_id").on(t.userId),
+        index("idx_uta_arena_id").on(t.arenaId),
     ]
 )
 
