@@ -1,8 +1,6 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createChatGroup, getChatGroups } from "server/actions/chat";
-import { User } from "better-auth"
-import { ChatGroup } from "@/lib/validators/chat";
 import { ArenaUser } from "@/lib/validators/arena";
 import ChatGroupItem from "./ChatGroupItem";
 import ChatGroupsPanelSkeleton from "./ChatGroupsPanelSkeleton";
@@ -12,44 +10,49 @@ import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/in
 import { toast } from "sonner";
 
 interface ChatGroupsPanelProps {
-    user: User;
     arenaUsers: ArenaUser[];
     slug: string;
     setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
-    setActiveGroup: Dispatch<SetStateAction<string | null>>;
+    setActiveGroupId: Dispatch<SetStateAction<string | null>>;
 }
-export default function ChatGroupsPanel({ user, arenaUsers, slug, setActiveGroup }: ChatGroupsPanelProps) {
+export default function ChatGroupsPanel({ arenaUsers, slug, setActiveChatUser, setActiveGroupId }: ChatGroupsPanelProps) {
 
 
     const queryClient = useQueryClient();
 
     // fetch all chat groups user is part of 
-    const { data: chatGroups, isLoading, isError } = useQuery({
-        queryKey: ["chat-groups", user.id],
+    const { data: chatGroups, isLoading, isError, error } = useQuery({
+        queryKey: ["chat-groups", slug],
         queryFn: async () => {
             const res = await getChatGroups(slug);
-            if (res.type === "success") return res.chatGroups
-            else if (res.type === "error") toast.error(res.message)
+            if (res.type === "error") throw new Error(res.message);
+            return res.chatGroups;
         },
         staleTime: 60 * 1000 // 60 seconds
     })
 
     // create message group mutation
-    const { mutate: createChatGroupMutation, isPending: isCreatingGroup } = useMutation({
-        mutationFn: ({ slug, participantId }: { slug: string; participantId: string }) => createChatGroup(slug, participantId),
-        onSuccess: (res) => {
-            if (res.type === "success" && res.newMessageGroup) {
-                const existingGroups = queryClient.getQueryData<ChatGroup[]>(["chat-groups", user.id]) || [];
-                setActiveGroup(res.newMessageGroup.publicId);
-                queryClient.setQueryData(["chat-groups", user.id], [res.newMessageGroup, ...existingGroups]);
-                toast.success(res.message);
-            } else if (res.type === "error") toast.error(res.message);
+    const { mutateAsync: createChatGroupMutation, isPending: isCreatingGroup } = useMutation({
+        mutationFn: async ({ slug, participantId }: { slug: string; participantId: string }) => {
+            const res = await createChatGroup(slug, participantId);
+            if (res.type === "error") throw new Error(res.message);
+            return res;
+        },
+        onSuccess: async (res) => {
+            await queryClient.invalidateQueries({ queryKey: ["chat-groups", slug] });
+            setActiveGroupId(res.newMessageGroup.publicId);
+            toast.success(res.message);
         },
         onError: (err) => {
-            toast.error(err instanceof Error ? err.message : "An unexpected error occurred.");
+            toast.error(err.message);
         },
     })
 
+    console.log(chatGroups)
+    // fetching error effect
+    useEffect(() => {
+        if (isError && error) toast.error(error.message)
+    }, [isError, error]);
 
     if (isLoading) return <ChatGroupsPanelSkeleton />
     if (!chatGroups || isError) return (
@@ -58,10 +61,11 @@ export default function ChatGroupsPanel({ user, arenaUsers, slug, setActiveGroup
         </div>
     )
 
+    // sets ActiveGroupId, after checking if group already exists
     const setGroupId = async (participantId: string) => {
         const existingGroupId = chatGroups.find(chatGroup => chatGroup.participants.find(p => p.id === participantId))?.publicId;
-        if (!existingGroupId) createChatGroupMutation({slug, participantId})
-        else setActiveGroup(existingGroupId);
+        if (!existingGroupId) await createChatGroupMutation({ slug, participantId })
+        else setActiveGroupId(existingGroupId);
     }
 
     return (
@@ -70,7 +74,7 @@ export default function ChatGroupsPanel({ user, arenaUsers, slug, setActiveGroup
                 <h3>
                     Chat
                 </h3>
-                <NewChatDialog arenaUsers={arenaUsers} setGroupId={setGroupId} isCreatingGroup={isCreatingGroup} />
+                <NewChatDialog arenaUsers={arenaUsers} setGroupId={setGroupId} setActiveChatUser={setActiveChatUser} isCreatingGroup={isCreatingGroup} />
             </div>
             <InputGroup>
                 <InputGroupInput placeholder="Search chats" />

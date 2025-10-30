@@ -10,10 +10,10 @@ import { BsEmojiSmile } from "react-icons/bs";
 
 interface ChatInputProps {
     activeChatUser: ArenaUser | null;
-    activeGroup: string | null;
+    activeGroupId: string | null;
 }
 
-export default function ChatInput({ activeChatUser, activeGroup }: ChatInputProps) {
+export default function ChatInput({ activeChatUser, activeGroupId }: ChatInputProps) {
     if(!activeChatUser) return null;
     const [openEmojiPanel, setOpenEmojiPanel] = useState<boolean>(false);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);

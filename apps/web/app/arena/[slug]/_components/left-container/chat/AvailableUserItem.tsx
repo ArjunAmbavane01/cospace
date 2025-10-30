@@ -7,16 +7,17 @@ interface AvailableUserItemProps {
     user: ArenaUser;
     setGroupId: (userId: string) => void;
     setOpenModal: Dispatch<SetStateAction<boolean>>
-
+    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>
 }
 
-export default function AvailableUserItem({ user, setGroupId, setOpenModal }: AvailableUserItemProps) {
+export default function AvailableUserItem({ user, setGroupId, setActiveChatUser, setOpenModal }: AvailableUserItemProps) {
     if (!user) return null;
     const userInitials = user.name.split(" ").map(w => w[0]).join("");
     return <div
         className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition group cursor-pointer"
         onClick={() => {
-            setGroupId(user.id)
+            setGroupId(user.id);
+            setActiveChatUser(user);
             setOpenModal(false);
         }}
     >

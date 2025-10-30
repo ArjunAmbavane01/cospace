@@ -22,26 +22,14 @@ export const createChatGroup = async (userId: string, participantId: string, are
                 .values({ arenaId })
                 .returning()
 
-            if (!newMessageGroup) throw new Error("Failed to create arena")
+            if (!newMessageGroup) throw new Error("Failed to create group")
 
-            const utaRowUser = await tx
-                .insert(usersToMessageGroups)
-                .values({
-                    userId,
-                    messageGroupId: newMessageGroup.id
-                })
-                .returning();
+            await tx.insert(usersToMessageGroups).values([
+                { userId, messageGroupId: newMessageGroup.id },
+                { userId: participantId, messageGroupId: newMessageGroup.id },
+            ]);
 
-            const utaRowParticipant = await tx
-                .insert(usersToMessageGroups)
-                .values({
-                    userId: participantId,
-                    messageGroupId: newMessageGroup.id
-                })
-                .returning();
-
-            if (!utaRowUser || !utaRowParticipant) throw new Error("Failed to link user to message group")
-            return { newMessageGroup, utaRowUser, utaRowParticipant };
+            return { newMessageGroup };
         })
         const { newMessageGroup } = result;
         const { id, arenaId: aId, ...groupWithoutIds } = newMessageGroup;

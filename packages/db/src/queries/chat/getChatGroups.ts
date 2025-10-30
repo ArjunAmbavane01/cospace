@@ -15,71 +15,43 @@ export const getChatGroups = async (userId: string, arenaSlug: string) => {
         if (!arenaRecord[0]) throw new Error("Arena does not exists");
         const { arenaId } = arenaRecord[0];
 
-        // fetch all message groups user is part of in this arena
-        const userGroupsInArena = await db
-            .select({ messageGroupId: usersToMessageGroups.messageGroupId })
-            .from(usersToMessageGroups)
-            .innerJoin(messageGroups,
+        const result = await db.query.messageGroups.findMany({
+            where: (mg, { eq, inArray }) =>
                 and(
-                    eq(messageGroups.id, usersToMessageGroups.messageGroupId),
-                    eq(messageGroups.arenaId, arenaId)
-                )
-            )
-            .where(eq(usersToMessageGroups.userId, userId))
-
-        if (userGroupsInArena.length === 0) {
-            return {
-                type: "success" as const,
-                message: "No chat groups found",
-                chatGroups: [],
-            };
-        }
-
-        const groupIds = userGroupsInArena.map(uga => uga.messageGroupId);
-
-        // fetch last message and participant for these groups
-        const userChatgroups = await db.query.usersToMessageGroups.findMany({
-            where: (utg, { and, eq, inArray }) =>
-                and(
-                    eq(utg.userId, userId),
-                    inArray(utg.messageGroupId, groupIds)
+                    eq(mg.arenaId, arenaId),
+                    inArray(
+                        mg.id,
+                        db
+                            .select({ id: usersToMessageGroups.messageGroupId })
+                            .from(usersToMessageGroups)
+                            .where(eq(usersToMessageGroups.userId, userId))
+                    )
                 ),
             with: {
-                messageGroup: {
-                    columns: { id: false },
+                messages: {
+                    columns: { content: true, createdAt: true },
+                    limit: 1,
+                    orderBy: (msgs, { desc }) => [desc(msgs.createdAt)],
+                },
+                usersToGroups: {
+                    columns: {},
+                    where: (utg, { ne }) => ne(utg.userId, userId),
                     with: {
-                        messages: {
-                            columns: { content: true, createdAt: true },
-                            orderBy: (msgs, { desc }) => [desc(msgs.createdAt)],
-                            limit: 1,
-
-                        },
-                        usersToGroups: {
-                            where: (utg, { ne }) => ne(utg.userId, userId),
-                            with: {
-                                user: {
-                                    columns: { id: true, name: true, image: true },
-                                }
-                            }
+                        user: {
+                            columns: { id: true, name: true, image: true }
                         }
                     }
-                },
-            },
-        })
-
-        const chatGroups = userChatgroups
-            .map(ug => {
-                const group = ug.messageGroup;
-                const lastMessage = group.messages[0] || null;
-                const participants = group.usersToGroups.map(u => u.user);
-                return {
-                    createdAt: group.createdAt,
-                    updatedAt: group.updatedAt,
-                    publicId: group.publicId,
-                    lastMessage,
-                    participants,
                 }
-            })
+            }
+        });
+
+        const chatGroups = result.map(g => ({
+            createdAt: g.createdAt,
+            updatedAt: g.updatedAt,
+            publicId: g.publicId,
+            lastMessage: g.messages[0] ?? null,
+            participants: g.usersToGroups.map(u => u.user),
+        }));
 
         return {
             type: "success" as const,

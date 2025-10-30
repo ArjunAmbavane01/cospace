@@ -1,9 +1,9 @@
 import { Dispatch, ReactNode, SetStateAction } from "react"
 import { cn } from "@/lib/utils";
+import { Tabs } from "../ArenaLayout";
 import { Settings } from "lucide-react"
 import { CiMap } from "react-icons/ci"
 import { PiChatsCircle } from "react-icons/pi";
-import { Tabs } from "../ArenaLayout";
 
 interface SidebarProps {
     activeTab: Tabs,

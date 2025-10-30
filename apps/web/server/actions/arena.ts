@@ -44,8 +44,8 @@ export const editArena = async (inputArenaName: string, arenaSlug: string): Prom
 }
 
 export const getArenaUsers = async (arenaSlug: string): Promise<GetArenaUsersResponse> => {
-    await verifyAuth();
-    return getArenaUsersQuery(arenaSlug);
+    const { id: userId } = await verifyAuth();
+    return getArenaUsersQuery(arenaSlug, userId);
 }
 
 export const validateArenaSlug = async (arenaSlug: string): Promise<ValidateArenaSlugResponse> => {

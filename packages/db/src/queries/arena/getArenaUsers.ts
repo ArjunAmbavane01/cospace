@@ -1,6 +1,6 @@
 import { db } from "../../client";
 
-export const getArenaUsers = async (arenaSlug: string) => {
+export const getArenaUsers = async (arenaSlug: string, userId: string) => {
     try {
         if (!arenaSlug.trim()) throw new Error("Invalid arena slug")
 
@@ -8,10 +8,11 @@ export const getArenaUsers = async (arenaSlug: string) => {
             where: (a, { eq }) => eq(a.slug, arenaSlug),
             with: {
                 usersToArenas: {
+                    where: (uta, { ne }) => ne(uta.userId, userId),
                     columns: {},
                     with: {
                         user: {
-                            columns: { id: true, name: true, image: true }
+                            columns: { id: true, name: true, image: true },
                         }
                     }
                 }

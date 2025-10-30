@@ -21,7 +21,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants }: { slug: 
     const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>(participants);
     const [activeTab, setActiveTab] = useState<Tabs>("map");
     const [activeChatUser, setActiveChatUser] = useState<ArenaUser | null>(null);
-    const [activeGroup, setActiveGroup] = useState<string | null>(null);
+    const [activeGroupId, setActiveGroupId] = useState<string | null>(null);
 
     useEffect(() => {
 
@@ -91,10 +91,10 @@ export default function ArenaLayout({ slug, arenaUsers: participants }: { slug: 
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     setActiveChatUser={setActiveChatUser}
-                    setActiveGroup={setActiveGroup}
+                    setActiveGroupId={setActiveGroupId}
                 />
                 <div className='flex-1 relative mx-3'>
-                    {activeTab === "chat" && <ChatPanel activeChatUser={activeChatUser} activeGroup={activeGroup} />}
+                    {activeTab === "chat" && <ChatPanel activeChatUser={activeChatUser} activeGroupId={activeGroupId} />}
                     <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />
                     <CanvasOverlay adminUser={user} />
                 </div>

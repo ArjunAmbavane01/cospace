@@ -13,10 +13,10 @@ interface ArenaSidebarContainerProps {
     activeTab: Tabs;
     setActiveTab: Dispatch<SetStateAction<Tabs>>;
     setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
-    setActiveGroup: Dispatch<SetStateAction<string | null>>;
+    setActiveGroupId: Dispatch<SetStateAction<string | null>>;
 }
 
-export default function ArenaSidebarContainer({ user, slug, arenaUsers, activeTab, setActiveTab, setActiveChatUser,setActiveGroup }: ArenaSidebarContainerProps) {
+export default function ArenaSidebarContainer({ user, slug, arenaUsers, activeTab, setActiveTab, setActiveChatUser,setActiveGroupId }: ArenaSidebarContainerProps) {
 
     const renderPanel = () => {
         switch (activeTab) {
@@ -35,9 +35,8 @@ export default function ArenaSidebarContainer({ user, slug, arenaUsers, activeTa
                     <ChatGroupsPanel
                         arenaUsers={arenaUsers}
                         slug={slug}
-                        user={user}
                         setActiveChatUser={setActiveChatUser}
-                        setActiveGroup={setActiveGroup}
+                        setActiveGroupId={setActiveGroupId}
                     />
                 );
             default:

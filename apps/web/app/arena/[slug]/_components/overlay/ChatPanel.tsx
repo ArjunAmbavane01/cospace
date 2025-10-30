@@ -6,18 +6,18 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChatPanelProps {
   activeChatUser: ArenaUser | null;
-  activeGroup: string | null;
+  activeGroupId: string | null;
 }
 
-export default function ChatPanel({ activeChatUser,activeGroup }: ChatPanelProps) {
+export default function ChatPanel({ activeChatUser,activeGroupId }: ChatPanelProps) {
   
-  if (!activeChatUser || !activeGroup) return (
+  if (!activeChatUser || !activeGroupId) return (
     <div className='flex justify-center items-center absolute inset-0 bg-accent rounded-xl z-30'>
       Select a user to chat with
     </div>
   )
 
-  // // fetch top-50 messages and if activeGroup id
+  // // fetch top-50 messages and if activeGroupId id
   // const { data: userArenas, isLoading, isError } = useQuery({
   //   queryKey: ["chat-messages", activeChatUser.userId],
   //   queryFn: async () => {
@@ -53,7 +53,7 @@ export default function ChatPanel({ activeChatUser,activeGroup }: ChatPanelProps
       </div>
       <div className="flex-1 flex flex-col gap-5 p-3">
         <ChatArea />
-        <ChatInput activeChatUser={activeChatUser} activeGroup={activeGroup} />
+        <ChatInput activeChatUser={activeChatUser} activeGroupId={activeGroupId} />
       </div>
     </div>
   )

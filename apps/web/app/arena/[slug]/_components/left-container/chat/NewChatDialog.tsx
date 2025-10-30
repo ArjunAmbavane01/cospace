@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ArenaUser } from "@/lib/validators/arena";
 import AvailableUsersList from "./AvailableUsersList";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -10,11 +10,12 @@ import { FiEdit } from "react-icons/fi";
 
 interface NewChatDialogProps {
     arenaUsers: ArenaUser[];
-    setGroupId: (userId: string) => void;
     isCreatingGroup: boolean;
+    setGroupId: (userId: string) => void;
+    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
 
-export default function NewChatDialog({ arenaUsers, setGroupId, isCreatingGroup }: NewChatDialogProps) {
+export default function NewChatDialog({ arenaUsers, setGroupId, setActiveChatUser, isCreatingGroup }: NewChatDialogProps) {
     const [openModal, setOpenModal] = useState<boolean>(false);
     return (
         <Dialog open={openModal} onOpenChange={setOpenModal}>
@@ -41,7 +42,13 @@ export default function NewChatDialog({ arenaUsers, setGroupId, isCreatingGroup 
                         <Kbd>Ctrl</Kbd><Kbd>F</Kbd>
                     </InputGroupAddon>
                 </InputGroup>
-                <AvailableUsersList arenaUsers={arenaUsers} setGroupId={setGroupId} setOpenModal={setOpenModal} isCreatingGroup={isCreatingGroup} />
+                <AvailableUsersList
+                    arenaUsers={arenaUsers}
+                    isCreatingGroup={isCreatingGroup}
+                    setGroupId={setGroupId}
+                    setOpenModal={setOpenModal}
+                    setActiveChatUser={setActiveChatUser}
+                />
             </DialogContent>
         </Dialog>
     )
