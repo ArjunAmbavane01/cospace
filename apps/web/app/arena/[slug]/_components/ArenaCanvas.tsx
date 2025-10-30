@@ -4,17 +4,17 @@ import { RefObject, useEffect, useRef } from 'react';
 import { Engine } from 'excalibur';
 import { User } from 'better-auth';
 import { Socket } from 'socket.io-client';
-import { ArenaUser } from '@/lib/validators/game';
+import { ArenaUser } from '@/lib/validators/arena';
 import { InitGame } from '@/components/game/main';
 
 interface ArenaCanvasProps {
     slug: string;
-    usersRef: RefObject<ArenaUser[]>;
+    arenaUsers: ArenaUser[];
     socket: Socket | null;
     user: User;
 }
 
-export default function ArenaCanvas({ slug, usersRef, socket, user }: ArenaCanvasProps) {
+export default function ArenaCanvas({ slug, arenaUsers, socket, user }: ArenaCanvasProps) {
 
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
     const gameRef = useRef<Engine | null>(null);
@@ -24,7 +24,7 @@ export default function ArenaCanvas({ slug, usersRef, socket, user }: ArenaCanva
 
         (async () => {
             try {
-                gameRef.current = await InitGame(canvasRef.current!, usersRef, socket!, user);
+                gameRef.current = await InitGame(canvasRef.current!, arenaUsers, socket!, user);
                 gameRef.current.start();
             } catch (error) {
                 console.error("Failed to create arena:", error);

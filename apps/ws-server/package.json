@@ -25,6 +25,7 @@
   "license": "ISC",
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@repo/schemas": "workspace:*",
     "dotenv": "^17.2.3",
     "ioredis": "^5.8.1",
     "socket.io": "^4.8.1",

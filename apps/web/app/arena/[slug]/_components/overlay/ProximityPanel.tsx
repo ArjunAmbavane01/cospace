@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArenaUser } from '@/lib/validators/game'
+import { ArenaUser } from '@/lib/validators/arena'
 import { User } from 'better-auth'
 import ProximityCard from './ProximityCard'
 
@@ -15,15 +15,15 @@ export default function ProximityPanel({ adminUser }: ProximityPanelProps) {
             const customEvent = evt as CustomEvent;
             const { user } = customEvent.detail;
             setProximityUsers((users) => {
-                if (users.some(u => u.userId === user.userId)) return users;
+                if (users.some(u => u.id === user.id)) return users;
                 return [...users, user]
             });
         }
 
         const handleDeleteProximityUser = (evt: Event) => {
             const customEvent = evt as CustomEvent;
-            const data = customEvent.detail;
-            setProximityUsers((proxyUsers) => proxyUsers.filter(u => u.userId !== data.userId));
+            const { userId } = customEvent.detail;
+            setProximityUsers((proxyUsers) => proxyUsers.filter(u => u.id !== userId));
         }
 
         window.addEventListener('user-proximity', handleAddProximityUser);
@@ -38,7 +38,7 @@ export default function ProximityPanel({ adminUser }: ProximityPanelProps) {
             {proximityUsers.length > 0 &&
                 <div className='flex gap-2 w-fit p-1 pb-5 rounded-xl bg-[#3f323e] border border-muted'>
                     <ProximityCard key={adminUser.id} name={adminUser.name} image={adminUser.image} />
-                    {proximityUsers.map((user) => <ProximityCard key={user.userId} name={user.userName} image={user.userImage} />)}
+                    {proximityUsers.map((user) => <ProximityCard key={user.id} name={user.name} image={user.image} />)}
                 </div>
             }
         </div>

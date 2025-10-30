@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getArenas, deleteArena, leaveArena } from "server/actions/arena";
-import { useRouter } from "next/navigation";
 import useAuthStore from "store/authStore";
 import type { User } from "better-auth";
 import { Arena } from "@/lib/validators/arena";

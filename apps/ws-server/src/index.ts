@@ -1,19 +1,13 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import { Server } from "socket.io";
+import { ClientToServerEvents } from "@repo/schemas/arena-ws-events";
+import { ServerToClientEvents } from "@repo/schemas/ws-arena-events";
+
 import { handleAuth } from './lib/handleAuth';
 
-const parseMessage = (message: string) => {
-    try {
-        return JSON.parse(message);
-    } catch (err) {
-        console.error("Error parsing the message");
-        throw new Error("Error parsing the message");
-    }
-}
-
 try {
-    const wss = new Server(Number(process.env.WS_PORT), {
+    const wss = new Server<ClientToServerEvents, ServerToClientEvents>(Number(process.env.WS_PORT), {
         cors: {
             origin: ["http://localhost:3000"],
             methods: ["GET", "POST"],
@@ -27,19 +21,14 @@ try {
     wss.on("connection", async (socket) => {
         try {
             socket.emit("welcome", `Welcome to CoSpace! ${socket.data.userName}`);
-            const roomUsers = await wss.in(socket.data.arenaSlug).fetchSockets();
+            const onlineUserSockets = await wss.in(socket.data.arenaSlug).fetchSockets();
 
-            const roomUsersData = roomUsers.filter(roomUser => roomUser.id !== socket.id).map(roomUser => {
-                return {
-                    userId: roomUser.data.userId,
-                    userName: roomUser.data.userName,
-                    userImage: roomUser.data.userImage,
-                    lastOnline: "online"
-                }
+            const onlineUsers = onlineUserSockets.filter(roomUser => roomUser.id !== socket.id).map(roomUser => {
+                return { userId: roomUser.data.userId }
             })
 
-            socket.emit("room-users", {
-                roomUsers: roomUsersData
+            socket.emit("online-users", {
+                onlineUserIds: onlineUsers.map(u => u.userId)
             })
 
             socket.to(socket.data.arenaSlug).emit("user-joined", {

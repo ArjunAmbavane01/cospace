@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { User } from "better-auth";
-import { ArenaUser } from "@/lib/validators/game";
+import { ArenaUser } from "@/lib/validators/arena";
 import { Tabs } from "./ArenaLayout";
 import Sidebar from "./left-container/Sidebar";
 import MapPanel from "./left-container/map/MapPanel";

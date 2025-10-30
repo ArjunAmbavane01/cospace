@@ -1,4 +1,13 @@
+import { Character } from "@/components/game/actors/Character";
 import { z } from "zod";
+
+export interface ArenaUser {
+    id: string;
+    name: string;
+    image: string | null | undefined;
+    isOnline: boolean,
+    character?: Character;
+}
 
 export const arenaSchema = z.object({
     name: z.string().min(1, "Arena name must have at least 1 character").max(100, "Arena name cannot be longer than 100 characters"),

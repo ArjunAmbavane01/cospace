@@ -1,18 +1,25 @@
 import React, { Dispatch, SetStateAction } from 'react'
 import AvailableUserItem from './AvailableUserItem'
-import { ArenaUser } from '@/lib/validators/game';
+import { ArenaUser } from '@/lib/validators/arena';
+import { Spinner } from '@/components/ui/spinner';
 
 interface AvailableUsersListProps {
     arenaUsers: ArenaUser[];
     setGroupId: (userId: string) => void;
-    setOpenModal:Dispatch<SetStateAction<boolean>>
+    setOpenModal: Dispatch<SetStateAction<boolean>>
+    isCreatingGroup: boolean;
 }
 
-export default function AvailableUsersList({ arenaUsers, setGroupId,setOpenModal }: AvailableUsersListProps) {
+export default function AvailableUsersList({ arenaUsers, setGroupId, setOpenModal, isCreatingGroup }: AvailableUsersListProps) {
     return (
         <div className='flex flex-col gap-1 p-2 rounded-xl h-32 overflow-y-auto'>
+            {isCreatingGroup && (
+                <div className='flex justify-center items-center inset-0 bg-foreground/20 pointer-events-none'>
+                    <Spinner />
+                </div>
+            )}
             {arenaUsers.map(user => {
-                return <AvailableUserItem key={user.userId} user={user} setGroupId={setGroupId} setOpenModal={setOpenModal} />
+                return <AvailableUserItem key={user.id} user={user} setGroupId={setGroupId} setOpenModal={setOpenModal} />
             })}
         </div>
     )

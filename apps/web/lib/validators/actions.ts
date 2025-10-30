@@ -1,5 +1,6 @@
 import { Arena } from "./arena";
 import { ChatGroup } from "./chat";
+import { ArenaUser } from "./game";
 
 export type ActionResponse<T = void> =
     | { type: "success"; message: string } & T
@@ -12,6 +13,7 @@ export type DeleteArenaResponse = ActionResponse<{ arenaSlug: string }>;
 export type LeaveArenaResponse = ActionResponse<{ arenaSlug: string }>;
 export type JoinArenaResponse = ActionResponse<{ arenaSlug: string }>;
 export type EditArenaResponse = ActionResponse<{ newArenaDetails: { name: string } }>;
+export type GetArenaUsersResponse = ActionResponse<{ arenaUsers: ArenaUser[] }>;
 export type ValidateArenaSlugResponse = ActionResponse;
 
 // chat actions

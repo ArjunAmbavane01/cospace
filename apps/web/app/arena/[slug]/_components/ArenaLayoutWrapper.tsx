@@ -1,5 +1,6 @@
 'use client';
 
+import { ArenaUser } from '@/lib/validators/arena';
 import dynamic from 'next/dynamic';
 
 const ArenaLayout = dynamic(() => import('./ArenaLayout'), {
@@ -7,6 +8,6 @@ const ArenaLayout = dynamic(() => import('./ArenaLayout'), {
     loading: () => <div>Loading arena...</div>
 });
 
-export default function ArenaLayoutWrapper({ slug }: { slug: string }) {
-    return <ArenaLayout slug={slug} />
+export default function ArenaLayoutWrapper({ slug, arenaUsers }: { slug: string, arenaUsers: ArenaUser[] }) {
+    return <ArenaLayout slug={slug} arenaUsers={arenaUsers} />
 }

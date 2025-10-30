@@ -1,19 +1,19 @@
+import { RefObject } from 'react';
+import { Socket } from "socket.io-client";
+import { User } from "better-auth";
+import { ArenaUser } from "@/lib/validators/arena";
 import { Color, DisplayMode, Engine, vec, Actor, CollisionType } from "excalibur";
 import { COLLISION_MAP_TILES, ORIGINAL_MAP_WIDTH_PX, ORIGINAL_TILE_SIZE, ORIGINAL_ZOOM } from "./constants";
 import { MainCharacter } from "./actors/MainCharacter";
 import { Island } from "./actors/Island";
+import { Character } from "./actors/Character";
 import { CollisionLayer } from "./actors/Collision";
 import { COLLISION_MAP } from "./CollisionMap";
-import { RefObject } from 'react';
-import { Character } from "./actors/Character";
-import { Socket } from "socket.io-client";
-import { User } from "better-auth";
-import { ArenaUser } from "@/lib/validators/game";
 
 export const USER_PROXIMITY_EVENT = 'user-proximity';
 export const USER_LEFT_PROXIMITY_EVENT = 'user-left-proximity';
 
-export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefObject<ArenaUser[]>, socket: Socket, user: User) => {
+export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: ArenaUser[], socket: Socket, user: User) => {
     // create engine
     const game = new Engine({
         canvasElement,
@@ -63,9 +63,13 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
     const CHECK_INTERVAL = 500; // ms
     const usersInProximity = new Set<string>();
 
+    // init characters for online users
+    const onlineUsers = arenaUsers.filter(user => user.isOnline);
+    onlineUsers.forEach(user => createUserCharacter(user));
+
     // create character for other users
     const createUserCharacter = (user: ArenaUser) => {
-        if (otherUsers.has(user.userId)) return;
+        if (otherUsers.has(user.id)) return;
 
         const character = new Character(user);
         const randomX = island.getMapWidth() / 2 - 100;
@@ -75,19 +79,15 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
             ...user,
             character,
         }
-        otherUsers.set(user.userId, newUser);
+        otherUsers.set(user.id, newUser);
         game.add(character);
     };
 
-    // init characters for existing users
-    if (usersRef.current) usersRef.current.forEach(user => createUserCharacter(user));
-
     // check for newly joined users
     const checkForNewUsers = () => {
-        if (!usersRef.current) return;
-
-        usersRef.current.forEach(user => {
-            if (!otherUsers.has(user.userId)) {
+        const onlineUsers = arenaUsers.filter(user => user.isOnline);
+        onlineUsers.forEach(user => {
+            if (!otherUsers.has(user.id)) {
                 createUserCharacter(user);
             }
         });
@@ -101,18 +101,18 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, usersRef: RefOb
             const isNearby = distance <= PROXIMITY_RADIUS;
 
             // check is any new user in proximity
-            if (isNearby && !usersInProximity.has(user.userId)) {
-                usersInProximity.add(user.userId);
+            if (isNearby && !usersInProximity.has(user.id)) {
+                usersInProximity.add(user.id);
                 window.dispatchEvent(new CustomEvent(USER_PROXIMITY_EVENT, {
                     detail: {
                         user
                     }
                 }));
-            } else if (!isNearby && usersInProximity.has(user.userId)) {
-                usersInProximity.delete(user.userId);
+            } else if (!isNearby && usersInProximity.has(user.id)) {
+                usersInProximity.delete(user.id);
                 window.dispatchEvent(new CustomEvent(USER_LEFT_PROXIMITY_EVENT, {
                     detail: {
-                        userId: user.userId,
+                        userId: user.id,
                     }
                 }));
             }

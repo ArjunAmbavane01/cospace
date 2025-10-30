@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ArenaUser } from "@/lib/validators/game"
+import { ArenaUser } from "@/lib/validators/arena"
 import ChatInput from "./chat/ChatInput";
 import ChatArea from "./chat/ChatArea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,7 +28,7 @@ export default function ChatPanel({ activeChatUser,activeGroup }: ChatPanelProps
   //   staleTime: 60 * 1000 // 60 seconds
   // })
 
-  const userInitials = activeChatUser?.userName.split(" ").map(w => w[0]).join("");
+  const userInitials = activeChatUser?.name.split(" ").map(w => w[0]).join("");
 
   return (
     <div className='flex flex-col absolute inset-0 bg-accent rounded-xl z-30'>
@@ -39,16 +39,16 @@ export default function ChatPanel({ activeChatUser,activeGroup }: ChatPanelProps
               <div className="absolute size-[9px] bg-success border bottom-0 right-0 rounded-full" />
             </div>
             {
-              activeChatUser.userImage ?
-                <Image src={activeChatUser.userImage} alt="User image" width={40} height={40} className="size-full rounded-full" />
+              activeChatUser.image ?
+                <Image src={activeChatUser.image} alt="User image" width={40} height={40} className="size-full rounded-full" />
                 :
                 <Avatar className="size-full rounded-full">
-                  <AvatarImage src={activeChatUser.userImage ?? undefined} alt="User image" />
+                  <AvatarImage src={activeChatUser.image ?? undefined} alt="User image" />
                   <AvatarFallback>{userInitials}</AvatarFallback>
                 </Avatar>
             }
           </div>
-          {activeChatUser.userName}
+          {activeChatUser.name}
         </div>
       </div>
       <div className="flex-1 flex flex-col gap-5 p-3">

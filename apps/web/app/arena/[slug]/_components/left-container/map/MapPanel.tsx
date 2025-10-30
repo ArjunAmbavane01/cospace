@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { User } from "better-auth";
-import { ArenaUser } from "@/lib/validators/game";
+import { ArenaUser } from "@/lib/validators/arena";
 import { Tabs } from "../../ArenaLayout";
 import UsersList from "./UsersList";
 import { Kbd } from "@/components/ui/kbd";
@@ -14,9 +14,9 @@ interface MapPanelProps {
     setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
 
-export default function MapPanel({ user, arenaUsers, activeTab, setActiveTab, setActiveChatUser }: MapPanelProps) {
-    const onlineUsers = arenaUsers.filter((user) => user.lastOnline === "online");
-    const offlineUsers = arenaUsers.filter((user) => user.lastOnline !== "online");
+export default function MapPanel({ user, arenaUsers, setActiveTab, setActiveChatUser }: MapPanelProps) {
+    const onlineUsers = arenaUsers.filter((user) => user.isOnline);
+    const offlineUsers = arenaUsers.filter((user) => !user.isOnline);
     return (
         <div className="flex flex-col gap-5 w-72 p-3 bg-accent rounded-xl">
             <div className="px-1">

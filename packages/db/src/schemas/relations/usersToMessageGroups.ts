@@ -8,10 +8,10 @@ export const usersToMessageGroups = pgTable(
     {
         userId: text("user_id")
             .notNull()
-            .references(() => user.id),
+            .references(() => user.id, { onDelete: "cascade" }),
         messageGroupId: integer("message_group_id")
             .notNull()
-            .references(() => messageGroups.id),
+            .references(() => messageGroups.id, { onDelete: "cascade" }),
     },
     (t) => [
         primaryKey({ columns: [t.userId, t.messageGroupId] }),

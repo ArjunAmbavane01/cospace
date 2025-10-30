@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createChatGroup, getChatGroups } from "server/actions/chat";
-import { set, User } from "better-auth"
+import { User } from "better-auth"
 import { ChatGroup } from "@/lib/validators/chat";
-import { ArenaUser } from "@/lib/validators/game";
+import { ArenaUser } from "@/lib/validators/arena";
 import ChatGroupItem from "./ChatGroupItem";
 import ChatGroupsPanelSkeleton from "./ChatGroupsPanelSkeleton";
 import NewChatDialog from "./NewChatDialog";
@@ -18,11 +18,10 @@ interface ChatGroupsPanelProps {
     setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
     setActiveGroup: Dispatch<SetStateAction<string | null>>;
 }
-export default function ChatGroupsPanel({ user, arenaUsers, slug, setActiveChatUser, setActiveGroup }: ChatGroupsPanelProps) {
+export default function ChatGroupsPanel({ user, arenaUsers, slug, setActiveGroup }: ChatGroupsPanelProps) {
 
 
     const queryClient = useQueryClient();
-
 
     // fetch all chat groups user is part of 
     const { data: chatGroups, isLoading, isError } = useQuery({
@@ -36,7 +35,7 @@ export default function ChatGroupsPanel({ user, arenaUsers, slug, setActiveChatU
     })
 
     // create message group mutation
-    const { mutate: createChatGroupMutation, isPending: isCreating } = useMutation({
+    const { mutate: createChatGroupMutation, isPending: isCreatingGroup } = useMutation({
         mutationFn: ({ slug, participantId }: { slug: string; participantId: string }) => createChatGroup(slug, participantId),
         onSuccess: (res) => {
             if (res.type === "success" && res.newMessageGroup) {
@@ -71,7 +70,7 @@ export default function ChatGroupsPanel({ user, arenaUsers, slug, setActiveChatU
                 <h3>
                     Chat
                 </h3>
-                <NewChatDialog arenaUsers={arenaUsers} setGroupId={setGroupId} />
+                <NewChatDialog arenaUsers={arenaUsers} setGroupId={setGroupId} isCreatingGroup={isCreatingGroup} />
             </div>
             <InputGroup>
                 <InputGroupInput placeholder="Search chats" />

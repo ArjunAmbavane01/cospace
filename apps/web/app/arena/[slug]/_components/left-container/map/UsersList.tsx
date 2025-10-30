@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { ArenaUser } from "@/lib/validators/game";
+import { ArenaUser } from "@/lib/validators/arena";
 import { Tabs } from "../../ArenaLayout";
 import UserItem from "./UserItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
@@ -37,7 +37,7 @@ export default function UsersList({ arenaUsers, type, setActiveTab, setActiveCha
             </div>
             <CollapsibleContent>
                 {arenaUsers.map(user => {
-                    return <UserItem key={user.userId} user={user} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
+                    return <UserItem key={user.id} user={user} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
                 })}
             </CollapsibleContent>
         </Collapsible>

@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from "socket.io-client";
 import { User } from 'better-auth';
+import { OnlineUsersPayload, ServerToClientEvents, UserJoinedPayload } from "@repo/schemas/ws-arena-events";
+import { ClientToServerEvents } from '@repo/schemas/arena-ws-events';
 import { authClient } from '@/lib/auth-client';
-import { ArenaUser } from '@/lib/validators/game';
+import { ArenaUser } from '@/lib/validators/arena';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaCanvas from './ArenaCanvas';
 import ArenaSidebarContainer from './ArenaSidebarContainer';
@@ -12,16 +14,14 @@ import ChatPanel from './overlay/ChatPanel';
 
 export type Tabs = "map" | "chat" | "setting";
 
-export default function ArenaLayout({ slug }: { slug: string }) {
+export default function ArenaLayout({ slug, arenaUsers: participants }: { slug: string, arenaUsers: ArenaUser[] }) {
 
     const [socket, setSocket] = useState<Socket | null>(null);
     const [user, setUser] = useState<User | null>(null);
-    const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>([]);
+    const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>(participants);
     const [activeTab, setActiveTab] = useState<Tabs>("map");
     const [activeChatUser, setActiveChatUser] = useState<ArenaUser | null>(null);
     const [activeGroup, setActiveGroup] = useState<string | null>(null);
-
-    const usersRef = useRef<ArenaUser[]>([]);
 
     useEffect(() => {
 
@@ -29,7 +29,7 @@ export default function ArenaLayout({ slug }: { slug: string }) {
 
         // this is for the race condition
         let isCancelled = false;
-        let ws: Socket | null = null;
+        let ws: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
         (async () => {
             try {
                 const { data: userSession } = await authClient.getSession();
@@ -47,15 +47,16 @@ export default function ArenaLayout({ slug }: { slug: string }) {
                 setSocket(ws);
 
                 ws.on("connect_error", (err) => console.log("Connection failed : ", err.message))
-                ws.on("user-joined", (user) => {
-                    const prevUsers = usersRef.current;
-                    setArenaUsers(u => [...u, { ...user, lastOnline: "online" }])
-                    usersRef.current = [...prevUsers, { ...user, lastOnline: "online" }]
+                ws.on("user-joined", (user: UserJoinedPayload) => {
+                    const newUser = { id: user.userId, name: user.userName, image: user.userImage, isOnline: true }
+                    setArenaUsers(u => [...u, newUser])
                 })
-                ws.on("room-users", (data) => {
-                    const { roomUsers } = data;
-                    usersRef.current = roomUsers;
-                    setArenaUsers([...roomUsers]);
+                ws.on("online-users", (data: OnlineUsersPayload) => {
+                    const { onlineUserIds } = data
+                    const updatedUsersList = arenaUsers.map(arena =>
+                        ({ ...arena, isOnline: onlineUserIds.includes(arena.id) })
+                    )
+                    setArenaUsers([...updatedUsersList]);
                 })
             } catch (err) {
                 setSocket(null);
@@ -69,7 +70,7 @@ export default function ArenaLayout({ slug }: { slug: string }) {
                 ws.disconnect();
                 setUser(null);
                 setSocket(null);
-                usersRef.current = [];
+                setArenaUsers([]);
             }
         }
     }, [slug])
@@ -93,8 +94,8 @@ export default function ArenaLayout({ slug }: { slug: string }) {
                     setActiveGroup={setActiveGroup}
                 />
                 <div className='flex-1 relative mx-3'>
-                    {activeTab === "chat" && <ChatPanel activeChatUser={activeChatUser} activeGroup={activeGroup}/>}
-                    <ArenaCanvas slug={slug} usersRef={usersRef} socket={socket} user={user} />
+                    {activeTab === "chat" && <ChatPanel activeChatUser={activeChatUser} activeGroup={activeGroup} />}
+                    <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />
                     <CanvasOverlay adminUser={user} />
                 </div>
             </div>

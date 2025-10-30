@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import TextareaAutosize from "react-textarea-autosize"
-import { ArenaUser } from "@/lib/validators/game";
+import { ArenaUser } from "@/lib/validators/arena";
 import { InputGroup, InputGroupAddon, InputGroupButton } from "@/components/ui/input-group"
 import { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter } from "@/components/ui/emoji-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -14,6 +14,7 @@ interface ChatInputProps {
 }
 
 export default function ChatInput({ activeChatUser, activeGroup }: ChatInputProps) {
+    if(!activeChatUser) return null;
     const [openEmojiPanel, setOpenEmojiPanel] = useState<boolean>(false);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const onEmojiSelect = ({ emoji }: { emoji: string }) => {
@@ -34,7 +35,7 @@ export default function ChatInput({ activeChatUser, activeGroup }: ChatInputProp
                 maxRows={6}
                 data-slot="input-group-control"
                 className="flex field-sizing-content min-h-12 w-full resize-none rounded-xl bg-transparent px-3 py-2.5 text-base transition-[color,box-shadow] outline-none"
-                placeholder={`Message ${activeChatUser?.userName}`}
+                placeholder={`Message ${activeChatUser.name}`}
             />
             <InputGroupAddon align="block-end" className="flex items-center justify-end gap-2">
                 <Popover onOpenChange={setOpenEmojiPanel} open={openEmojiPanel}>
