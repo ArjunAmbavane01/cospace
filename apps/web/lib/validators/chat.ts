@@ -10,10 +10,10 @@ export const chatGroupSchema = z.object({
     createdAt: z.date(),
     updatedAt: z.date(),
     publicId: z.string(),
-    lastMessage: z.object({
+    lastMessage: z.nullable(z.object({
         content: z.string().optional(),
         createdAt: z.date()
-    }).optional(),
+    })),
     participants: chatGroupParticipant.array(),
 })
 

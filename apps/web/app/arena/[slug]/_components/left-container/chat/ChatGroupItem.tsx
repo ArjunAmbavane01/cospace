@@ -1,6 +1,6 @@
 import Image from "next/image";
-import { formatDate } from "@/lib/formatDate";
 import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/formatDate";
 import { ChatGroup } from "@/lib/validators/chat"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -14,8 +14,8 @@ export default function ChatGroupItem({ group }: ChatGroupItemProps) {
     if (!user) return;
     const userInitials = user.name.split(" ").map(w => w[0]).join("");
     return (
-        <div className="flex items-center gap-2 w-full p-3">
-            <div className="flex justify-center items-center size-8 relative">
+        <div className="flex items-start gap-3 w-full p-2 rounded-lg hover:bg-muted-foreground/10 cursor-pointer transition">
+            <div className="flex justify-center items-center size-9 shrink-0 relative">
                 <div className="absolute size-2.5 bg-accent bottom-0 right-0 rounded-full">
                     <div className={cn(
                         "absolute size-[9px] border bottom-0 right-0 rounded-full",
@@ -23,23 +23,23 @@ export default function ChatGroupItem({ group }: ChatGroupItemProps) {
                 </div>
                 {
                     user.image ?
-                        <Image src={user.image as string} alt="User image" width={40} height={40} className="size-full rounded-full" />
+                        <Image src={user.image as string} alt="User image" width={36} height={36} className="size-9 rounded-full object-cover" />
                         :
-                        <Avatar className="size-full rounded-full">
+                        <Avatar className="size-9 rounded-full">
                             <AvatarImage src={user.image as string ?? undefined} alt="User image" />
                             <AvatarFallback>{userInitials}</AvatarFallback>
                         </Avatar>
                 }
             </div>
 
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col w-full">
                 <div className="flex justify-between items-center w-full">
-                    <h4>
+                    <h5>
                         {user.name}
-                    </h4>
-                    <p>{formatDate(updatedAt)}</p>
+                    </h5>
+                    <h6>{formatDate(updatedAt, "message")}</h6>
                 </div>
-                <p>{lastMessage?.content}</p>
+                <p>{lastMessage?.content || "hey there"}</p>
             </div>
         </div>
     )

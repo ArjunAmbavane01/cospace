@@ -6,12 +6,12 @@ import { Tabs } from "../../ArenaLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
-interface UserRowProps {
+interface UserItemProps {
   user: ArenaUser;
   setActiveTab: Dispatch<SetStateAction<Tabs>>;
   setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
-export default function UserRow({ user, setActiveTab, setActiveChatUser }: UserRowProps) {
+export default function UserItem({ user, setActiveTab, setActiveChatUser }: UserItemProps) {
   const userInitials = user?.userName.split(" ").map(w => w[0]).join("");
   return (
     <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition group">

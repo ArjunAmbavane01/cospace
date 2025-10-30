@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { Tabs } from "../../ArenaLayout";
 import { ArenaUser } from "@/lib/validators/game";
+import { Tabs } from "../../ArenaLayout";
+import UserItem from "./UserItem";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import { Button } from "@/components/ui/button";
-import UserRow from "./UserRow";
 import { ChevronDown, ChevronRight } from "lucide-react";
 
 interface UsersListProps {
@@ -37,7 +37,7 @@ export default function UsersList({ arenaUsers, type, setActiveTab, setActiveCha
             </div>
             <CollapsibleContent>
                 {arenaUsers.map(user => {
-                    return <UserRow key={user.userId} user={user} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
+                    return <UserItem key={user.userId} user={user} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
                 })}
             </CollapsibleContent>
         </Collapsible>

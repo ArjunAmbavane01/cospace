@@ -10,9 +10,10 @@ import { BsEmojiSmile } from "react-icons/bs";
 
 interface ChatInputProps {
     activeChatUser: ArenaUser | null;
+    activeGroup: string | null;
 }
 
-export default function ChatInput({ activeChatUser }: ChatInputProps) {
+export default function ChatInput({ activeChatUser, activeGroup }: ChatInputProps) {
     const [openEmojiPanel, setOpenEmojiPanel] = useState<boolean>(false);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const onEmojiSelect = ({ emoji }: { emoji: string }) => {
@@ -24,7 +25,6 @@ export default function ChatInput({ activeChatUser }: ChatInputProps) {
     const sendMessage = () => {
         if (!textareaRef.current) return;
         if (textareaRef.current.value.trim() === "") textareaRef.current.focus();
-        
     }
 
     return (

@@ -7,8 +7,8 @@ import { authClient } from '@/lib/auth-client';
 import { ArenaUser } from '@/lib/validators/game';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaCanvas from './ArenaCanvas';
-import ChatPanel from './overlay/ChatPanel';
 import ArenaSidebarContainer from './ArenaSidebarContainer';
+import ChatPanel from './overlay/ChatPanel';
 
 export type Tabs = "map" | "chat" | "setting";
 
@@ -16,16 +16,11 @@ export default function ArenaLayout({ slug }: { slug: string }) {
 
     const [socket, setSocket] = useState<Socket | null>(null);
     const [user, setUser] = useState<User | null>(null);
-    const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>([{
-        "userId": "8MiELjFPThRmZYOadfiRln7mmPOTZ6vI",
-        "userName": "Arjun Ambavane",
-        "userImage": "https://lh3.googleusercontent.com/a/ACg8ocI1WT32DhgXDzdH5Uw6WnJ7HJdlOh4Ctx0yJnmPfKcc-dWxMg=s96-c",
-        "lastOnline": "online"
-    }]);
+    const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>([]);
     const [activeTab, setActiveTab] = useState<Tabs>("map");
     const [activeChatUser, setActiveChatUser] = useState<ArenaUser | null>(null);
+    const [activeGroup, setActiveGroup] = useState<string | null>(null);
 
-    console.log(arenaUsers)
     const usersRef = useRef<ArenaUser[]>([]);
 
     useEffect(() => {
@@ -95,9 +90,10 @@ export default function ArenaLayout({ slug }: { slug: string }) {
                     activeTab={activeTab}
                     setActiveTab={setActiveTab}
                     setActiveChatUser={setActiveChatUser}
+                    setActiveGroup={setActiveGroup}
                 />
                 <div className='flex-1 relative mx-3'>
-                    {activeTab === "chat" && <ChatPanel activeChatUser={activeChatUser} />}
+                    {activeTab === "chat" && <ChatPanel activeChatUser={activeChatUser} activeGroup={activeGroup}/>}
                     <ArenaCanvas slug={slug} usersRef={usersRef} socket={socket} user={user} />
                     <CanvasOverlay adminUser={user} />
                 </div>

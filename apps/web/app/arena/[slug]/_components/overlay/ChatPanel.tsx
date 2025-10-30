@@ -1,23 +1,23 @@
-import { ArenaUser } from "@/lib/validators/game"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Image from "next/image";
+import { ArenaUser } from "@/lib/validators/game"
 import ChatInput from "./chat/ChatInput";
 import ChatArea from "./chat/ChatArea";
-import { useQuery } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ChatPanelProps {
   activeChatUser: ArenaUser | null;
+  activeGroup: string | null;
 }
 
-export default function ChatPanel({ activeChatUser }: ChatPanelProps) {
-  if (!activeChatUser) return (
+export default function ChatPanel({ activeChatUser,activeGroup }: ChatPanelProps) {
+  
+  if (!activeChatUser || !activeGroup) return (
     <div className='flex justify-center items-center absolute inset-0 bg-accent rounded-xl z-30'>
       Select a user to chat with
     </div>
   )
 
-  // // fetch top-50 messages
+  // // fetch top-50 messages and if activeGroup id
   // const { data: userArenas, isLoading, isError } = useQuery({
   //   queryKey: ["chat-messages", activeChatUser.userId],
   //   queryFn: async () => {
@@ -53,7 +53,7 @@ export default function ChatPanel({ activeChatUser }: ChatPanelProps) {
       </div>
       <div className="flex-1 flex flex-col gap-5 p-3">
         <ChatArea />
-        <ChatInput activeChatUser={activeChatUser} />
+        <ChatInput activeChatUser={activeChatUser} activeGroup={activeGroup} />
       </div>
     </div>
   )

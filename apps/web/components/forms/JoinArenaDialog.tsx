@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from "@tanstack/react-form"
-import { joinArenaFormSchema } from '@/lib/validators/arena';
+import { JoinArenaDialogSchema } from '@/lib/validators/arena';
 import { ArenaMutation } from 'app/hub/_components/HubDashboard';
 import AnimatedInput from '../AnimatedInput';
 import { Button } from "@/components/ui/button"
@@ -11,12 +11,12 @@ import { Spinner } from '@/components/ui/spinner';
 import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 
-interface JoinArenaFormProps {
+interface JoinArenaDialogProps {
     joinArena: ArenaMutation;
     isJoining: boolean;
 }
 
-export default function JoinArenaForm({ joinArena, isJoining }: JoinArenaFormProps) {
+export default function JoinArenaDialog({ joinArena, isJoining }: JoinArenaDialogProps) {
 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const router = useRouter();
@@ -26,7 +26,7 @@ export default function JoinArenaForm({ joinArena, isJoining }: JoinArenaFormPro
             inviteLink: ""
         },
         validators: {
-            onSubmit: joinArenaFormSchema,
+            onSubmit: JoinArenaDialogSchema,
         },
         onSubmit: ({ value }) => {
             const slug = value.inviteLink.split("http://localhost:3000/arena/")[1];

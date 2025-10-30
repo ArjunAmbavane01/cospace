@@ -6,7 +6,7 @@ import { createArena } from 'server/actions/arena';
 import useAuthStore from 'store/authStore';
 import { useForm } from "@tanstack/react-form"
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createArenaFormSchema } from '@/lib/validators/arena';
+import { CreateArenaDialogSchema } from '@/lib/validators/arena';
 import { Arena } from '@/lib/validators/arena';
 import z from 'zod';
 import { toast } from 'sonner';
@@ -17,9 +17,9 @@ import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { FiPlus } from "react-icons/fi";
 
-type createArenaFormData = z.infer<typeof createArenaFormSchema>;
+type CreateArenaDialogData = z.infer<typeof CreateArenaDialogSchema>;
 
-export default function CreateArenaForm() {
+export default function CreateArenaDialog() {
 
     const [modalOpen, setModalOpen] = useState<boolean>(false);
 
@@ -32,13 +32,14 @@ export default function CreateArenaForm() {
             arenaName: ""
         },
         validators: {
-            onSubmit: createArenaFormSchema,
+            onSubmit: CreateArenaDialogSchema,
         },
         onSubmit: ({ value }) => addArenaMutation(value)
     })
 
+    // create arena mutation
     const { mutate: addArenaMutation, isPending: isCreating } = useMutation({
-        mutationFn: (data: createArenaFormData) => createArena(data.arenaName),
+        mutationFn: (data: CreateArenaDialogData) => createArena(data.arenaName),
         onSuccess: (res) => {
             if (res.type === "success" && res.arena) {
                 const existingArenas = queryClient.getQueryData<Arena[]>(["arenas", user?.id]) || [];
@@ -46,7 +47,6 @@ export default function CreateArenaForm() {
                 toast.success(res.message);
                 setModalOpen(false);
                 form.reset();
-                handleModalClose();
                 router.push(`/arena/${res.arena.slug}`);
             } else if (res.type === "error") toast.error(res.message);
         },

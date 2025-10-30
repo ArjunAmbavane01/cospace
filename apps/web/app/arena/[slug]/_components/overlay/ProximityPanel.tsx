@@ -14,7 +14,6 @@ export default function ProximityPanel({ adminUser }: ProximityPanelProps) {
         const handleAddProximityUser = (evt: Event) => {
             const customEvent = evt as CustomEvent;
             const { user } = customEvent.detail;
-            console.log(user)
             setProximityUsers((users) => {
                 if (users.some(u => u.userId === user.userId)) return users;
                 return [...users, user]
