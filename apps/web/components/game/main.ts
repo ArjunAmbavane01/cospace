@@ -1,4 +1,3 @@
-import { RefObject } from 'react';
 import { Socket } from "socket.io-client";
 import { User } from "better-auth";
 import { ArenaUser } from "@/lib/validators/arena";
@@ -9,6 +8,7 @@ import { Island } from "./actors/Island";
 import { Character } from "./actors/Character";
 import { CollisionLayer } from "./actors/Collision";
 import { COLLISION_MAP } from "./CollisionMap";
+import { PlayerPosPayload } from "@repo/schemas/arena-ws-events";
 
 export const USER_PROXIMITY_EVENT = 'user-proximity';
 export const USER_LEFT_PROXIMITY_EVENT = 'user-left-proximity';
@@ -44,7 +44,7 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
     // Store characters with ID
     const otherUsers = new Map<string, ArenaUser>();
 
-    socket.on("player-pos", (data) => {
+    socket.on("player-pos", (data: PlayerPosPayload) => {
         const { userId, playerPos } = data;
         const character = otherUsers.get(userId)?.character;
         if (!character) return;
@@ -60,7 +60,7 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
 
     // Proximity detection settings
     const PROXIMITY_RADIUS = 150; // pixels
-    const CHECK_INTERVAL = 500; // ms
+    const PROXIMITY_CHECK_INTERVAL = 200; // ms
     const usersInProximity = new Set<string>();
 
     // init characters for online users
@@ -83,15 +83,24 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
         game.add(character);
     };
 
-    // check for newly joined users
-    const checkForNewUsers = () => {
-        const onlineUsers = arenaUsers.filter(user => user.isOnline);
-        onlineUsers.forEach(user => {
-            if (!otherUsers.has(user.id)) {
-                createUserCharacter(user);
-            }
-        });
-    };
+    // create foreground layer
+    const foreground = new Actor({
+        pos: vec(0, 0),
+        anchor: vec(0, 0),
+        collisionType: CollisionType.PreventCollision,
+        z: 100,
+    });
+
+    const foregroundSprite = island.getForegroundSprite();
+    if (foregroundSprite) {
+        foregroundSprite.origin = vec(0, 0);
+        foreground.graphics.use(foregroundSprite);
+    }
+    game.add(foreground);
+
+    // camera to follow character
+    game.currentScene.camera.strategy.lockToActor(mainCharacter);
+    game.currentScene.camera.zoom = 0.8;
 
     // proximity detection
     const checkProximity = () => {
@@ -118,34 +127,25 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
             }
         });
     };
+
     // Set up periodic checks
-    const userCheckInterval = setInterval(checkForNewUsers, 300);
-    const proximityCheckInterval = setInterval(checkProximity, CHECK_INTERVAL);
+    const proximityCheckInterval = setInterval(checkProximity, PROXIMITY_CHECK_INTERVAL);
+
+    // listen for game events
+    game.on("update-arena-users", (event) => {
+        const updatedArenaUsers = event as unknown as ArenaUser[];
+        const onlineUsers = updatedArenaUsers.filter(user => user.isOnline);
+        onlineUsers.forEach(user => {
+            if (!otherUsers.has(user.id)) createUserCharacter(user);
+        });
+
+    })
 
     // Cleanup on game stop
     game.on('stop', () => {
-        clearInterval(userCheckInterval);
+        // clearInterval(onlineUserCheckInterval);
         clearInterval(proximityCheckInterval);
     });
-
-    // create foreground layer
-    const foreground = new Actor({
-        pos: vec(0, 0),
-        anchor: vec(0, 0),
-        collisionType: CollisionType.PreventCollision,
-        z: 100,
-    });
-
-    const foregroundSprite = island.getForegroundSprite();
-    if (foregroundSprite) {
-        foregroundSprite.origin = vec(0, 0);
-        foreground.graphics.use(foregroundSprite);
-    }
-    game.add(foreground);
-
-    // camera to follow character
-    game.currentScene.camera.strategy.lockToActor(mainCharacter);
-    game.currentScene.camera.zoom = 0.8;
 
     return game;
 }

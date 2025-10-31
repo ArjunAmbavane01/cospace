@@ -1,6 +1,6 @@
 'use client';
 
-import { RefObject, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { Engine } from 'excalibur';
 import { User } from 'better-auth';
 import { Socket } from 'socket.io-client';
@@ -36,6 +36,11 @@ export default function ArenaCanvas({ slug, arenaUsers, socket, user }: ArenaCan
             gameRef.current = null;
         };
     }, [slug, socket]);
+
+    useEffect(()=>{
+        if(!gameRef.current) return;
+        gameRef.current.emit("update-arena-users",arenaUsers);
+    },[arenaUsers])
 
     return (
         <canvas ref={canvasRef} className='rounded-xl' />

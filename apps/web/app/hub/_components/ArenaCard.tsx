@@ -50,7 +50,7 @@ export default function ArenaCard({
 
     const adminUser = arena.admin;
     const usersCount = arena.usersToArenas?.length;
-    const formattedDate = formatDate(arena.createdAt,"card");
+    const formattedDate = formatDate(arena.createdAt, "card");
     return (
         <div className="flex flex-col w-72 h-56 overflow-hidden relative group rounded-xl">
             <motion.div
@@ -164,7 +164,7 @@ export default function ArenaCard({
                                         }
                                     </DropdownMenuItem>
                                     <ArenaDeleteBtn
-                                        arenaSlug={arena.slug}
+                                        arena={arena}
                                         deleteArena={deleteArena}
                                         isDeleting={isDeleting}
                                     />

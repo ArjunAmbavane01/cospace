@@ -1,5 +1,6 @@
 import { Actor, vec, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas, Engine } from "excalibur";
-import { ArenaUser, PlayerDirection } from "@/lib/validators/game";
+import { PlayerDirection } from "@/lib/validators/game";
+import { ArenaUser } from "@/lib/validators/arena";
 
 export class Character extends Actor {
     private spriteSheet?: SpriteSheet;
@@ -27,9 +28,9 @@ export class Character extends Actor {
             z: 50,
             collisionType: CollisionType.Active,
         });
-        this.userId = user.userId;
-        this.userName = user.userName;
-        this.userImage = user.userImage;
+        this.userId = user.id;
+        this.userName = user.name;
+        this.userImage = user.image;
     }
 
     async onInitialize(): Promise<void> {

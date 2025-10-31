@@ -1,14 +1,13 @@
-import { Dispatch, SetStateAction, useCallback, useEffect } from "react";
+import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createChatGroup, getChatGroups } from "server/actions/chat";
 import { ArenaUser } from "@/lib/validators/arena";
-import ChatGroupItem from "./ChatGroupItem";
-import ChatGroupsPanelSkeleton from "./ChatGroupsPanelSkeleton";
-import NewChatDialog from "./NewChatDialog";
-import { Kbd } from "@/components/ui/kbd";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
-import { toast } from "sonner";
 import { ChatGroup } from "@/lib/validators/chat";
+import ChatGroupsPanelSkeleton from "./ChatGroupsPanelSkeleton";
+import ChatGroupItem from "./ChatGroupItem";
+import NewChatDialog from "./NewChatDialog";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
 
 interface ChatGroupsPanelProps {
     arenaUsers: ArenaUser[];
@@ -18,7 +17,17 @@ interface ChatGroupsPanelProps {
     setActiveChatUserId: Dispatch<SetStateAction<string | null>>;
     setActiveGroup: Dispatch<SetStateAction<ChatGroup | null>>;
 }
-export default function ChatGroupsPanel({ arenaUsers, slug, activeGroup, activeChatUserId, setActiveChatUserId, setActiveGroup }: ChatGroupsPanelProps) {
+export default function ChatGroupsPanel({
+    arenaUsers,
+    slug,
+    activeGroup,
+    activeChatUserId,
+    setActiveChatUserId,
+    setActiveGroup
+}: ChatGroupsPanelProps) {
+
+    const [searchQuery, setSearchQuery] = useState("");
+    const inputRef = useRef<HTMLInputElement | null>(null);
 
     const queryClient = useQueryClient();
 
@@ -67,21 +76,32 @@ export default function ChatGroupsPanel({ arenaUsers, slug, activeGroup, activeC
         if (isError && error) toast.error(error.message)
     }, [isError, error]);
 
+    // set online status of participants in chatGroups
     useEffect(() => {
-        // set online status of participants in chatGroups
         (async () => {
             if (chatGroups) {
-                const updatedGroups = chatGroups.map(chatGroup => chatGroup.participants.map(participant => {
-                    const user = arenaUsers.find(a => a.id === participant.id);
-                    return {
-                        ...participant,
-                        isOnline: user?.isOnline
-                    }
+                const updatedGroups = chatGroups.map(group => ({
+                    ...group,
+                    participants: group.participants.map(p => {
+                        const user = arenaUsers.find(a => a.id === p.id);
+                        return { ...p, isOnline: user?.isOnline }
+                    })
                 }))
-                queryClient.setQueryData(["chat-groups", slug], updatedGroups)
+                await queryClient.setQueryData(["chat-groups", slug], updatedGroups)
+                console.log(chatGroups);
             }
         })();
     }, [arenaUsers]);
+
+    const filteredGroups = useMemo(() => {
+        if (!chatGroups) return [];
+        return chatGroups.filter((group) =>
+            group.participants
+                .map((p) => p.name?.toLowerCase())
+                .join(" ")
+                .includes(searchQuery.toLowerCase())
+        );
+    }, [chatGroups, searchQuery]);
 
     // sets ActiveGroupId, after checking if group already exists
     const handleSelectGroup = useCallback(async (participantId: string) => {
@@ -94,9 +114,10 @@ export default function ChatGroupsPanel({ arenaUsers, slug, activeGroup, activeC
     if (isLoading) return <ChatGroupsPanelSkeleton />
     if (!chatGroups || isError) return (
         <div>
-            Failed to fetch chats. Please try again
+            Failed to fetch chats. Please try again.
         </div>
     )
+
     return (
         <div className="flex flex-col gap-5 w-72 p-3 bg-accent rounded-xl">
             <div className="flex items-center justify-between px-1">
@@ -109,32 +130,33 @@ export default function ChatGroupsPanel({ arenaUsers, slug, activeGroup, activeC
                     isCreatingGroup={isCreatingGroup}
                 />
             </div>
-            <InputGroup>
-                <InputGroupInput placeholder="Search chats" />
-                <InputGroupAddon align={"inline-end"}>
-                    <Kbd>Ctrl</Kbd><Kbd>F</Kbd>
-                </InputGroupAddon>
-            </InputGroup>
+            <Input
+                ref={inputRef}
+                placeholder="Search chats"
+                onChange={(e) => setSearchQuery(e.target.value.trim())}
+            />
             <div className="flex flex-col gap-3">
                 {
                     chatGroups.length === 0 ? (
-                        <div>
-                            Start Chatting
+                        <div className="flex justify-center items-center h-40 p-5 text-muted-foreground text-center border border-dashed rounded-xl">
+                            <h4>No chats yet. Start a conversation.</h4>
+                        </div>
+                    ) : filteredGroups.length === 0 && searchQuery ? (
+                        <div className="flex justify-center items-center h-40 p-5 text-muted-foreground text-center border border-dashed rounded-xl break-all">
+                            No chats match &quot;{searchQuery.slice(0, 20)}{searchQuery.length > 20 ? "…" : ""}&quot;.
                         </div>
                     ) : (
-                        <>
-                            {chatGroups.map(group =>
-                                <ChatGroupItem
-                                    key={`chatGroup-${group.publicId}`}
-                                    group={group}
-                                    activeGroup={activeGroup}
-                                    handleSelectGroup={handleSelectGroup}
-                                />)
-                            }
-                        </>
+                        filteredGroups.map(group =>
+                            <ChatGroupItem
+                                key={`chatGroup-${group.publicId}`}
+                                group={group}
+                                activeGroup={activeGroup}
+                                handleSelectGroup={handleSelectGroup}
+                            />
+                        )
                     )
                 }
             </div>
-        </div>
+        </div >
     )
 }

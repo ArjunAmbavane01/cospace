@@ -69,7 +69,6 @@ export class MainCharacter extends Actor {
 
         this.createNameLabel();
         setInterval(() => this.sendPlayerCoordinates(), 50);
-
     }
 
     private sendPlayerCoordinates(): void {

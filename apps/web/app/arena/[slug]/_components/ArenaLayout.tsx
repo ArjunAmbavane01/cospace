@@ -49,21 +49,30 @@ export default function ArenaLayout({ slug, arenaUsers: participants }: { slug: 
 
                 ws.on("connect_error", (err) => console.log("Connection failed : ", err.message))
                 ws.on("user-joined", (user: UserJoinedPayload) => {
-                    const newUser = { id: user.userId, name: user.userName, image: user.userImage, isOnline: true }
-                    setArenaUsers(u => {
-                        // check if user already exists
-                        if (u.some(a => a.id === newUser.id)) return u;
-                        return [...u, newUser]
+                    const { userId, userName, userImage } = user;
+                    setArenaUsers(prev => {
+                        // check if user is already part of arena
+                        if (prev.some(u => u.id === userId)) {
+                            return prev.map(u => {
+                                if (u.id === userId) u.isOnline = true;
+                                return u;
+                            })
+                        } else {
+                            return [...prev, {
+                                id: userId,
+                                name: userName,
+                                image: userImage,
+                                isOnline: true
+                            }]
+                        }
                     })
                 })
                 ws.on("online-users", (data: OnlineUsersPayload) => {
                     const { onlineUserIds } = data;
-                    setArenaUsers(u =>
-                        u.map(arena => ({
-                            ...arena,
-                            isOnline: onlineUserIds.includes(arena.id)
-                        }))
-                    );
+                    setArenaUsers(prev => {
+                        const updated = prev.map(u => ({ ...u, isOnline: onlineUserIds.includes(u.id) }));
+                        return updated;
+                    });
                 })
             } catch (err) {
                 setSocket(null);
