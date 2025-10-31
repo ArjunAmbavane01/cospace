@@ -2,21 +2,25 @@
 
 import { useState } from "react";
 import { ArenaMutation } from "./HubDashboard";
+import { Arena } from "@/lib/validators/arena";
 import { Button } from "@/components/ui/button";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger, AlertDialogFooter, AlertDialogHeader } from "@/components/ui/alert-dialog";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Spinner } from "@/components/ui/spinner";
 import { Trash2Icon } from "lucide-react";
+import useAuthStore from "store/authStore";
+import { toast } from "sonner";
 
 interface ArenaDeleteBtnProps {
-    arenaSlug: string;
+    arena: Arena;
     deleteArena: ArenaMutation;
     isDeleting: boolean;
 }
 
-export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeleting }: ArenaDeleteBtnProps) {
+export default function ArenaDeleteBtn({ arena, deleteArena, isDeleting }: ArenaDeleteBtnProps) {
 
     const [open, setOpen] = useState<boolean>(false);
+    const { user } = useAuthStore();
 
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
@@ -44,7 +48,15 @@ export default function ArenaDeleteBtn({ arenaSlug, deleteArena, isDeleting }: A
                     <AlertDialogAction asChild>
                         <Button
                             variant={"destructive"}
-                            onClick={() => deleteArena(arenaSlug)}
+                            onClick={() => {
+                                if (!user) return;
+                                const isAdmin = user.id === arena.adminId;
+                                if (!isAdmin) {
+                                    toast.error("Only admin can delete this arena")
+                                    return;
+                                }
+                                deleteArena(arena.slug)
+                            }}
                         >
                             {
                                 isDeleting ? (

@@ -15,7 +15,9 @@ export default function ChatPanel({ activeGroup }: ChatPanelProps) {
   const chatParticipant = activeGroup?.participants[0];
   if (!activeGroup || !chatParticipant) return (
     <div className='flex justify-center items-center absolute inset-0 bg-accent rounded-xl z-30'>
-      Select a user to chat with
+      <h4>
+        Start a chat by selecting a user
+      </h4>
     </div>
   )
 

@@ -28,26 +28,28 @@ export default function ArenaList({
             </div>
         )
     }
+   
     if (filteredArenas.length === 0 && searchQuery) {
         return (
-            <div className="text-muted-foreground text-center col-span-4 p-20 border border-dashed rounded-xl">
-                No arenas found matching &quot;{searchQuery}&quot;
+            <div className="text-muted-foreground text-center p-20 border border-dashed rounded-xl break-all whitespace-normal">
+                No arenas match &quot;{searchQuery.slice(0, 20)}{searchQuery.length > 20 ? "…" : ""}&quot;.
             </div>
         );
     }
 
     if (filteredArenas.length === 0) {
         return (
-            <div className="text-muted-foreground text-center col-span-4 p-20 border border-dashed rounded-xl">
+            <div className="text-muted-foreground text-center p-20 border border-dashed rounded-xl">
                 <h4>
-                    No arenas yet.{" "}
+                    You don't have any arenas yet.{" "}
                     <span className="text-foreground">Create Arena</span> or{" "}
-                    <span className="text-foreground">join one</span>{" "}
-                    to get started!
+                    <span className="text-foreground">join</span>{" "}
+                    one to begin!
                 </h4>
             </div>
         );
     }
+
     return (
         <div className="grid grid-cols-4 gap-x-24 gap-y-14">
             {filteredArenas?.map((arena) => {

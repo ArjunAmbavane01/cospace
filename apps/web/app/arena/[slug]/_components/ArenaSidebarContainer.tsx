@@ -1,11 +1,11 @@
 import { Dispatch, SetStateAction } from "react";
 import { User } from "better-auth";
+import { ChatGroup } from "@/lib/validators/chat";
 import { ArenaUser } from "@/lib/validators/arena";
 import { Tabs } from "./ArenaLayout";
 import Sidebar from "./left-container/Sidebar";
 import MapPanel from "./left-container/map/MapPanel";
 import ChatGroupsPanel from "./left-container/chat/ChatGroupsPanel";
-import { ChatGroup } from "@/lib/validators/chat";
 
 interface ArenaSidebarContainerProps {
     user: User;

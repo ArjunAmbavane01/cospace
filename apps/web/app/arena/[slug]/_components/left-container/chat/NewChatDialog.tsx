@@ -1,11 +1,10 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { ArenaUser } from "@/lib/validators/arena";
 import AvailableUsersList from "./AvailableUsersList";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Dialog, DialogClose, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button";
-import { Kbd } from "@/components/ui/kbd";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Input } from "@/components/ui/input";
 import { FiEdit } from "react-icons/fi";
 
 interface NewChatDialogProps {
@@ -16,6 +15,18 @@ interface NewChatDialogProps {
 
 export default function NewChatDialog({ arenaUsers, handleSelectGroup, isCreatingGroup }: NewChatDialogProps) {
     const [openModal, setOpenModal] = useState<boolean>(false);
+    const [searchQuery, setSearchQuery] = useState<string>("");
+
+    const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const filteredArenas = useMemo(() => {
+        if (!arenaUsers) return [];
+        return arenaUsers.filter((user) => {
+            if (!user?.name) return false;
+            return user.name.toLowerCase().includes(searchQuery.toLowerCase());
+        })
+    }, [searchQuery, arenaUsers]);
+
     return (
         <Dialog open={openModal} onOpenChange={setOpenModal}>
             <Tooltip>
@@ -35,14 +46,14 @@ export default function NewChatDialog({ arenaUsers, handleSelectGroup, isCreatin
                     <DialogTitle>Choose User to start chatting</DialogTitle>
                     <DialogClose />
                 </DialogHeader>
-                <InputGroup>
-                    <InputGroupInput placeholder="Search users" />
-                    <InputGroupAddon align={"inline-end"}>
-                        <Kbd>Ctrl</Kbd><Kbd>F</Kbd>
-                    </InputGroupAddon>
-                </InputGroup>
+                <Input
+                    ref={inputRef}
+                    onChange={(e) => (setSearchQuery(e.target.value.trim()))}
+                    placeholder="Search users"
+                />
                 <AvailableUsersList
-                    arenaUsers={arenaUsers}
+                    arenaUsers={filteredArenas}
+                    searchQuery={searchQuery}
                     isCreatingGroup={isCreatingGroup}
                     handleSelectGroup={handleSelectGroup}
                     setOpenModal={setOpenModal}
