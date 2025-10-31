@@ -5,18 +5,31 @@ import { Tabs } from "./ArenaLayout";
 import Sidebar from "./left-container/Sidebar";
 import MapPanel from "./left-container/map/MapPanel";
 import ChatGroupsPanel from "./left-container/chat/ChatGroupsPanel";
+import { ChatGroup } from "@/lib/validators/chat";
 
 interface ArenaSidebarContainerProps {
     user: User;
     slug: string;
     arenaUsers: ArenaUser[];
+    activeGroup: ChatGroup | null;
     activeTab: Tabs;
+    activeChatUserId: string | null;
+    setActiveChatUserId: Dispatch<SetStateAction<string | null>>;
     setActiveTab: Dispatch<SetStateAction<Tabs>>;
-    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
-    setActiveGroupId: Dispatch<SetStateAction<string | null>>;
+    setActiveGroup: Dispatch<SetStateAction<ChatGroup | null>>;
 }
 
-export default function ArenaSidebarContainer({ user, slug, arenaUsers, activeTab, setActiveTab, setActiveChatUser,setActiveGroupId }: ArenaSidebarContainerProps) {
+export default function ArenaSidebarContainer({
+    user,
+    slug,
+    arenaUsers,
+    activeGroup,
+    activeTab,
+    activeChatUserId,
+    setActiveChatUserId,
+    setActiveTab,
+    setActiveGroup
+}: ArenaSidebarContainerProps) {
 
     const renderPanel = () => {
         switch (activeTab) {
@@ -27,16 +40,18 @@ export default function ArenaSidebarContainer({ user, slug, arenaUsers, activeTa
                         arenaUsers={arenaUsers}
                         activeTab={activeTab}
                         setActiveTab={setActiveTab}
-                        setActiveChatUser={setActiveChatUser}
+                        setActiveChatUserId={setActiveChatUserId}
                     />
                 );
             case "chat":
                 return (
                     <ChatGroupsPanel
                         arenaUsers={arenaUsers}
+                        activeGroup={activeGroup}
                         slug={slug}
-                        setActiveChatUser={setActiveChatUser}
-                        setActiveGroupId={setActiveGroupId}
+                        activeChatUserId={activeChatUserId}
+                        setActiveChatUserId={setActiveChatUserId}
+                        setActiveGroup={setActiveGroup}
                     />
                 );
             default:

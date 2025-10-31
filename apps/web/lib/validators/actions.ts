@@ -1,6 +1,6 @@
 import { Arena } from "./arena";
 import { ChatGroup } from "./chat";
-import { ArenaUser } from "./game";
+import { ArenaUser } from "./arena";
 
 export type ActionResponse<T = void> =
     | { type: "success"; message: string } & T

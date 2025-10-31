@@ -50,7 +50,7 @@ export const getChatGroups = async (userId: string, arenaSlug: string) => {
             updatedAt: g.updatedAt,
             publicId: g.publicId,
             lastMessage: g.messages[0] ?? null,
-            participants: g.usersToGroups.map(u => u.user),
+            participants: g.usersToGroups.map(u => { return { ...u.user, isOnline: false } }),
         }));
 
         return {

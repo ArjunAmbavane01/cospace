@@ -52,7 +52,7 @@ export default function ArenaList({
         <div className="grid grid-cols-4 gap-x-24 gap-y-14">
             {filteredArenas?.map((arena) => {
                 return <ArenaCard
-                    key={arena.slug}
+                    key={`arenaCard-${arena.slug}`}
                     arena={arena}
                     isDeleting={isDeleting}
                     isLeaving={isLeaving}

@@ -19,7 +19,7 @@ export default function ChatGroupsPanelSkeleton() {
             </InputGroup>
             <div className="flex flex-col gap-3">
                 {Array.from({ length: 4 }).map((_, idx) => {
-                    return <div key={idx} className="flex items-center gap-2 w-full p-3">
+                    return <div key={`chatGroup-${idx}`} className="flex items-center gap-2 w-full p-3">
                         <Skeleton className="bg-muted-foreground/20 size-9 shrink-0 rounded-full" />
                         <div className="flex flex-col gap-2 w-full">
                             <div className="flex justify-between items-center w-full">

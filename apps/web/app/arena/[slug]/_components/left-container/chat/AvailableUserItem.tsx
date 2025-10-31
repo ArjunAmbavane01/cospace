@@ -5,20 +5,21 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface AvailableUserItemProps {
     user: ArenaUser;
-    setGroupId: (userId: string) => void;
+    isCreatingGroup: boolean;
+    handleSelectGroup: (userId: string) => Promise<void>;
     setOpenModal: Dispatch<SetStateAction<boolean>>
-    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>
 }
 
-export default function AvailableUserItem({ user, setGroupId, setActiveChatUser, setOpenModal }: AvailableUserItemProps) {
+export default function AvailableUserItem({ user, isCreatingGroup, handleSelectGroup, setOpenModal }: AvailableUserItemProps) {
     if (!user) return null;
     const userInitials = user.name.split(" ").map(w => w[0]).join("");
     return <div
         className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition group cursor-pointer"
-        onClick={() => {
-            setGroupId(user.id);
-            setActiveChatUser(user);
-            setOpenModal(false);
+        onClick={async () => {
+            if (!isCreatingGroup) {
+                await handleSelectGroup(user.id);
+                setOpenModal(false);
+            }
         }}
     >
         <div className="flex items-center gap-3">

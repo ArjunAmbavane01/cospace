@@ -9,10 +9,10 @@ import { Button } from "@/components/ui/button";
 interface UserItemProps {
   user: ArenaUser;
   setActiveTab: Dispatch<SetStateAction<Tabs>>;
-  setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
+  setActiveChatUserId: Dispatch<SetStateAction<string | null>>;
 }
-export default function UserItem({ user, setActiveTab, setActiveChatUser }: UserItemProps) {
-  if(!user) return null;
+export default function UserItem({ user, setActiveTab, setActiveChatUserId }: UserItemProps) {
+  if (!user) return null;
   const userInitials = user.name.split(" ").map(w => w[0]).join("");
   return (
     <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition group">
@@ -38,8 +38,8 @@ export default function UserItem({ user, setActiveTab, setActiveChatUser }: User
       </div>
       <div className="opacity-0 group-hover:opacity-100 transition-all">
         <Button size={"sm"} variant={"outline"} onClick={() => {
-          setActiveChatUser(user)
-          setActiveTab("chat")
+          setActiveChatUserId(user.id);
+          setActiveTab("chat");
         }}
         >
           Chat

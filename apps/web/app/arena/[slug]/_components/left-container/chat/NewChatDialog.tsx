@@ -11,11 +11,10 @@ import { FiEdit } from "react-icons/fi";
 interface NewChatDialogProps {
     arenaUsers: ArenaUser[];
     isCreatingGroup: boolean;
-    setGroupId: (userId: string) => void;
-    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
+    handleSelectGroup: (userId: string) => Promise<void>;
 }
 
-export default function NewChatDialog({ arenaUsers, setGroupId, setActiveChatUser, isCreatingGroup }: NewChatDialogProps) {
+export default function NewChatDialog({ arenaUsers, handleSelectGroup, isCreatingGroup }: NewChatDialogProps) {
     const [openModal, setOpenModal] = useState<boolean>(false);
     return (
         <Dialog open={openModal} onOpenChange={setOpenModal}>
@@ -45,9 +44,8 @@ export default function NewChatDialog({ arenaUsers, setGroupId, setActiveChatUse
                 <AvailableUsersList
                     arenaUsers={arenaUsers}
                     isCreatingGroup={isCreatingGroup}
-                    setGroupId={setGroupId}
+                    handleSelectGroup={handleSelectGroup}
                     setOpenModal={setOpenModal}
-                    setActiveChatUser={setActiveChatUser}
                 />
             </DialogContent>
         </Dialog>

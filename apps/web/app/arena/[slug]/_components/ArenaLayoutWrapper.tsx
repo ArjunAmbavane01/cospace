@@ -1,7 +1,7 @@
 'use client';
 
-import { ArenaUser } from '@/lib/validators/arena';
 import dynamic from 'next/dynamic';
+import { ArenaUser } from '@/lib/validators/arena';
 
 const ArenaLayout = dynamic(() => import('./ArenaLayout'), {
     ssr: false,

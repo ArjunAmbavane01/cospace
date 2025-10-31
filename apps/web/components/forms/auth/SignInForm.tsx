@@ -27,11 +27,8 @@ export default function SignInForm({ authLoading, googleAuthLoading, signInWithE
         },
         onSubmit: async ({ value }) => {
             try {
-                console.log("here1")
                 await signInWithEmail(value.email, value.password);
-                console.log("here2")
             } catch (err: unknown) {
-                console.log("here3")
                 toast.error(err instanceof Error ? err.message : "Something went wrong");
             }
         },

@@ -158,7 +158,7 @@ export default function HubDashboard({ sessionUser }: HubDashboardProps) {
                     isLoading ? (
                         <div className="grid grid-cols-4 gap-24">
                             {Array.from({ length: 4 }).map((_, idx) => {
-                                return <ArenaCardSkeleton key={idx} />
+                                return <ArenaCardSkeleton key={`arenaCard-${idx}`} />
                             })}
                         </div>
                     ) : <ArenaList

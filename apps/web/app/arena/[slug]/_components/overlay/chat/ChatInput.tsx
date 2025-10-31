@@ -7,14 +7,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { LuSendHorizontal } from "react-icons/lu";
 import { BsEmojiSmile } from "react-icons/bs";
+import { ChatGroup, ChatGroupParticipant } from "@/lib/validators/chat";
 
 interface ChatInputProps {
-    activeChatUser: ArenaUser | null;
-    activeGroupId: string | null;
+    chatParticipant: ChatGroupParticipant;
+    activeGroup: ChatGroup | null;
 }
 
-export default function ChatInput({ activeChatUser, activeGroupId }: ChatInputProps) {
-    if(!activeChatUser) return null;
+export default function ChatInput({ chatParticipant, activeGroup }: ChatInputProps) {
     const [openEmojiPanel, setOpenEmojiPanel] = useState<boolean>(false);
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const onEmojiSelect = ({ emoji }: { emoji: string }) => {
@@ -35,7 +35,7 @@ export default function ChatInput({ activeChatUser, activeGroupId }: ChatInputPr
                 maxRows={6}
                 data-slot="input-group-control"
                 className="flex field-sizing-content min-h-12 w-full resize-none rounded-xl bg-transparent px-3 py-2.5 text-base transition-[color,box-shadow] outline-none"
-                placeholder={`Message ${activeChatUser.name}`}
+                placeholder={`Message ${chatParticipant.name}`}
             />
             <InputGroupAddon align="block-end" className="flex items-center justify-end gap-2">
                 <Popover onOpenChange={setOpenEmojiPanel} open={openEmojiPanel}>

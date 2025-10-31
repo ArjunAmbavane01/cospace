@@ -9,11 +9,11 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 interface UsersListProps {
     arenaUsers: ArenaUser[];
     setActiveTab: Dispatch<SetStateAction<Tabs>>;
-    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
+    setActiveChatUserId: Dispatch<SetStateAction<string | null>>;
     type: "online" | "offline";
 }
 
-export default function UsersList({ arenaUsers, type, setActiveTab, setActiveChatUser }: UsersListProps) {
+export default function UsersList({ arenaUsers, type, setActiveTab, setActiveChatUserId }: UsersListProps) {
     const [showUsers, setShowUsers] = useState<boolean>(true);
     return (
         <Collapsible
@@ -37,7 +37,14 @@ export default function UsersList({ arenaUsers, type, setActiveTab, setActiveCha
             </div>
             <CollapsibleContent>
                 {arenaUsers.map(user => {
-                    return <UserItem key={user.id} user={user} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
+                    return (
+                        <UserItem
+                            key={`${user.id}-${type}`}
+                            user={user}
+                            setActiveTab={setActiveTab}
+                            setActiveChatUserId={setActiveChatUserId}
+                        />
+                    )
                 })}
             </CollapsibleContent>
         </Collapsible>

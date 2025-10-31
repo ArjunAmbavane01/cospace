@@ -1,9 +1,10 @@
-import { z } from "zod";
+import { boolean, z } from "zod";
 
 export const chatGroupParticipant = z.object({
     id: z.string(),
     name: z.string(),
     image: z.nullish(z.string()),
+    isOnline: z.boolean().default(false),
 })
 
 export const chatGroupSchema = z.object({

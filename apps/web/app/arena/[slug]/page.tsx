@@ -1,7 +1,6 @@
 import { getArenaUsers, validateArenaSlug } from 'server/actions/arena';
 import ArenaLayoutWrapper from './_components/ArenaLayoutWrapper';
 import ArenaNotFound from './_components/ArenaNotFound';
-import { useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export default async function ArenaPage({ params }: { params: Promise<{ slug: string }> }) {

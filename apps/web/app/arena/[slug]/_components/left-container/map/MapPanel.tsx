@@ -10,11 +10,11 @@ interface MapPanelProps {
     user: User
     arenaUsers: ArenaUser[]
     activeTab: Tabs;
+    setActiveChatUserId: Dispatch<SetStateAction<string | null>>;
     setActiveTab: Dispatch<SetStateAction<Tabs>>;
-    setActiveChatUser: Dispatch<SetStateAction<ArenaUser | null>>;
 }
 
-export default function MapPanel({ user, arenaUsers, setActiveTab, setActiveChatUser }: MapPanelProps) {
+export default function MapPanel({ user, arenaUsers, setActiveChatUserId, setActiveTab }: MapPanelProps) {
     const onlineUsers = arenaUsers.filter((user) => user.isOnline);
     const offlineUsers = arenaUsers.filter((user) => !user.isOnline);
     return (
@@ -38,8 +38,8 @@ export default function MapPanel({ user, arenaUsers, setActiveTab, setActiveChat
                         </div>
                     ) : (
                         <>
-                            <UsersList type="online" arenaUsers={onlineUsers} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
-                            <UsersList type="offline" arenaUsers={offlineUsers} setActiveTab={setActiveTab} setActiveChatUser={setActiveChatUser} />
+                            <UsersList type="online" arenaUsers={onlineUsers} setActiveChatUserId={setActiveChatUserId} setActiveTab={setActiveTab} />
+                            <UsersList type="offline" arenaUsers={offlineUsers} setActiveChatUserId={setActiveChatUserId} setActiveTab={setActiveTab} />
                         </>
                     )
                 }
