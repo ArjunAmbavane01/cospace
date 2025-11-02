@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from "react";
 import { UseMutateFunction, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getArenas, deleteArena, leaveArena } from "server/actions/arena";
 import useAuthStore from "store/authStore";
-import type { User } from "better-auth";
+import type { Session, User } from "better-auth";
 import { Arena } from "@/lib/validators/arena";
 import { AnimatePresence } from "motion/react";
+import ArenaCardSkeleton from "./ArenaCardSkeleton";
 import HubHeader from "./HubHeader";
 import ArenaList from "./ArenaList";
-import ArenaCardSkeleton from "./ArenaCardSkeleton";
-import Navbar from "@/components/navbar/Navbar";
 import WelcomeUserToast from "@/components/toast/WelcomeUserToast";
+import Navbar from "@/components/navbar/Navbar";
 import { toast } from "sonner";
 
 export type ArenaMutation = UseMutateFunction<
@@ -22,17 +22,17 @@ export type ArenaMutation = UseMutateFunction<
 >;
 
 interface HubDashboardProps {
-    sessionUser: User;
+    userSession: { user: User; session: Session };
 }
 
-export default function HubDashboard({ sessionUser }: HubDashboardProps) {
+export default function HubDashboard({ userSession }: HubDashboardProps) {
 
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [showWelcomeToast, setShowWelcomeToast] = useState<boolean>(false);
 
-    const { user, setUser } = useAuthStore();
+    const { user, setUser, setToken } = useAuthStore();
     const queryClient = useQueryClient();
-    const userId = sessionUser.id;
+    const userId = userSession.user.id;
 
     // get user arenas
     const { data: userArenas, isLoading, isError, error } = useQuery({
@@ -141,8 +141,11 @@ export default function HubDashboard({ sessionUser }: HubDashboardProps) {
 
     // set user effect
     useEffect(() => {
-        if (!user) setUser(sessionUser)
-    }, [user, sessionUser])
+        if (!user) {
+            setUser(userSession.user);
+            setToken(userSession.session.token);
+        }
+    }, [user, userSession])
 
     // fetching error effect
     useEffect(() => {

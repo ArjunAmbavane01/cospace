@@ -1,5 +1,5 @@
 import { Arena } from "./arena";
-import { ChatGroup } from "./chat";
+import { ChatGroup, Message } from "./chat";
 import { ArenaUser } from "./arena";
 
 export type ActionResponse<T = void> =
@@ -18,3 +18,6 @@ export type ValidateArenaSlugResponse = ActionResponse;
 
 // chat actions
 export type GetChatMessagesResponse = ActionResponse<{ chatGroups: ChatGroup[] }>;
+export type CreateChatGroupResponse = ActionResponse<{ newMessageGroup: { publicId: string; updatedAt: Date; createdAt: Date } }>;
+export type GetChatGroupMessagesResponse = ActionResponse<{ groupMessages: { rows: Message[] } }>;
+export type CreateMessageResponse = ActionResponse<{ createdMessage: Message }>;

@@ -1,4 +1,5 @@
-import { boolean, z } from "zod";
+import { InfiniteData } from "@tanstack/react-query";
+import { z } from "zod";
 
 export const chatGroupParticipant = z.object({
     id: z.string(),
@@ -18,5 +19,20 @@ export const chatGroupSchema = z.object({
     participants: chatGroupParticipant.array(),
 })
 
+export const MessageSchema = z.object({
+    id: z.number(),
+    senderId: z.string(),
+    senderName: z.nullable(z.string()),
+    senderImage: z.nullish(z.string()),
+    content: z.string(),
+    createdAt: z.date(),
+})
+
+export interface MessagePage {
+    rows: Message[];
+}
+export type MessagesInfiniteData = InfiniteData<MessagePage, number>;
+
 export type ChatGroup = z.infer<typeof chatGroupSchema>;
 export type ChatGroupParticipant = z.infer<typeof chatGroupParticipant>;
+export type Message = z.infer<typeof MessageSchema>;

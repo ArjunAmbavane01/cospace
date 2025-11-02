@@ -1,3 +1,4 @@
 export * from "./getChatGroups";
-export * from "./getChatMessages";
+export * from "./getChatGroupMessages";
 export * from "./createChatGroup";
+export * from "./createMessage";
