@@ -1,79 +1,121 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { io, Socket } from "socket.io-client";
-import { User } from 'better-auth';
+import { Session, User } from 'better-auth';
+import useAuthStore from 'store/authStore';
 import { OnlineUsersPayload, ServerToClientEvents, UserJoinedPayload } from "@repo/schemas/ws-arena-events";
 import { ClientToServerEvents } from '@repo/schemas/arena-ws-events';
-import { authClient } from '@/lib/auth-client';
 import { ArenaUser } from '@/lib/validators/arena';
 import { ChatGroup } from '@/lib/validators/chat';
 import ArenaSidebarContainer from './ArenaSidebarContainer';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaCanvas from './ArenaCanvas';
 import ChatPanel from './overlay/ChatPanel';
+import { Spinner } from '@/components/ui/spinner';
+import { Button } from '@/components/ui/button';
+import { MdErrorOutline } from "react-icons/md";
 
 export type Tabs = "map" | "chat" | "setting";
 
-export default function ArenaLayout({ slug, arenaUsers: participants }: { slug: string, arenaUsers: ArenaUser[] }) {
+interface ArenaLayoutProps {
+    slug: string,
+    arenaUsers: ArenaUser[],
+    userSession: { user: User; session: Session }
+}
+
+export default function ArenaLayout({ slug, arenaUsers: participants, userSession }: ArenaLayoutProps) {
 
     const [activeTab, setActiveTab] = useState<Tabs>("map");
     const [arenaUsers, setArenaUsers] = useState<ArenaUser[]>(participants);
     const [activeChatUserId, setActiveChatUserId] = useState<string | null>(null);
     const [activeGroup, setActiveGroup] = useState<ChatGroup | null>(null);
     const [socket, setSocket] = useState<Socket | null>(null);
-    const [user, setUser] = useState<User | null>(null);
+    const [connectionError, setConnectionError] = useState<string | null>(null);
+    const [isConnecting, setIsConnecting] = useState<boolean>(true);
+
+    const { user, setUser, token, setToken } = useAuthStore();
+
+    // init auth store
+    useEffect(() => {
+        if (userSession?.user && userSession?.session) {
+            setUser(userSession.user);
+            setToken(userSession.session.token);
+        }
+    }, [userSession, setUser, setToken]);
 
     useEffect(() => {
 
-        if (socket || !slug) return;
+        if (!slug || !userSession?.session.token) {
+            setConnectionError("Missing required authentication");
+            setIsConnecting(false);
+            return;
+        }
+
+        if (socket) return; // already connected
 
         // this is for the race condition
         let isCancelled = false;
         let ws: Socket<ServerToClientEvents, ClientToServerEvents> | null = null;
         (async () => {
             try {
-                const { data: userSession } = await authClient.getSession();
-                if (!userSession?.session) throw new Error("Session not found")
-
                 if (isCancelled) return;
                 ws = io("http://localhost:3002", {
                     auth: {
                         userToken: userSession.session.token,
                         arenaSlug: slug,
                     },
+                    reconnection: true,
+                    reconnectionDelay: 1000,
+                    reconnectionAttempts: 3,
                 });
 
-                setUser(userSession.user);
-                setSocket(ws);
+                // connection handlers
+                ws.on("connect", () => {
+                    setConnectionError(null);
+                    setIsConnecting(false);
+                });
 
-                ws.on("connect_error", (err) => console.log("Connection failed : ", err.message))
+                ws.on("connect_error", (err) => {
+                    console.log("Connection failed : ", err.message)
+                    setConnectionError(`Connection failed: ${err.message}`);
+                    setIsConnecting(false);
+                });
+
+                ws.on("disconnect", (reason) => {
+                    if (reason === "io server disconnect") {
+                        // server forcefully disconnected, try to reconnect
+                        ws?.connect();
+                    }
+                });
+
+                // arena event handlers
                 ws.on("user-joined", (user: UserJoinedPayload) => {
                     const { userId, userName, userImage } = user;
+
+                    if (userId === userSession.user.id) return;
+
                     setArenaUsers(prev => {
                         // check if user is already part of arena
-                        if (prev.some(u => u.id === userId)) {
-                            return prev.map(u => {
-                                if (u.id === userId) u.isOnline = true;
-                                return u;
-                            })
-                        } else {
-                            return [...prev, {
-                                id: userId,
-                                name: userName,
-                                image: userImage,
-                                isOnline: true
-                            }]
+                        const userExists = prev.find(u => u.id === userId);
+                        if (userExists) {
+                            return prev.map(u => u.id === userId ? { ...u, isOnline: true } : u);
                         }
+                        return [...prev, {
+                            id: userId,
+                            name: userName,
+                            image: userImage,
+                            isOnline: true
+                        }]
                     })
-                })
+                });
+
                 ws.on("online-users", (data: OnlineUsersPayload) => {
                     const { onlineUserIds } = data;
-                    setArenaUsers(prev => {
-                        const updated = prev.map(u => ({ ...u, isOnline: onlineUserIds.includes(u.id) }));
-                        return updated;
-                    });
-                })
+                    setArenaUsers(prev => prev.map(u => ({ ...u, isOnline: onlineUserIds.includes(u.id) })));
+                });
+
+                setSocket(ws);
             } catch (err) {
                 setSocket(null);
                 console.error(err instanceof Error ? err.message : err)
@@ -82,19 +124,60 @@ export default function ArenaLayout({ slug, arenaUsers: participants }: { slug: 
 
         return () => {
             isCancelled = true;
-            if (ws) {
-                ws.disconnect();
-                setUser(null);
-                setSocket(null);
-                setArenaUsers([]);
-            }
+            if (ws?.connected) ws.disconnect();
+            setSocket(null);
         }
-    }, [slug])
+    }, [slug, userSession?.session?.token])
 
-    if (!socket || !user) {
-        return <div className='flex justify-center items-center absolute inset-0 bg-black/80'>
-            Loading Arena...
-        </div>
+    const handleCloseChat = useCallback(() => {
+        setActiveGroup(null);
+        setActiveChatUserId(null);
+    }, []);
+
+    // force reconnect
+    const handleRetryConnection = useCallback(() => {
+        setConnectionError(null);
+        setIsConnecting(true);
+        setSocket(null);
+    }, []);
+
+    if (isConnecting) {
+        return (
+            <div className='flex flex-col justify-center items-center gap-4 absolute inset-0 bg-background/95'>
+                <Spinner />
+                <h4 className="text-muted-foreground">Connecting to arena...</h4>
+            </div>
+        );
+    }
+
+    if (connectionError) {
+        return (
+            <div className='flex flex-col justify-center items-center gap-4 absolute inset-0 bg-background p-4'>
+                <div className="flex flex-col items-center gap-3 text-center">
+                    <MdErrorOutline className='size-8 text-destructive' />
+                    <h3 className="font-semibold text-destructive">Connection Error</h3>
+                    <h4>{connectionError}</h4>
+                    <Button
+                        onClick={handleRetryConnection}
+                        variant="outline"
+                        className="w-full"
+                    >
+                        Retry Connection
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
+    if (!user || !token) {
+        return (
+            <div className='flex flex-col justify-center items-center gap-4 absolute inset-0 bg-background/95'>
+                <div className="flex flex-col gap-3">
+                    <p className="font-semibold">Authentication Required</p>
+                    <p className="text-sm mt-2">Please sign in to access the arena.</p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -112,7 +195,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants }: { slug: 
                     setActiveGroup={setActiveGroup}
                 />
                 <div className='flex-1 relative mx-3'>
-                    {activeTab === "chat" && <ChatPanel activeGroup={activeGroup} />}
+                    <ChatPanel activeGroup={activeGroup} activeTab={activeTab} user={userSession.user} handleCloseChat={handleCloseChat} />
                     <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />
                     <CanvasOverlay adminUser={user} />
                 </div>

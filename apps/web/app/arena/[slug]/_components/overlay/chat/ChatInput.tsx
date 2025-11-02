@@ -1,37 +1,125 @@
 import { useRef, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { createMessage } from "server/actions/chat";
+import { User } from "better-auth";
 import TextareaAutosize from "react-textarea-autosize"
-import { ArenaUser } from "@/lib/validators/arena";
+import { ChatGroup, ChatGroupParticipant, MessagesInfiniteData } from "@/lib/validators/chat";
 import { InputGroup, InputGroupAddon, InputGroupButton } from "@/components/ui/input-group"
 import { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter } from "@/components/ui/emoji-picker";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
-import { LuSendHorizontal } from "react-icons/lu";
+import { toast } from "sonner";
 import { BsEmojiSmile } from "react-icons/bs";
-import { ChatGroup, ChatGroupParticipant } from "@/lib/validators/chat";
+import { LuSendHorizontal } from "react-icons/lu";
 
 interface ChatInputProps {
     chatParticipant: ChatGroupParticipant;
-    activeGroup: ChatGroup | null;
+    user: User;
+    activeGroup: ChatGroup;
 }
 
-export default function ChatInput({ chatParticipant, activeGroup }: ChatInputProps) {
+export default function ChatInput({ chatParticipant, user, activeGroup }: ChatInputProps) {
+
+    const [message, setMessage] = useState("");
     const [openEmojiPanel, setOpenEmojiPanel] = useState<boolean>(false);
+
     const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+    const queryClient = useQueryClient();
+
+    const { mutateAsync: createMessageMutation, isPending: isSending } = useMutation({
+        mutationFn: async (content: string) => {
+            const res = await createMessage(activeGroup.publicId, content);
+            if (res.type === "error") throw new Error(res.message);
+            return res;
+        },
+        onMutate: async (content: string) => {
+            // cancel outgoing refecthes
+            await queryClient.cancelQueries({ queryKey: ["messages", activeGroup.publicId] })
+            // save previous value
+            const prevMessageData = queryClient.getQueryData<MessagesInfiniteData>(["messages", activeGroup.publicId]);
+            const optimisticMessage = {
+                id: -1 * Date.now(),
+                content,
+                recieverId: chatParticipant.id,
+                senderId: user.id,
+                senderName: user.name,
+                senderImage: user?.image,
+                createdAt: new Date(),
+            }
+
+            queryClient.setQueryData<MessagesInfiniteData>(
+                ["messages", activeGroup.publicId],
+                (old) => {
+                    if (!old || !user) return old;
+                    const newPages = [...old.pages];
+                    console.log(newPages)
+                    // Check if there are any pages at all
+                    if (newPages[0]) {
+                        // Append the optimistic message to end of first page
+                        newPages[0] = {
+                            ...newPages[0],
+                            rows: [optimisticMessage, ...newPages[0].rows],
+                        };
+                    } else {
+                        // if first message ever
+                        newPages.push({ rows: [optimisticMessage] });
+                    }
+                    return {
+                        pages: newPages,
+                        pageParams: old.pageParams,
+                    };
+                }
+            );
+            setMessage("");
+            return { prevMessageData };
+        },
+        onSuccess: () => {
+        },
+        onError: (err, _, context) => {
+            // restore previous state
+            if (context?.prevMessageData) {
+                queryClient.setQueryData(
+                    ["messages", activeGroup.publicId],
+                    context.prevMessageData
+                );
+            }
+            toast.error(err.message || "Failed to send message");
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: ["messages", activeGroup.publicId] })
+        },
+    })
+
     const onEmojiSelect = ({ emoji }: { emoji: string }) => {
-        if (!textareaRef.current) return;
-        textareaRef.current.value += emoji;
-        textareaRef.current.focus();
+        setMessage(prev => prev + emoji);
+        textareaRef.current?.focus();
     }
 
-    const sendMessage = () => {
-        if (!textareaRef.current) return;
-        if (textareaRef.current.value.trim() === "") textareaRef.current.focus();
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        // new line on Shift+Enter
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    };
+
+    const sendMessage = async () => {
+        if (isSending) return;
+        if (!message.trim()) {
+            textareaRef.current?.focus();
+            return;
+        }
+        await createMessageMutation(message);
     }
 
     return (
         <InputGroup>
             <TextareaAutosize
                 ref={textareaRef}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                onKeyDown={handleKeyDown}
                 maxRows={6}
                 data-slot="input-group-control"
                 className="flex field-sizing-content min-h-12 w-full resize-none rounded-xl bg-transparent px-3 py-2.5 text-base transition-[color,box-shadow] outline-none"
@@ -42,7 +130,12 @@ export default function ChatInput({ chatParticipant, activeGroup }: ChatInputPro
                     <PopoverTrigger asChild>
                         <Tooltip>
                             <TooltipTrigger asChild>
-                                <InputGroupButton size="icon-sm" variant="ghost" onClick={() => setOpenEmojiPanel(c => !c)}>
+                                <InputGroupButton
+                                    size="icon-sm"
+                                    variant="ghost"
+                                    type="button"
+                                    onClick={() => setOpenEmojiPanel(c => !c)}
+                                >
                                     <BsEmojiSmile />
                                 </InputGroupButton>
                             </TooltipTrigger>
@@ -64,7 +157,13 @@ export default function ChatInput({ chatParticipant, activeGroup }: ChatInputPro
                 </Popover>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <InputGroupButton size="icon-sm" variant="default" onClick={sendMessage}>
+                        <InputGroupButton
+                            size="icon-sm"
+                            variant="default"
+                            onClick={sendMessage}
+                            disabled={isSending || !message.trim()}
+                            type="button"
+                        >
                             <LuSendHorizontal />
                         </InputGroupButton>
                     </TooltipTrigger>
