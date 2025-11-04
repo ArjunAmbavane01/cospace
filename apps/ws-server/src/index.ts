@@ -9,7 +9,7 @@ import { handleAuth } from './lib/handleAuth';
 try {
     const wss = new Server<ClientToServerEvents, ServerToClientEvents>(Number(process.env.WS_PORT), {
         cors: {
-            origin: ["http://localhost:3000"],
+            origin: [process.env.FRONTEND_URL!],
             methods: ["GET", "POST"],
             credentials: true
         }

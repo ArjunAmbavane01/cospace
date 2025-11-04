@@ -12,9 +12,9 @@ import ArenaSidebarContainer from './ArenaSidebarContainer';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaCanvas from './ArenaCanvas';
 import ChatPanel from './overlay/ChatPanel';
-import { Spinner } from '@/components/ui/spinner';
 import { Button } from '@/components/ui/button';
 import { MdErrorOutline } from "react-icons/md";
+import ArenaLoading from './ArenaLoading';
 
 export type Tabs = "map" | "chat" | "setting";
 
@@ -32,7 +32,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [activeGroup, setActiveGroup] = useState<ChatGroup | null>(null);
     const [socket, setSocket] = useState<Socket | null>(null);
     const [connectionError, setConnectionError] = useState<string | null>(null);
-    const [isConnecting, setIsConnecting] = useState<boolean>(true);
+    const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
     const { user, setUser, token, setToken } = useAuthStore();
 
@@ -46,6 +46,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
 
     useEffect(() => {
 
+        setIsConnecting(true);
         if (!slug || !userSession?.session.token) {
             setConnectionError("Missing required authentication");
             setIsConnecting(false);
@@ -60,7 +61,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         (async () => {
             try {
                 if (isCancelled) return;
-                ws = io("http://localhost:3002", {
+                ws = io(`${process.env.NEXT_PUBLIC_WS_BACKEND_URL}`, {
                     auth: {
                         userToken: userSession.session.token,
                         arenaSlug: slug,
@@ -118,6 +119,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                 setSocket(ws);
             } catch (err) {
                 setSocket(null);
+                setIsConnecting(false);
                 console.error(err instanceof Error ? err.message : err)
             }
         })();
@@ -125,6 +127,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         return () => {
             isCancelled = true;
             if (ws?.connected) ws.disconnect();
+            setIsConnecting(false);
             setSocket(null);
         }
     }, [slug, userSession?.session?.token])
@@ -141,14 +144,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         setSocket(null);
     }, []);
 
-    if (isConnecting) {
-        return (
-            <div className='flex flex-col justify-center items-center gap-4 absolute inset-0 bg-background/95'>
-                <Spinner />
-                <h4 className="text-muted-foreground">Connecting to arena...</h4>
-            </div>
-        );
-    }
+    if (isConnecting) return <ArenaLoading />
 
     if (connectionError) {
         return (
@@ -173,8 +169,8 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         return (
             <div className='flex flex-col justify-center items-center gap-4 absolute inset-0 bg-background/95'>
                 <div className="flex flex-col gap-3">
-                    <p className="font-semibold">Authentication Required</p>
-                    <p className="text-sm mt-2">Please sign in to access the arena.</p>
+                    <h3 className="font-semibold">Authentication Required</h3>
+                    <p>Please sign in to access the arena.</p>
                 </div>
             </div>
         );
@@ -195,7 +191,13 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                     setActiveGroup={setActiveGroup}
                 />
                 <div className='flex-1 relative mx-3'>
-                    <ChatPanel activeGroup={activeGroup} activeTab={activeTab} user={userSession.user} handleCloseChat={handleCloseChat} />
+                    <ChatPanel
+                        slug={slug}
+                        activeGroup={activeGroup}
+                        activeTab={activeTab}
+                        user={userSession.user}
+                        handleCloseChat={handleCloseChat}
+                    />
                     <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />
                     <CanvasOverlay adminUser={user} />
                 </div>

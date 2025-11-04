@@ -1,5 +1,5 @@
-import { Character } from "@/components/game/actors/Character";
 import { z } from "zod";
+import { Character } from "@/components/game/actors/Character";
 
 export interface ArenaUser {
     id: string;
@@ -36,7 +36,7 @@ export const JoinArenaDialogSchema = z.object({
     inviteLink: z.
         url()
         .refine(
-            (url) => url.startsWith("http://localhost:3000/arena/"),
-            "Link must be a valid Cospace Arena link (http://localhost:3000/arena/...)"
+            (url) => url.startsWith(`${process.env.NEXT_PUBLIC_URL}/arena/`),
+            `Link must be a valid Cospace Arena link (${process.env.NEXT_PUBLIC_URL}/arena/...)`
         ),
 })

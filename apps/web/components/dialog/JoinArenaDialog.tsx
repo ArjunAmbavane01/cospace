@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { joinArena } from 'server/actions/arena';
 import useAuthStore from 'store/authStore';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from "@tanstack/react-form"
 import { JoinArenaDialogSchema } from '@/lib/validators/arena';
 import AnimatedInput from '../AnimatedInput';
@@ -11,7 +12,6 @@ import { Button } from "@/components/ui/button"
 import { Spinner } from '@/components/ui/spinner';
 import { Field, FieldError, FieldGroup, } from "@/components/ui/field"
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 export default function JoinArenaDialog() {
@@ -30,7 +30,7 @@ export default function JoinArenaDialog() {
             onSubmit: JoinArenaDialogSchema,
         },
         onSubmit: async ({ value }) => {
-            const slug = value.inviteLink.split("http://localhost:3000/arena/")[1];
+            const slug = value.inviteLink.split(`${process.env.NEXT_PUBLIC_URL}/arena/`)[1];
             if (!slug) return;
             joinArenaMutation(slug);
         }

@@ -13,12 +13,13 @@ import { BsEmojiSmile } from "react-icons/bs";
 import { LuSendHorizontal } from "react-icons/lu";
 
 interface ChatInputProps {
+    slug: string;
     chatParticipant: ChatGroupParticipant;
     user: User;
     activeGroup: ChatGroup;
 }
 
-export default function ChatInput({ chatParticipant, user, activeGroup }: ChatInputProps) {
+export default function ChatInput({ slug, chatParticipant, user, activeGroup }: ChatInputProps) {
 
     const [message, setMessage] = useState("");
     const [openEmojiPanel, setOpenEmojiPanel] = useState<boolean>(false);
@@ -38,6 +39,7 @@ export default function ChatInput({ chatParticipant, user, activeGroup }: ChatIn
             await queryClient.cancelQueries({ queryKey: ["messages", activeGroup.publicId] })
             // save previous value
             const prevMessageData = queryClient.getQueryData<MessagesInfiniteData>(["messages", activeGroup.publicId]);
+            const prevChatGroupsData = queryClient.getQueryData<ChatGroup[]>(["chat-groups", slug]);
             const optimisticMessage = {
                 id: -1 * Date.now(),
                 content,
@@ -50,9 +52,9 @@ export default function ChatInput({ chatParticipant, user, activeGroup }: ChatIn
 
             queryClient.setQueryData<MessagesInfiniteData>(
                 ["messages", activeGroup.publicId],
-                (old) => {
-                    if (!old || !user) return old;
-                    const newPages = [...old.pages];
+                (oldData) => {
+                    if (!oldData || !user) return oldData;
+                    const newPages = [...oldData.pages];
                     console.log(newPages)
                     // Check if there are any pages at all
                     if (newPages[0]) {
@@ -67,14 +69,43 @@ export default function ChatInput({ chatParticipant, user, activeGroup }: ChatIn
                     }
                     return {
                         pages: newPages,
-                        pageParams: old.pageParams,
+                        pageParams: oldData.pageParams,
                     };
                 }
             );
+
+            queryClient.setQueryData<ChatGroup[]>(
+                ["chat-groups", slug],
+                (oldData) => {
+                    if (!oldData) return oldData;
+                    let targetGroup: ChatGroup | undefined;
+                    const otherGroups: ChatGroup[] = [];
+
+                    for (const group of oldData) {
+                        if (group.publicId === activeGroup.publicId) {
+                            targetGroup = group;
+                        } else {
+                            otherGroups.push(group);
+                        }
+                    }
+                    if (!targetGroup) return oldData;
+                    const updatedGroup = {
+                        ...targetGroup,
+                        lastMessage: {
+                            content: optimisticMessage.content,
+                            createdAt: optimisticMessage.createdAt,
+                        }
+                    };
+
+                    // updated group at the top
+                    return [updatedGroup, ...otherGroups];
+                }
+            )
             setMessage("");
-            return { prevMessageData };
+            return { prevMessageData, prevChatGroupsData };
         },
         onSuccess: () => {
+            console.log("done")
         },
         onError: (err, _, context) => {
             // restore previous state
@@ -82,6 +113,12 @@ export default function ChatInput({ chatParticipant, user, activeGroup }: ChatIn
                 queryClient.setQueryData(
                     ["messages", activeGroup.publicId],
                     context.prevMessageData
+                );
+            }
+            if (context?.prevChatGroupsData) {
+                queryClient.setQueryData(
+                    ["chat-groups", slug],
+                    context.prevChatGroupsData
                 );
             }
             toast.error(err.message || "Failed to send message");

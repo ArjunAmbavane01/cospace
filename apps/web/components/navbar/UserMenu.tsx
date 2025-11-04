@@ -3,10 +3,10 @@ import useAuth from "hooks/useAuth";
 import useAuthStore from "store/authStore";
 import UserMenuSkeleton from "./UserMenuSkeleton";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, } from "@/components/ui/dropdown-menu"
-import { Kbd } from "@/components/ui/kbd";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LogOut, UserCircle2 } from "lucide-react";
+import { Kbd } from "@/components/ui/kbd";
 import { Spinner } from "../ui/spinner";
+import { LogOut, UserCircle2 } from "lucide-react";
 
 export default function UserMenu() {
     const { isLoggingOut, logout } = useAuth();

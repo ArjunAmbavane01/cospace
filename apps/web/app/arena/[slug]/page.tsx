@@ -4,7 +4,6 @@ import { getArenaUsers, validateArenaSlug } from 'server/actions/arena';
 import { auth } from '@/lib/auth';
 import ArenaLayoutWrapper from './_components/ArenaLayoutWrapper';
 import ArenaNotFound from './_components/ArenaNotFound';
-import { toast } from 'sonner';
 
 export default async function ArenaPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -17,9 +16,6 @@ export default async function ArenaPage({ params }: { params: Promise<{ slug: st
     if (isSlugValid.type === "error") return <ArenaNotFound />
 
     const res = await getArenaUsers(slug);
-    if (res.type === "error") {
-        toast.error(res.message)
-        return <div>Failed to initialize the arena</div>;
-    }
+    if (res.type === "error") throw new Error(res.message);
     return <ArenaLayoutWrapper slug={slug} arenaUsers={res.arenaUsers} userSession={userSession} />
 }

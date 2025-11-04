@@ -20,11 +20,11 @@ export default function ArenaCanvas({ slug, arenaUsers, socket, user }: ArenaCan
     const gameRef = useRef<Engine | null>(null);
 
     useEffect(() => {
-        if (!canvasRef.current || !socket || gameRef.current) return;
 
         (async () => {
             try {
-                gameRef.current = await InitGame(canvasRef.current!, arenaUsers, socket!, user);
+                if (!canvasRef.current || !socket || gameRef.current) return;
+                gameRef.current = await InitGame(canvasRef.current, arenaUsers, socket, user);
                 gameRef.current.start();
             } catch (error) {
                 console.error("Failed to create arena:", error);
@@ -37,12 +37,10 @@ export default function ArenaCanvas({ slug, arenaUsers, socket, user }: ArenaCan
         };
     }, [slug, socket]);
 
-    useEffect(()=>{
-        if(!gameRef.current) return;
-        gameRef.current.emit("update-arena-users",arenaUsers);
-    },[arenaUsers])
+    useEffect(() => {
+        if (!gameRef.current) return;
+        gameRef.current.emit("update-arena-users", arenaUsers);
+    }, [arenaUsers])
 
-    return (
-        <canvas ref={canvasRef} className='rounded-xl' />
-    )
+    return <canvas ref={canvasRef} className='rounded-xl' />
 }

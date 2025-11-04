@@ -21,7 +21,7 @@ export default function ChatGroupItem({ group, activeGroup, handleSelectGroup }:
     return (
         <div
             className={cn(
-                "flex items-start gap-3 w-full p-2 rounded-lg hover:bg-muted-foreground/10 cursor-pointer transition",
+                "flex items-start gap-3 w-full h-14 p-2 rounded-lg hover:bg-muted-foreground/10 cursor-pointer relative transition",
                 activeGroup?.publicId === group.publicId && "bg-muted-foreground/20"
             )}
             onClick={handleClick}
@@ -44,14 +44,14 @@ export default function ChatGroupItem({ group, activeGroup, handleSelectGroup }:
                 }
             </div>
 
-            <div className="flex flex-col w-full">
-                <div className="flex justify-between items-center w-full">
-                    <h5>
-                        {chatParticipant.name}
-                    </h5>
-                    <h6>{lastMessage && formatDate(lastMessage?.createdAt, "message")}</h6>
-                </div>
-                <p>{lastMessage?.content}</p>
+            <h6 className="absolute top-1.5 right-3">{lastMessage && formatDate(lastMessage?.createdAt, "message")}</h6>
+            <div className="flex flex-col flex-1 min-w-0">
+                <h5 className="w-full max-w-[150px] text-ellipsis break-words whitespace-nowrap overflow-hidden">
+                    {chatParticipant.name}
+                </h5>
+                <p className="truncate text-sm text-muted-foreground">
+                    {lastMessage?.content}
+                </p>
             </div>
         </div>
     )

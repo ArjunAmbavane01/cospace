@@ -6,7 +6,6 @@ import JoinArenaDialog from "@/components/dialog/JoinArenaDialog";
 import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group"
 import { Kbd } from '@/components/ui/kbd';
 import { SearchIcon } from 'lucide-react';
-import { ArenaMutation } from "./HubDashboard";
 
 interface HubHeaderProps {
     setSearchQuery: Dispatch<SetStateAction<string>>;

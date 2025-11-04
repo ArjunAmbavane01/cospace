@@ -2,8 +2,8 @@ import Image from "next/image";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { getChatGroupMessages } from "server/actions/chat";
 import { ChatGroup, MessagePage } from "@/lib/validators/chat";
-import { User } from "better-auth";
 import { cn } from "@/lib/utils";
+import { User } from "better-auth";
 import { Tabs } from "../ArenaLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import ChatInput from "./chat/ChatInput";
 import ChatArea from "./chat/ChatArea";
 
 interface ChatPanelProps {
+  slug: string;
   activeGroup: ChatGroup | null;
   activeTab: Tabs;
   user: User;
@@ -19,7 +20,7 @@ interface ChatPanelProps {
 
 const MAX_PAGE_SIZE = 35; // 35 messages
 
-export default function ChatPanel({ activeGroup, activeTab, user, handleCloseChat }: ChatPanelProps) {
+export default function ChatPanel({ slug, activeGroup, activeTab, user, handleCloseChat }: ChatPanelProps) {
 
   const infiniteQuery = useInfiniteQuery<
     MessagePage,
@@ -51,7 +52,10 @@ export default function ChatPanel({ activeGroup, activeTab, user, handleCloseCha
 
   if (!user) return null;
   if (!chatParticipant || !activeGroup) return (
-    <div className='flex justify-center items-center absolute inset-0 bg-accent rounded-xl z-30'>
+    <div className={cn(
+      'flex justify-center items-center absolute inset-0 bg-accent rounded-xl z-30',
+      activeTab === "chat" ? "flex" : "hidden"
+    )}>
       <h4>
         Start a chat by selecting a user
       </h4>
@@ -64,9 +68,9 @@ export default function ChatPanel({ activeGroup, activeTab, user, handleCloseCha
   return (
     <div className={cn(
       "flex-col absolute inset-0 bg-accent rounded-xl z-30",
-      activeTab === "chat" ? "flex" : "opacity-0"
+      activeTab === "chat" ? "flex" : "hidden"
     )}>
-      <div className="flex justify-between h-fit p-5 border-b">
+      <div className="flex justify-between h-fit p-3 px-5 border-b">
         <div className="flex items-center gap-3">
           <div className="flex justify-center items-center size-7 relative">
             <div className="absolute size-2.5 bg-accent bottom-0 right-0 rounded-full">
@@ -90,7 +94,7 @@ export default function ChatPanel({ activeGroup, activeTab, user, handleCloseCha
         <div className="flex items-center gap-2">
           <Button
             onClick={handleCloseChat}
-            variant={"ghost"}
+            variant={"secondary"}
           >
             Close
           </Button>
@@ -104,11 +108,12 @@ export default function ChatPanel({ activeGroup, activeTab, user, handleCloseCha
           allMessages={allMessages}
           user={user}
         />
-        <ChatInput 
-        chatParticipant={chatParticipant} 
-        user={user} 
-        activeGroup={activeGroup}
-         />
+        <ChatInput
+          slug={slug}
+          chatParticipant={chatParticipant}
+          user={user}
+          activeGroup={activeGroup}
+        />
       </div>
     </div>
   )
