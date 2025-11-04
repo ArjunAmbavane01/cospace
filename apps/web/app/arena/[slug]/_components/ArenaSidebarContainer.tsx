@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { User } from "better-auth";
+import { Socket } from "socket.io-client";
 import { ChatGroup } from "@/lib/validators/chat";
 import { ArenaUser } from "@/lib/validators/arena";
 import { Tabs } from "./ArenaLayout";
@@ -10,6 +11,7 @@ import ChatGroupsPanel from "./left-container/chat/ChatGroupsPanel";
 interface ArenaSidebarContainerProps {
     user: User;
     slug: string;
+    socket: Socket | null;
     arenaUsers: ArenaUser[];
     activeGroup: ChatGroup | null;
     activeTab: Tabs;
@@ -22,6 +24,7 @@ interface ArenaSidebarContainerProps {
 export default function ArenaSidebarContainer({
     user,
     slug,
+    socket,
     arenaUsers,
     activeGroup,
     activeTab,
@@ -46,6 +49,7 @@ export default function ArenaSidebarContainer({
             case "chat":
                 return (
                     <ChatGroupsPanel
+                        socket={socket}
                         arenaUsers={arenaUsers}
                         activeGroup={activeGroup}
                         slug={slug}

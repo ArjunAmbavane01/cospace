@@ -1,20 +1,21 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { io, Socket } from "socket.io-client";
 import { Session, User } from 'better-auth';
 import useAuthStore from 'store/authStore';
 import { OnlineUsersPayload, ServerToClientEvents, UserJoinedPayload } from "@repo/schemas/ws-arena-events";
 import { ClientToServerEvents } from '@repo/schemas/arena-ws-events';
 import { ArenaUser } from '@/lib/validators/arena';
-import { ChatGroup } from '@/lib/validators/chat';
+import { ChatGroup, MessagesInfiniteData } from '@/lib/validators/chat';
 import ArenaSidebarContainer from './ArenaSidebarContainer';
 import CanvasOverlay from './CanvasOverlay';
+import ArenaLoading from './ArenaLoading';
 import ArenaCanvas from './ArenaCanvas';
 import ChatPanel from './overlay/ChatPanel';
 import { Button } from '@/components/ui/button';
 import { MdErrorOutline } from "react-icons/md";
-import ArenaLoading from './ArenaLoading';
 
 export type Tabs = "map" | "chat" | "setting";
 
@@ -35,6 +36,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [isConnecting, setIsConnecting] = useState<boolean>(false);
 
     const { user, setUser, token, setToken } = useAuthStore();
+    const queryClient = useQueryClient();
 
     // init auth store
     useEffect(() => {
@@ -116,6 +118,63 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                     setArenaUsers(prev => prev.map(u => ({ ...u, isOnline: onlineUserIds.includes(u.id) })));
                 });
 
+                ws.on("chat-message", (data) => {
+                    const { groupPublicId, message: recievedMsg } = data;
+                    console.log(groupPublicId)
+                    // update group message cache and last message
+                    queryClient.setQueryData<MessagesInfiniteData>(
+                        ["messages", groupPublicId],
+                        (oldData) => {
+                            if (!oldData) return oldData;
+                            const newPages = [...oldData.pages];
+                            // Check if there are any pages at all
+                            if (newPages[0]) {
+                                // Append the recieved message to end of first page
+                                newPages[0] = {
+                                    ...newPages[0],
+                                    rows: [recievedMsg, ...newPages[0].rows],
+                                };
+                                console.log("here")
+                            } else {
+                                // if first message ever
+                                newPages.push({ rows: [recievedMsg] });
+                            }
+                            return {
+                                pages: newPages,
+                                pageParams: oldData.pageParams,
+                            };
+                        }
+                    );
+
+                    queryClient.setQueryData<ChatGroup[]>(
+                        ["chat-groups", slug],
+                        (oldData) => {
+                            if (!oldData) return oldData;
+                            let targetGroup: ChatGroup | undefined;
+                            const otherGroups: ChatGroup[] = [];
+
+                            for (const group of oldData) {
+                                if (group.publicId === groupPublicId) {
+                                    targetGroup = group;
+                                } else {
+                                    otherGroups.push(group);
+                                }
+                            }
+                            if (!targetGroup) return oldData;
+                            const updatedGroup = {
+                                ...targetGroup,
+                                lastMessage: {
+                                    content: recievedMsg.content,
+                                    createdAt: recievedMsg.createdAt,
+                                }
+                            };
+
+                            // updated group at the top
+                            return [updatedGroup, ...otherGroups];
+                        }
+                    )
+                })
+
                 setSocket(ws);
             } catch (err) {
                 setSocket(null);
@@ -182,6 +241,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                 <ArenaSidebarContainer
                     user={user}
                     slug={slug}
+                    socket={socket}
                     arenaUsers={arenaUsers}
                     activeGroup={activeGroup}
                     activeTab={activeTab}
@@ -192,10 +252,11 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                 />
                 <div className='flex-1 relative mx-3'>
                     <ChatPanel
+                        user={userSession.user}
                         slug={slug}
+                        socket={socket}
                         activeGroup={activeGroup}
                         activeTab={activeTab}
-                        user={userSession.user}
                         handleCloseChat={handleCloseChat}
                     />
                     <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />

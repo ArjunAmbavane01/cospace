@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Socket } from "socket.io-client";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createChatGroup, getChatGroups } from "server/actions/chat";
 import { ArenaUser } from "@/lib/validators/arena";
@@ -12,6 +13,7 @@ import { toast } from "sonner";
 interface ChatGroupsPanelProps {
     arenaUsers: ArenaUser[];
     slug: string;
+    socket: Socket | null;
     activeGroup: ChatGroup | null;
     activeChatUserId: string | null;
     setActiveChatUserId: Dispatch<SetStateAction<string | null>>;
@@ -20,6 +22,7 @@ interface ChatGroupsPanelProps {
 export default function ChatGroupsPanel({
     arenaUsers,
     slug,
+    socket,
     activeGroup,
     activeChatUserId,
     setActiveChatUserId,
@@ -60,6 +63,14 @@ export default function ChatGroupsPanel({
             toast.error(err.message);
         },
     })
+
+    // send all group ids user is part of
+    useEffect(() => {
+        if (!socket || !chatGroups) return;
+        socket.emit("chat-groups", {
+            chatGroupIds: chatGroups.map((g) => g.publicId)
+        })
+    }, [chatGroups]);
 
     // when user is selected, select its group
     useEffect(() => {

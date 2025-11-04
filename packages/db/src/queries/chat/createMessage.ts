@@ -5,7 +5,7 @@ import { messageGroups, messages } from "../../schemas";
 export const createMessage = async (userId: string, userName: string, userImage: string | undefined | null, groupPublicId: string, content: string) => {
     try {
         if (!userId || !groupPublicId || !content.trim()) throw new Error("Invalid chat or user information");
-        if (content.length > 512) throw new Error("Message can't be more than 512 characters");
+        if (content.length > 512) throw new Error("Message cannot exceed 512 characters");
 
         // get group ID
         const groupRecord = await db

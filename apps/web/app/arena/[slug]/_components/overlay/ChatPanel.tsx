@@ -1,9 +1,11 @@
 import Image from "next/image";
+import { Socket } from "socket.io-client";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { getChatGroupMessages } from "server/actions/chat";
 import { ChatGroup, MessagePage } from "@/lib/validators/chat";
-import { cn } from "@/lib/utils";
 import { User } from "better-auth";
+import { Message } from "@repo/schemas/arena-ws-events";
+import { cn } from "@/lib/utils";
 import { Tabs } from "../ArenaLayout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -11,16 +13,17 @@ import ChatInput from "./chat/ChatInput";
 import ChatArea from "./chat/ChatArea";
 
 interface ChatPanelProps {
+  user: User;
   slug: string;
+  socket: Socket | null;
   activeGroup: ChatGroup | null;
   activeTab: Tabs;
-  user: User;
   handleCloseChat: () => void;
 }
 
 const MAX_PAGE_SIZE = 35; // 35 messages
 
-export default function ChatPanel({ slug, activeGroup, activeTab, user, handleCloseChat }: ChatPanelProps) {
+export default function ChatPanel({ user, socket, slug, activeGroup, activeTab, handleCloseChat }: ChatPanelProps) {
 
   const infiniteQuery = useInfiniteQuery<
     MessagePage,
@@ -29,7 +32,7 @@ export default function ChatPanel({ slug, activeGroup, activeTab, user, handleCl
     [string, string],
     number
   >({
-    queryKey: ['messages', activeGroup?.publicId ?? "null-group"],
+    queryKey: ['messages', activeGroup?.publicId ?? "no-group"],
     queryFn: async (ctx: { pageParam: number }): Promise<MessagePage> => {
       const offset = ctx.pageParam * MAX_PAGE_SIZE;
       const res = await getChatGroupMessages(activeGroup!.publicId, MAX_PAGE_SIZE, offset);
@@ -49,6 +52,14 @@ export default function ChatPanel({ slug, activeGroup, activeTab, user, handleCl
   });
 
   const chatParticipant = activeGroup?.participants[0];
+
+  const sendMessage = (groupPublicId: string, message:Message) => {
+    if (!socket) return;
+    socket.emit("chat-message", {
+      groupPublicId,
+      message,
+    });
+  }
 
   if (!user) return null;
   if (!chatParticipant || !activeGroup) return (
@@ -73,12 +84,6 @@ export default function ChatPanel({ slug, activeGroup, activeTab, user, handleCl
       <div className="flex justify-between h-fit p-3 px-5 border-b">
         <div className="flex items-center gap-3">
           <div className="flex justify-center items-center size-7 relative">
-            <div className="absolute size-2.5 bg-accent bottom-0 right-0 rounded-full">
-              <div className={cn(
-                "absolute size-[9px] border bottom-0 right-0 rounded-full",
-                chatParticipant.isOnline ? "bg-success" : "bg-muted"
-              )} />
-            </div>
             {
               chatParticipant.image ?
                 <Image src={chatParticipant.image} alt="User image" width={40} height={40} className="size-full rounded-full" />
@@ -104,15 +109,16 @@ export default function ChatPanel({ slug, activeGroup, activeTab, user, handleCl
       <div className="flex-1 flex flex-col gap-5 p-3 min-h-0">
         <ChatArea
           key={activeGroup.publicId}
+          user={user}
           infiniteQuery={infiniteQuery}
           allMessages={allMessages}
-          user={user}
         />
         <ChatInput
+          user={user}
           slug={slug}
           chatParticipant={chatParticipant}
-          user={user}
           activeGroup={activeGroup}
+          sendMessage={sendMessage}
         />
       </div>
     </div>

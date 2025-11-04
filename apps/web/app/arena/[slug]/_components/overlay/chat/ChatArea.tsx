@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef } from "react";
 import { InfiniteData, useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Message, MessagePage } from "@/lib/validators/chat";
 import { User } from "better-auth";
+import { Message } from "@repo/schemas/arena-ws-events";
+import { MessagePage } from "@/lib/validators/chat";
 import MessageBubble from './MessageBubble';
 import { Spinner } from "@/components/ui/spinner";
 import { MdErrorOutline } from "react-icons/md";
@@ -182,7 +183,7 @@ export default function ChatArea({ infiniteQuery, allMessages, user }: ChatAreaP
   return (
     <div
       ref={parentRef}
-      className="flex-1 w-full overflow-auto min-h-0"
+      className="flex-1 w-full overflow-auto min-h-0 scrollbar-thin scrollbar-thumb-muted-foreground/50 scrollbar-track-transparent"
     >
       <div
         className="relative w-full"
@@ -195,7 +196,7 @@ export default function ChatArea({ infiniteQuery, allMessages, user }: ChatAreaP
             <div className="bg-background/95 backdrop-blur-sm border rounded-full px-4 py-2 shadow-lg">
               <div className="flex items-center gap-2">
                 <Spinner />
-                <p className="text-sm text-muted-foreground">Loading older messages...</p>
+                <p className="text-sm text-muted-foreground">Loading older messages</p>
               </div>
             </div>
           </div>

@@ -3,7 +3,6 @@ dotenv.config();
 import { Server } from "socket.io";
 import { ClientToServerEvents } from "@repo/schemas/arena-ws-events";
 import { ServerToClientEvents } from "@repo/schemas/ws-arena-events";
-
 import { handleAuth } from './lib/handleAuth';
 
 try {
@@ -39,6 +38,16 @@ try {
 
             socket.on("player-pos", (data) => {
                 socket.to(socket.data.arenaSlug).emit("player-pos", data);
+            })
+
+            socket.on("chat-groups", (data) => {
+                const { chatGroupIds } = data;
+                chatGroupIds.forEach(groupId => socket.join(groupId));
+            })
+
+            socket.on("chat-message", (data) => {
+                const { groupPublicId } = data;
+                socket.to(groupPublicId).emit("chat-message", data);
             })
 
             socket.on("disconnect", () => {

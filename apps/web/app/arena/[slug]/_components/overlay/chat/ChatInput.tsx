@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createMessage } from "server/actions/chat";
 import { User } from "better-auth";
+import { Message } from "@repo/schemas/arena-ws-events";
 import TextareaAutosize from "react-textarea-autosize"
 import { ChatGroup, ChatGroupParticipant, MessagesInfiniteData } from "@/lib/validators/chat";
 import { InputGroup, InputGroupAddon, InputGroupButton } from "@/components/ui/input-group"
@@ -17,9 +18,10 @@ interface ChatInputProps {
     chatParticipant: ChatGroupParticipant;
     user: User;
     activeGroup: ChatGroup;
+    sendMessage: (groupPublicId: string, message: Message) => void;
 }
 
-export default function ChatInput({ slug, chatParticipant, user, activeGroup }: ChatInputProps) {
+export default function ChatInput({ slug, chatParticipant, user, activeGroup, sendMessage }: ChatInputProps) {
 
     const [message, setMessage] = useState("");
     const [openEmojiPanel, setOpenEmojiPanel] = useState<boolean>(false);
@@ -28,7 +30,7 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup }: 
 
     const queryClient = useQueryClient();
 
-    const { mutateAsync: createMessageMutation, isPending: isSending } = useMutation({
+    const { mutateAsync: handleSendMessage, isPending: isSending } = useMutation({
         mutationFn: async (content: string) => {
             const res = await createMessage(activeGroup.publicId, content);
             if (res.type === "error") throw new Error(res.message);
@@ -104,8 +106,8 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup }: 
             setMessage("");
             return { prevMessageData, prevChatGroupsData };
         },
-        onSuccess: () => {
-            console.log("done")
+        onSuccess: (res) => {
+            sendMessage(activeGroup.publicId, res.createdMessage);
         },
         onError: (err, _, context) => {
             // restore previous state
@@ -137,17 +139,22 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup }: 
         // new line on Shift+Enter
         if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault();
-            sendMessage();
+            handleMessageInput();
         }
     };
 
-    const sendMessage = async () => {
-        if (isSending) return;
-        if (!message.trim()) {
-            textareaRef.current?.focus();
-            return;
+    const handleMessageInput = async () => {
+        try {
+            if (isSending) return;
+            if (!message.trim()) {
+                textareaRef.current?.focus();
+                return;
+            }
+            await handleSendMessage(message);
+        } catch (err) {
+            console.error(err);
+            toast.error(err instanceof Error ? err.message : "Something went wrong");
         }
-        await createMessageMutation(message);
     }
 
     return (
@@ -197,7 +204,7 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup }: 
                         <InputGroupButton
                             size="icon-sm"
                             variant="default"
-                            onClick={sendMessage}
+                            onClick={handleMessageInput}
                             disabled={isSending || !message.trim()}
                             type="button"
                         >

@@ -1,5 +1,6 @@
+import { Message } from "@repo/schemas/arena-ws-events";
 import { Arena, ArenaUser } from "./arena";
-import { ChatGroup, Message } from "./chat";
+import { ChatGroup } from "./chat";
 
 export type ActionResponse<T = void> =
     | { type: "success"; message: string } & T
