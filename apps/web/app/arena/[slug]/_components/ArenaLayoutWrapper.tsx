@@ -3,7 +3,6 @@
 import dynamic from 'next/dynamic';
 import { Session, User } from 'better-auth';
 import { ArenaUser } from '@/lib/validators/arena';
-import ArenaLoading from './ArenaLoading';
 import { Spinner } from '@/components/ui/spinner';
 
 const ArenaLayout = dynamic(() => import('./ArenaLayout'), {

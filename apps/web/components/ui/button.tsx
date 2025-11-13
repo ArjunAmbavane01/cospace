@@ -21,7 +21,7 @@ const buttonVariants = cva(baseStyles, {
         "text-muted-foreground hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
       link: "text-primary underline-offset-4 hover:underline",
       "3d":
-        "relative bg-gradient-to-b from-blue-500 to-blue-800 !text-white font-medium rounded-lg shadow-[0_1px_1px_1px_rgba(255,255,255,0.25)_inset,0_2px_0_4px_rgba(0,0,0,0.1)] before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100 active:shadow-[0_1px_0_0_rgba(255,255,255,0.25)_inset,0_1px_1px_0_rgba(0,0,0,0.2)_inset] active:translate-y-[1px] transition-all duration-150 border border-blue-900",
+        "relative bg-gradient-to-b from-blue-500 to-blue-800 !text-white font-medium rounded-lg shadow-[0_1px_0_0_rgba(255,255,255,0.25)_inset,0_1px_1px_0_rgba(0,0,0,0.1)] before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-b before:from-white/20 before:to-transparent before:opacity-100 active:shadow-[0_1px_0_0_rgba(255,255,255,0.25)_inset,0_1px_1px_0_rgba(0,0,0,0.2)_inset] active:translate-y-[1px] transition-all duration-150 border border-blue-900",
     },
     size: {
       default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -29,7 +29,7 @@ const buttonVariants = cva(baseStyles, {
       lg: "h-10 rounded-lg px-6 has-[>svg]:px-4 text-base",
       icon: "size-9",
       "icon-sm": "size-8",
-      "icon-lg": "size-10",
+      "icon-lg": "size-12",
     },
   },
   defaultVariants: {

@@ -13,6 +13,7 @@ import ArenaSidebarContainer from './ArenaSidebarContainer';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaLoading from './ArenaLoading';
 import ArenaCanvas from './ArenaCanvas';
+import MediaSetup from './MediaSetup';
 import ChatPanel from './overlay/ChatPanel';
 import { Button } from '@/components/ui/button';
 import { MdErrorOutline } from "react-icons/md";
@@ -34,6 +35,8 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [socket, setSocket] = useState<Socket | null>(null);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [isConnecting, setIsConnecting] = useState<boolean>(false);
+    const [isUserReady, setIsUserReady] = useState<boolean>(false);
+    const [userStream, setUserStream] = useState<MediaStream | null>(null);
 
     const { user, setUser, token, setToken } = useAuthStore();
     const queryClient = useQueryClient();
@@ -234,6 +237,8 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
             </div>
         );
     }
+
+    if (!isUserReady) return <MediaSetup userStream={userStream} setUserStream={setUserStream} setIsUserReady={setIsUserReady} />
 
     return (
         <>

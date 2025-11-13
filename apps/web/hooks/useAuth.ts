@@ -12,7 +12,7 @@ const useAuth = () => {
     const router = useRouter();
     const { setUser, setToken } = useAuthStore();
 
-    const signInWithGoogle = useCallback(async () => {
+    const signInWithGoogle = async () => {
         setLoadingGoogle(true);
         try {
             const { data, error } = await authClient.signIn.social({
@@ -32,9 +32,9 @@ const useAuth = () => {
         } finally {
             setLoadingGoogle(false);
         }
-    }, []);
+    }
 
-    const signInWithEmail = useCallback(async (email: string, password: string) => {
+    const signInWithEmail = async (email: string, password: string) => {
         setLoading(true);
         try {
             const { data, error } = await authClient.signIn.email({
@@ -52,9 +52,9 @@ const useAuth = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }
 
-    const signUpWithEmail = useCallback(async (name: string, email: string, password: string) => {
+    const signUpWithEmail = async (name: string, email: string, password: string) => {
         setLoading(true);
         try {
             const { data, error } = await authClient.signUp.email({
@@ -72,9 +72,9 @@ const useAuth = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }
 
-    const logout = useCallback(async () => {
+    const logout = async () => {
         setIsLoggingOut(true);
         try {
             await authClient.signOut({
@@ -89,7 +89,7 @@ const useAuth = () => {
         } finally {
             setIsLoggingOut(false);
         }
-    }, []);
+    }
 
     return {
         loading,
