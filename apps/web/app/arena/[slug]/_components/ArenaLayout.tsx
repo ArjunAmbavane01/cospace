@@ -7,8 +7,10 @@ import { Session, User } from 'better-auth';
 import useAuthStore from 'store/authStore';
 import { OnlineUsersPayload, ServerToClientEvents, UserJoinedPayload } from "@repo/schemas/ws-arena-events";
 import { ClientToServerEvents } from '@repo/schemas/arena-ws-events';
-import { ArenaUser } from '@/lib/validators/arena';
+import { rtcManager } from '@/lib/rtc/manager';
 import { ChatGroup, MessagesInfiniteData } from '@/lib/validators/chat';
+import { CallStatus, TypeOfCall } from '@/lib/validators/rtc';
+import { ArenaUser } from '@/lib/validators/arena';
 import ArenaSidebarContainer from './ArenaSidebarContainer';
 import CanvasOverlay from './CanvasOverlay';
 import ArenaLoading from './ArenaLoading';
@@ -35,11 +37,41 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [socket, setSocket] = useState<Socket | null>(null);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [isConnecting, setIsConnecting] = useState<boolean>(false);
-    const [isUserReady, setIsUserReady] = useState<boolean>(false);
-    const [userStream, setUserStream] = useState<MediaStream | null>(null);
+
+    // webrtc states
+    const [typeOfCall, setTypeOfCall] = useState<TypeOfCall>("offer");
+    const [isUserMediaReady, setIsUserMediaReady] = useState<boolean>(false);
+    const [signallingSocket, setSignallingSocket] = useState<Socket | null>(null);
+    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
+    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+    const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
+    const [offerData, setOfferData] = useState(null);
+    const [callStatus, setCallStatus] = useState<CallStatus>({ haveMedia: false, audioEnabled: false, videoEnabled: false });
 
     const { user, setUser, token, setToken } = useAuthStore();
     const queryClient = useQueryClient();
+
+    const handleCloseChat = useCallback(() => {
+        setActiveGroup(null);
+        setActiveChatUserId(null);
+    }, []);
+
+    // force reconnect
+    const handleRetryConnection = useCallback(() => {
+        setConnectionError(null);
+        setIsConnecting(true);
+        setSocket(null);
+    }, []);
+
+    const handleCreatePeerConnection = useCallback(() => {
+        if (socket && callStatus.haveMedia && !peerConnection) {
+            const res = rtcManager.createPeerConnection(socket, userSession.user.id, typeOfCall,)
+            if (!res) return;
+            const { peerConnection, remoteStream } = res;
+            setPeerConnection(peerConnection);
+            setRemoteStream(remoteStream);
+        }
+    }, [callStatus.haveMedia, socket, peerConnection])
 
     // init auth store
     useEffect(() => {
@@ -192,19 +224,13 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
             setIsConnecting(false);
             setSocket(null);
         }
-    }, [slug, userSession?.session?.token])
+    }, [slug, userSession?.session?.token]);
 
-    const handleCloseChat = useCallback(() => {
-        setActiveGroup(null);
-        setActiveChatUserId(null);
-    }, []);
-
-    // force reconnect
-    const handleRetryConnection = useCallback(() => {
-        setConnectionError(null);
-        setIsConnecting(true);
-        setSocket(null);
-    }, []);
+    useEffect(() => {
+        if (isUserMediaReady) {
+            rtcManager.connectToSignallingServer(userSession.user.id, setSignallingSocket);
+        }
+    }, [isUserMediaReady])
 
     if (isConnecting) return <ArenaLoading />
 
@@ -238,7 +264,14 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         );
     }
 
-    if (!isUserReady) return <MediaSetup userStream={userStream} setUserStream={setUserStream} setIsUserReady={setIsUserReady} />
+    if (!isUserMediaReady) return (
+        <MediaSetup
+            localStream={localStream}
+            setCallStatus={setCallStatus}
+            setLocalStream={setLocalStream}
+            setIsUserMediaReady={setIsUserMediaReady}
+        />
+    )
 
     return (
         <>
@@ -265,7 +298,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                         handleCloseChat={handleCloseChat}
                     />
                     <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />
-                    <CanvasOverlay adminUser={user} />
+                    <CanvasOverlay adminUser={user} socket={socket} handleCreatePeerConnection={handleCreatePeerConnection} />
                 </div>
             </div>
         </>

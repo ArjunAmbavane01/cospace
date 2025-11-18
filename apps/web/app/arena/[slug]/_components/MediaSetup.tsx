@@ -1,20 +1,22 @@
 'use client';
 
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
+import { CallStatus } from "@/lib/validators/rtc";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { IoCheckmarkCircleOutline, IoWarningOutline } from "react-icons/io5";
 import { BsCameraVideo, BsCameraVideoOff } from "react-icons/bs";
 import { IoMdMic, IoMdMicOff } from "react-icons/io";
-import { IoCheckmarkCircleOutline, IoWarningOutline } from "react-icons/io5";
 import { toast } from "sonner";
 
 interface MediaSetupProps {
-    userStream: MediaStream | null
-    setUserStream: Dispatch<SetStateAction<MediaStream | null>>;
-    setIsUserReady: Dispatch<SetStateAction<boolean>>;
+    localStream: MediaStream | null;
+    setCallStatus: Dispatch<SetStateAction<CallStatus>>;
+    setLocalStream: Dispatch<SetStateAction<MediaStream | null>>;
+    setIsUserMediaReady: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function MediaSetup({ userStream, setUserStream, setIsUserReady }: MediaSetupProps) {
+export default function MediaSetup({ localStream, setCallStatus, setLocalStream, setIsUserMediaReady }: MediaSetupProps) {
 
     const [cameraPermission, setCameraPermission] = useState<PermissionState | "unknown">("unknown");
     const [micPermission, setMicPermission] = useState<PermissionState | "unknown">("unknown");
@@ -47,7 +49,8 @@ export default function MediaSetup({ userStream, setUserStream, setIsUserReady }
                     if (track.kind === "audio") track.enabled = isMicOn;
                     else if (track.kind === "video") track.enabled = isCameraOn;
                 })
-                setUserStream(stream);
+                setCallStatus(c => ({ ...c, haveMedia: true }));
+                setLocalStream(stream);
             } catch (err) {
                 toast.error(err instanceof Error ? err.message : "Some error occurred. Please try again.");
             }
@@ -60,7 +63,7 @@ export default function MediaSetup({ userStream, setUserStream, setIsUserReady }
         if (!hasPermissionsAPI) {
             navigator.mediaDevices.getUserMedia({ audio: true, video: true })
                 .then(stream => {
-                    setUserStream(stream);
+                    setLocalStream(stream);
                     setMicPermission("granted");
                     setCameraPermission("granted");
                 })
@@ -72,13 +75,13 @@ export default function MediaSetup({ userStream, setUserStream, setIsUserReady }
     }, []);
 
     useEffect(() => {
-        if (!videoRef.current || !userStream) return;
-        videoRef.current.srcObject = userStream;
-    }, [userStream]);
+        if (!videoRef.current || !localStream) return;
+        videoRef.current.srcObject = localStream;
+    }, [localStream]);
 
     useEffect(() => {
-        if (!userStream) return;
-        userStream.getTracks().forEach(track => {
+        if (!localStream) return;
+        localStream.getTracks().forEach(track => {
             if (track.kind === "audio") track.enabled = isMicOn;
             else if (track.kind === "video") track.enabled = isCameraOn;
         })
@@ -89,15 +92,10 @@ export default function MediaSetup({ userStream, setUserStream, setIsUserReady }
 
     let statusMessage = "";
 
-    if (!isMicGranted && !isCameraGranted) {
-        statusMessage = "Camera and microphone are blocked. Allow access to continue.";
-    } else if (!isMicGranted) {
-        statusMessage = "Microphone is blocked. Allow access in browser settings.";
-    } else if (!isCameraGranted) {
-        statusMessage = "Camera is blocked. Enable camera access to continue.";
-    } else {
-        statusMessage = "Camera and microphone are enabled. You're good to go.";
-    }
+    if (!isMicGranted && !isCameraGranted) statusMessage = "Camera and microphone are blocked. Allow access to continue.";
+    else if (!isMicGranted) statusMessage = "Microphone is blocked. Allow access in browser settings.";
+    else if (!isCameraGranted) statusMessage = "Camera is blocked. Enable camera access to continue.";
+    else statusMessage = "Camera and microphone are enabled. You're good to go.";
 
     return (
         <div className="absolute inset-0 bg-background flex items-center justify-center gap-10 text-center">
@@ -166,7 +164,7 @@ export default function MediaSetup({ userStream, setUserStream, setIsUserReady }
                     <Button
                         size={"lg"}
                         variant={"3d"}
-                        onClick={() => setIsUserReady(true)}
+                        onClick={() => setIsUserMediaReady(true)}
                         disabled={!isMicGranted || !isCameraGranted}
                     >
                         Next
