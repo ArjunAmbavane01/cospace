@@ -49,7 +49,7 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                     if (track.kind === "audio") track.enabled = isMicOn;
                     else if (track.kind === "video") track.enabled = isCameraOn;
                 })
-                setCallStatus(c => ({ ...c, haveMedia: true }));
+                setCallStatus(c => ({ ...c, haveMedia: true, audioEnabled: isMicOn, videoEnabled: isCameraOn }));
                 setLocalStream(stream);
             } catch (err) {
                 toast.error(err instanceof Error ? err.message : "Some error occurred. Please try again.");
@@ -146,7 +146,6 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                                 isMicGranted ?
                                     <IoCheckmarkCircleOutline className="size-6 text-success" /> :
                                     <IoWarningOutline className="size-6 text-yellow-400" />
-
                             }
                         </div>
 
@@ -156,7 +155,6 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                                 isCameraGranted ?
                                     <IoCheckmarkCircleOutline className="size-6 text-success" /> :
                                     <IoWarningOutline className="size-6 text-yellow-400" />
-
                             }
                         </div>
                     </div>

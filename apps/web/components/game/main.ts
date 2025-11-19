@@ -63,10 +63,6 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
     const PROXIMITY_CHECK_INTERVAL = 200; // ms
     const usersInProximity = new Set<string>();
 
-    // init characters for online users
-    const onlineUsers = arenaUsers.filter(user => user.isOnline);
-    onlineUsers.forEach(user => createUserCharacter(user));
-
     // create character for other users
     const createUserCharacter = (user: ArenaUser) => {
         if (otherUsers.has(user.id)) return;
@@ -82,6 +78,10 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
         otherUsers.set(user.id, newUser);
         game.add(character);
     };
+
+    // init characters for online users
+    const onlineUsers = arenaUsers.filter(user => user.isOnline);
+    onlineUsers.forEach(user => createUserCharacter(user));
 
     // create foreground layer
     const foreground = new Actor({

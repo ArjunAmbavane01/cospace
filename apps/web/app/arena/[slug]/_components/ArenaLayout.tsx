@@ -7,9 +7,10 @@ import { Session, User } from 'better-auth';
 import useAuthStore from 'store/authStore';
 import { OnlineUsersPayload, ServerToClientEvents, UserJoinedPayload } from "@repo/schemas/ws-arena-events";
 import { ClientToServerEvents } from '@repo/schemas/arena-ws-events';
-import { rtcManager } from '@/lib/rtc/manager';
+import { addWebrtcSocketListeners, connectToSignallingServer } from '@/lib/rtc/signalling';
 import { ChatGroup, MessagesInfiniteData } from '@/lib/validators/chat';
 import { CallStatus, TypeOfCall } from '@/lib/validators/rtc';
+import { rtcManager } from '@/lib/rtc/manager';
 import { ArenaUser } from '@/lib/validators/arena';
 import ArenaSidebarContainer from './ArenaSidebarContainer';
 import CanvasOverlay from './CanvasOverlay';
@@ -36,17 +37,23 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [activeGroup, setActiveGroup] = useState<ChatGroup | null>(null);
     const [socket, setSocket] = useState<Socket | null>(null);
     const [connectionError, setConnectionError] = useState<string | null>(null);
-    const [isConnecting, setIsConnecting] = useState<boolean>(false);
+    const [isSocketConnecting, setIsSocketConnecting] = useState<boolean>(false);
 
     // webrtc states
+    const [webrtcSocket, setWebrtcSocket] = useState<Socket | null>(null);
+    const [isWebrtcSocketConnecting, setIsWebrtcSocketConnecting] = useState<boolean>(false);
     const [typeOfCall, setTypeOfCall] = useState<TypeOfCall>("offer");
     const [isUserMediaReady, setIsUserMediaReady] = useState<boolean>(false);
-    const [signallingSocket, setSignallingSocket] = useState<Socket | null>(null);
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
     const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
-    const [offerData, setOfferData] = useState(null);
-    const [callStatus, setCallStatus] = useState<CallStatus>({ haveMedia: false, audioEnabled: false, videoEnabled: false });
+    const [callStatus, setCallStatus] = useState<CallStatus>({
+        haveMedia: false,
+        audioEnabled: false,
+        videoEnabled: false,
+        answer: null,
+        myRole: typeOfCall
+    });
 
     const { user, setUser, token, setToken } = useAuthStore();
     const queryClient = useQueryClient();
@@ -59,19 +66,40 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     // force reconnect
     const handleRetryConnection = useCallback(() => {
         setConnectionError(null);
-        setIsConnecting(true);
+        setIsSocketConnecting(true);
         setSocket(null);
     }, []);
 
-    const handleCreatePeerConnection = useCallback(() => {
-        if (socket && callStatus.haveMedia && !peerConnection) {
-            const res = rtcManager.createPeerConnection(socket, userSession.user.id, typeOfCall,)
-            if (!res) return;
-            const { peerConnection, remoteStream } = res;
-            setPeerConnection(peerConnection);
-            setRemoteStream(remoteStream);
-        }
-    }, [callStatus.haveMedia, socket, peerConnection])
+    const handleCreatePeerConnection = useCallback((): Promise<RTCPeerConnection | undefined> => {
+        return new Promise((resolve, reject) => {
+            try {
+                if (webrtcSocket && callStatus.haveMedia && !peerConnection) {
+                    const res = rtcManager.createPeerConnection(webrtcSocket, userSession.user.id, typeOfCall)
+                    if (!res) return;
+                    const { peerConnection, remoteStream } = res;
+                    setPeerConnection(peerConnection);
+                    setRemoteStream(remoteStream);
+                    resolve(peerConnection);
+                } else {
+                    resolve(undefined)
+                }
+            } catch (err) {
+                reject(err);
+            }
+        })
+    }, [callStatus.haveMedia, webrtcSocket, peerConnection, typeOfCall, userSession.user.id]);
+
+    const handleCreateOffer = useCallback((peerConnection: RTCPeerConnection, answerUserId: string): Promise<void> => {
+        return new Promise((resolve, reject) => {
+            try {
+                if (!webrtcSocket || !peerConnection) return;
+                rtcManager.createOffer(webrtcSocket, peerConnection, slug, answerUserId);
+                resolve();
+            } catch (err) {
+                reject(err);
+            }
+        })
+    }, [webrtcSocket, peerConnection]);
 
     // init auth store
     useEffect(() => {
@@ -81,12 +109,13 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         }
     }, [userSession, setUser, setToken]);
 
+    // init connection to ws server
     useEffect(() => {
 
-        setIsConnecting(true);
+        setIsSocketConnecting(true);
         if (!slug || !userSession?.session.token) {
             setConnectionError("Missing required authentication");
-            setIsConnecting(false);
+            setIsSocketConnecting(false);
             return;
         }
 
@@ -111,13 +140,13 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                 // connection handlers
                 ws.on("connect", () => {
                     setConnectionError(null);
-                    setIsConnecting(false);
+                    setIsSocketConnecting(false);
                 });
 
                 ws.on("connect_error", (err) => {
                     console.log("Connection failed : ", err.message)
                     setConnectionError(`Connection failed: ${err.message}`);
-                    setIsConnecting(false);
+                    setIsSocketConnecting(false);
                 });
 
                 ws.on("disconnect", (reason) => {
@@ -213,7 +242,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                 setSocket(ws);
             } catch (err) {
                 setSocket(null);
-                setIsConnecting(false);
+                setIsSocketConnecting(false);
                 console.error(err instanceof Error ? err.message : err)
             }
         })();
@@ -221,18 +250,42 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         return () => {
             isCancelled = true;
             if (ws?.connected) ws.disconnect();
-            setIsConnecting(false);
+            setIsSocketConnecting(false);
             setSocket(null);
         }
     }, [slug, userSession?.session?.token]);
 
+    // init connection to signalling server
     useEffect(() => {
-        if (isUserMediaReady) {
-            rtcManager.connectToSignallingServer(userSession.user.id, setSignallingSocket);
-        }
-    }, [isUserMediaReady])
 
-    if (isConnecting) return <ArenaLoading />
+        setIsWebrtcSocketConnecting(true);
+        if (!slug || !userSession?.session.token) {
+            setConnectionError("Missing required authentication");
+            setIsWebrtcSocketConnecting(false);
+            return;
+        }
+
+        if (webrtcSocket) return; // already connected
+        if (!isUserMediaReady) return;
+        try {
+            connectToSignallingServer(userSession.session.token, slug, setWebrtcSocket);
+        } catch (err) {
+            setWebrtcSocket(null);
+            setIsWebrtcSocketConnecting(false);
+            console.error(err instanceof Error ? err.message : err)
+        }
+        return () => {
+            setIsWebrtcSocketConnecting(false);
+            setWebrtcSocket(null);
+        }
+    }, [slug, userSession?.session?.token, isUserMediaReady]);
+
+    // once we have PC, add listeners to socket
+    useEffect(() => {
+        if (peerConnection && webrtcSocket) addWebrtcSocketListeners(webrtcSocket, peerConnection, setCallStatus);
+    }, [peerConnection, webrtcSocket])
+
+    if (isSocketConnecting) return <ArenaLoading />
 
     if (connectionError) {
         return (
@@ -298,7 +351,15 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                         handleCloseChat={handleCloseChat}
                     />
                     <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />
-                    <CanvasOverlay adminUser={user} socket={socket} handleCreatePeerConnection={handleCreatePeerConnection} />
+                    <CanvasOverlay
+                        adminUser={user}
+                        webrtcSocket={webrtcSocket}
+                        localStream={localStream}
+                        remoteStream={remoteStream}
+                        handleCreatePeerConnection={handleCreatePeerConnection}
+                        handleCreateOffer={handleCreateOffer}
+                        setTypeOfCall={setTypeOfCall}
+                    />
                 </div>
             </div>
         </>
