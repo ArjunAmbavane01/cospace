@@ -5,12 +5,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { io, Socket } from "socket.io-client";
 import { Session, User } from 'better-auth';
 import useAuthStore from 'store/authStore';
+import { useWebRTC } from 'hooks/useWebRTC';
 import { OnlineUsersPayload, ServerToClientEvents, UserJoinedPayload } from "@repo/schemas/ws-arena-events";
 import { ClientToServerEvents } from '@repo/schemas/arena-ws-events';
-import { addWebrtcSocketListeners, connectToSignallingServer } from '@/lib/rtc/signalling';
 import { ChatGroup, MessagesInfiniteData } from '@/lib/validators/chat';
-import { CallStatus, TypeOfCall } from '@/lib/validators/rtc';
-import { rtcManager } from '@/lib/rtc/manager';
 import { ArenaUser } from '@/lib/validators/arena';
 import ArenaSidebarContainer from './ArenaSidebarContainer';
 import CanvasOverlay from './CanvasOverlay';
@@ -39,21 +37,18 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [isSocketConnecting, setIsSocketConnecting] = useState<boolean>(false);
 
-    // webrtc states
-    const [webrtcSocket, setWebrtcSocket] = useState<Socket | null>(null);
-    const [isWebrtcSocketConnecting, setIsWebrtcSocketConnecting] = useState<boolean>(false);
-    const [typeOfCall, setTypeOfCall] = useState<TypeOfCall>("offer");
-    const [isUserMediaReady, setIsUserMediaReady] = useState<boolean>(false);
-    const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-    const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
-    const [callStatus, setCallStatus] = useState<CallStatus>({
-        haveMedia: false,
-        audioEnabled: false,
-        videoEnabled: false,
-        answer: null,
-        myRole: typeOfCall
-    });
+    const {
+        webrtcSocket,
+        localStream,
+        setLocalStream,
+        remoteStream,
+        isUserMediaReady,
+        setIsUserMediaReady,
+        setCallStatus,
+        setTypeOfCall,
+        handleCreateOffer,
+        handleCreatePeerConnection
+    } = useWebRTC(userSession, slug);
 
     const { user, setUser, token, setToken } = useAuthStore();
     const queryClient = useQueryClient();
@@ -69,37 +64,6 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         setIsSocketConnecting(true);
         setSocket(null);
     }, []);
-
-    const handleCreatePeerConnection = useCallback((): Promise<RTCPeerConnection | undefined> => {
-        return new Promise((resolve, reject) => {
-            try {
-                if (webrtcSocket && callStatus.haveMedia && !peerConnection) {
-                    const res = rtcManager.createPeerConnection(webrtcSocket, userSession.user.id, typeOfCall)
-                    if (!res) return;
-                    const { peerConnection, remoteStream } = res;
-                    setPeerConnection(peerConnection);
-                    setRemoteStream(remoteStream);
-                    resolve(peerConnection);
-                } else {
-                    resolve(undefined)
-                }
-            } catch (err) {
-                reject(err);
-            }
-        })
-    }, [callStatus.haveMedia, webrtcSocket, peerConnection, typeOfCall, userSession.user.id]);
-
-    const handleCreateOffer = useCallback((peerConnection: RTCPeerConnection, answerUserId: string): Promise<void> => {
-        return new Promise((resolve, reject) => {
-            try {
-                if (!webrtcSocket || !peerConnection) return;
-                rtcManager.createOffer(webrtcSocket, peerConnection, slug, answerUserId);
-                resolve();
-            } catch (err) {
-                reject(err);
-            }
-        })
-    }, [webrtcSocket, peerConnection]);
 
     // init auth store
     useEffect(() => {
@@ -255,36 +219,6 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         }
     }, [slug, userSession?.session?.token]);
 
-    // init connection to signalling server
-    useEffect(() => {
-
-        setIsWebrtcSocketConnecting(true);
-        if (!slug || !userSession?.session.token) {
-            setConnectionError("Missing required authentication");
-            setIsWebrtcSocketConnecting(false);
-            return;
-        }
-
-        if (webrtcSocket) return; // already connected
-        if (!isUserMediaReady) return;
-        try {
-            connectToSignallingServer(userSession.session.token, slug, setWebrtcSocket);
-        } catch (err) {
-            setWebrtcSocket(null);
-            setIsWebrtcSocketConnecting(false);
-            console.error(err instanceof Error ? err.message : err)
-        }
-        return () => {
-            setIsWebrtcSocketConnecting(false);
-            setWebrtcSocket(null);
-        }
-    }, [slug, userSession?.session?.token, isUserMediaReady]);
-
-    // once we have PC, add listeners to socket
-    useEffect(() => {
-        if (peerConnection && webrtcSocket) addWebrtcSocketListeners(webrtcSocket, peerConnection, setCallStatus);
-    }, [peerConnection, webrtcSocket])
-
     if (isSocketConnecting) return <ArenaLoading />
 
     if (connectionError) {
@@ -320,8 +254,8 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     if (!isUserMediaReady) return (
         <MediaSetup
             localStream={localStream}
-            setCallStatus={setCallStatus}
             setLocalStream={setLocalStream}
+            setCallStatus={setCallStatus}
             setIsUserMediaReady={setIsUserMediaReady}
         />
     )

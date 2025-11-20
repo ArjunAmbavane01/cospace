@@ -5,8 +5,7 @@ import { CallStatus } from "../validators/rtc";
 export const connectToSignallingServer = (
     userToken: string,
     arenaSlug: string,
-    setWebrtcSocket: Dispatch<SetStateAction<Socket | null>>
-) => {
+): Socket | undefined => {
     try {
         const ws = io(`${process.env.NEXT_PUBLIC_WEBRTC_BACKEND_URL}`, {
             auth: {
@@ -17,7 +16,7 @@ export const connectToSignallingServer = (
             reconnectionDelay: 1000,
             reconnectionAttempts: 3,
         });
-        setWebrtcSocket(ws);
+        return ws;
     } catch (err) {
         console.error(err instanceof Error ? err.message : "Something went wrong while connecting to signalling server")
     }

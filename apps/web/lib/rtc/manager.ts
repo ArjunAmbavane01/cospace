@@ -7,7 +7,7 @@ const createPeerConnection = (socket: Socket, userId: string, typeOfCall: TypeOf
         const peerConnection = new RTCPeerConnection(peerConfiguration);
         const remoteStream = new MediaStream();
 
-        peerConnection.addEventListener("signalingstatechange", (e) => {
+        peerConnection.addEventListener("signalingstatechange", () => {
             console.log("Signaling evt change");
             console.log(peerConnection.signalingState)
         });
