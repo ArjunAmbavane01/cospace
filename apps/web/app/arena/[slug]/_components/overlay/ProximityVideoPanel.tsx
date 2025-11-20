@@ -65,7 +65,7 @@ export default function ProximityVideoPanel({ adminName, adminImage, participant
 
 
             {/* participant video tile */}
-            <div className='flex flex-col justify-center items-center gap-2 h-32 w-56 bg-card border border-muted-foreground rounded-lg relative'>
+            <div className='flex flex-col justify-center items-center gap-2 h-32 w-56 bg-card border border-muted-foreground rounded-lg relative overflow-hidden'>
                 {isCameraOn ?
                     (
                         <video

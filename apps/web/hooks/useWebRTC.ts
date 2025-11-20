@@ -1,8 +1,8 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
 import { Socket } from "socket.io-client";
 import { Session, User } from 'better-auth';
-import { addWebrtcSocketListeners, connectToSignallingServer } from '@/lib/rtc/signalling';
-import { CallStatus, TypeOfCall } from '@/lib/validators/rtc';
+import { connectToSignallingServer } from '@/lib/rtc/signalling';
+import { CallStatus, OfferData, TypeOfCall } from '@/lib/validators/rtc';
 import { rtcManager } from '@/lib/rtc/manager';
 
 interface UseWebRTCResult {
@@ -14,6 +14,9 @@ interface UseWebRTCResult {
     setIsUserMediaReady: Dispatch<SetStateAction<boolean>>;
     callStatus: CallStatus;
     setCallStatus: Dispatch<SetStateAction<CallStatus>>;
+    offerData: OfferData | null;
+    setOfferData: Dispatch<SetStateAction<OfferData | null>>;
+    peerConnection: RTCPeerConnection | null;
     setTypeOfCall: Dispatch<SetStateAction<TypeOfCall>>;
     handleCreateOffer: (peerConnection: RTCPeerConnection, answerUserId: string) => Promise<void>;
     handleCreatePeerConnection: () => Promise<RTCPeerConnection | undefined>;
@@ -28,6 +31,7 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
     const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
+    const [offerData, setOfferData] = useState<OfferData | null>(null);
     const [callStatus, setCallStatus] = useState<CallStatus>({
         haveMedia: false,
         audioEnabled: false,
@@ -88,11 +92,6 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
         }
     }, [slug, userSession?.session?.token, isUserMediaReady]);
 
-    // once we have PC, add listeners to socket
-    useEffect(() => {
-        if (peerConnection && webrtcSocket) addWebrtcSocketListeners(webrtcSocket, peerConnection, setCallStatus);
-    }, [peerConnection, webrtcSocket])
-
     return {
         webrtcSocket,
         remoteStream,
@@ -102,6 +101,9 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
         setIsUserMediaReady,
         callStatus,
         setCallStatus,
+        offerData,
+        setOfferData,
+        peerConnection,
         setTypeOfCall,
         handleCreateOffer,
         handleCreatePeerConnection

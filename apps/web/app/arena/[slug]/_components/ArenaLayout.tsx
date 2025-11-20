@@ -45,6 +45,9 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         isUserMediaReady,
         setIsUserMediaReady,
         setCallStatus,
+        offerData,
+        setOfferData,
+        peerConnection,
         setTypeOfCall,
         handleCreateOffer,
         handleCreatePeerConnection
@@ -162,7 +165,6 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                                     ...newPages[0],
                                     rows: [recievedMsg, ...newPages[0].rows],
                                 };
-                                console.log("here")
                             } else {
                                 // if first message ever
                                 newPages.push({ rows: [recievedMsg] });
@@ -290,6 +292,10 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                         webrtcSocket={webrtcSocket}
                         localStream={localStream}
                         remoteStream={remoteStream}
+                        peerConnection={peerConnection}
+                        offerData={offerData}
+                        setOfferData={setOfferData}
+                        setCallStatus={setCallStatus}
                         handleCreatePeerConnection={handleCreatePeerConnection}
                         handleCreateOffer={handleCreateOffer}
                         setTypeOfCall={setTypeOfCall}

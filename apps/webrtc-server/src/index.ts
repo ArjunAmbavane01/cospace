@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 import { Server } from "socket.io";
 import { handleAuth } from './lib/handleAuth';
-import { Offer } from './types';
+import { OfferData } from './types';
 
-const offers: Offer[] = [];
+const offers: OfferData[] = [];
 
 try {
     const wss = new Server(Number(process.env.WEBRTC_PORT), {
@@ -31,7 +31,7 @@ try {
                     answerIceCandidates: [],
                 }
                 offers.push(newOffer);
-
+                
                 const onlineUserSockets = await wss.in(socket.data.arenaSlug).fetchSockets();
                 const answerSocket = onlineUserSockets.find(socket => socket.data.userId === payload.answerUserId);
                 if (!answerSocket) {
@@ -70,7 +70,25 @@ try {
         } catch (err) {
             console.error(err instanceof Error ? err.message : "Some internal error occurred");
         }
+
+        socket.on("newAnswer", async (offerData, ackFunction) => {
+            const onlineUserSockets = await wss.in(socket.data.arenaSlug).fetchSockets();
+            const answerSocket = onlineUserSockets.find(socket => socket.data.userId === offerData.offerUserId);
+            if (!answerSocket) {
+                console.log("no socket available for answer");
+                return;
+            }
+            const offerToUpdate = offers.find(o => o.offerUserId === offerData.offerUserId);
+            if (!offerToUpdate) {
+                console.log("No OfferToUpdate")
+                return;
+            }
+            ackFunction(offerToUpdate.offerIceCandidates);
+            offerToUpdate.answer = offerData.answer;
+            socket.to(answerSocket.id).emit("answerResponse", offerToUpdate);
+        })
     });
+    
 } catch (err) {
     console.error("Failed to start server", err);
 }

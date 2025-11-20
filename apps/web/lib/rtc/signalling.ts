@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction } from "react";
 import { io, Socket } from "socket.io-client";
-import { CallStatus } from "../validators/rtc";
+import { CallStatus, OfferData, TypeOfCall } from "../validators/rtc";
 
 export const connectToSignallingServer = (
     userToken: string,
@@ -25,20 +25,35 @@ export const connectToSignallingServer = (
 export const addWebrtcSocketListeners = (
     webrtcSocket: Socket,
     peerConnection: RTCPeerConnection,
-    setCallStatus: Dispatch<SetStateAction<CallStatus>>
+    setCallStatus: Dispatch<SetStateAction<CallStatus>>,
+    setOfferData: Dispatch<SetStateAction<OfferData | null>>,
+    setTypeOfCall: Dispatch<SetStateAction<TypeOfCall>>,
+    handleIncomingOffer: (peerConnection: RTCPeerConnection, offerData: OfferData) => Promise<void>,
 ) => {
     webrtcSocket.on("answerResponse", offerObj => {
-        console.log(offerObj);
-        setCallStatus(c => ({ ...c, answer: offerObj.answer }))
+        setCallStatus(c => ({ ...c, answer: offerObj.answer }));
+        peerConnection.setRemoteDescription(offerObj.answer);
     })
 
-    webrtcSocket.on("recievedIceCandidateFromServer", async (iceC) => {
+    webrtcSocket.on("recievedIceCandidateFromServer", async iceC => {
         if (!iceC) return;
         try {
-            console.log(iceC)
-            await peerConnection.addIceCandidate(iceC)
+            if (peerConnection.remoteDescription) {
+                await peerConnection.addIceCandidate(iceC)
+            }
         } catch (err) {
             console.error(err instanceof Error ? err.message : "Something went wrong while adding ice candidate from server")
+        }
+    })
+
+    webrtcSocket.on("offerAwaiting", async (offerData: OfferData) => {
+        if (!offerData) return;
+        try {
+            setOfferData(offerData);
+            setTypeOfCall("answer");
+            await handleIncomingOffer(peerConnection, offerData);
+        } catch (err) {
+            console.error(err instanceof Error ? err.message : "Something went wrong while receiving offer")
         }
     })
 }

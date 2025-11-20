@@ -26,7 +26,7 @@ try {
                 return { userId: roomUser.data.userId }
             })
 
-            socket.emit("online-users", {
+            socket.to(socket.data.arenaSlug).emit("online-users", {
                 onlineUserIds: onlineUsers.map(u => u.userId)
             })
 

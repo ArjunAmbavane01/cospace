@@ -47,7 +47,6 @@ const createOffer = async (socket: Socket, peerConnection: RTCPeerConnection, ar
         arenaSlug,
         answerUserId
     }
-    console.log("payload created  ", payload);
     socket.emit("offer", payload);
 }
 

@@ -23,24 +23,37 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
     const [isMicOn, setIsMicOn] = useState<boolean>(true);
     const [isCameraOn, setIsCameraOn] = useState<boolean>(true);
 
+    const micStatusRef = useRef<PermissionStatus | null>(null);
+    const cameraStatusRef = useRef<PermissionStatus | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
     const hasPermissionsAPI = !!navigator.permissions?.query;
 
     useEffect(() => {
-        if (!hasPermissionsAPI) return;
+        if (localStream) return;
         const getUserStream = async () => {
-            const micStatus = await navigator.permissions.query({ name: "microphone" });
-            const cameraStatus = await navigator.permissions.query({ name: "camera" });
-
-            setMicPermission(micStatus.state);
-            setCameraPermission(cameraStatus.state);
-            micStatus.onchange = () => setMicPermission(micStatus.state);
-            cameraStatus.onchange = () => setCameraPermission(cameraStatus.state);
-
-            if (micStatus.state !== "granted" || cameraStatus.state !== "granted") return;
-
             try {
+                micStatusRef.current = await navigator.permissions.query({ name: "microphone" });
+                cameraStatusRef.current = await navigator.permissions.query({ name: "camera" });
+
+                setMicPermission(micStatusRef.current.state);
+                setCameraPermission(cameraStatusRef.current.state);
+
+                micStatusRef.current.onchange = () => {
+                    setMicPermission(micStatusRef.current!.state);
+                    if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
+                        getUserStream();
+                    }
+                }
+                cameraStatusRef.current.onchange = () => {
+                    setCameraPermission(cameraStatusRef.current!.state);
+                    if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
+                        getUserStream();
+                    }
+                }
+
+                if (micStatusRef.current.state !== "granted" || cameraStatusRef.current.state !== "granted") return;
+
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
@@ -52,15 +65,16 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                 setCallStatus(c => ({ ...c, haveMedia: true, audioEnabled: isMicOn, videoEnabled: isCameraOn }));
                 setLocalStream(stream);
             } catch (err) {
-                toast.error(err instanceof Error ? err.message : "Some error occurred. Please try again.");
+                toast.error(err instanceof Error ? err.message : "Media error occurred. Please try again.");
+                setMicPermission("denied");
+                setCameraPermission("denied");
             }
         }
-        getUserStream();
-    }, [micPermission, cameraPermission])
 
-    // Safari fallback
-    useEffect(() => {
-        if (!hasPermissionsAPI) {
+        if (hasPermissionsAPI) {
+            getUserStream();
+        } else {
+            // Safari fallback
             navigator.mediaDevices.getUserMedia({ audio: true, video: true })
                 .then(stream => {
                     setLocalStream(stream);
@@ -72,7 +86,12 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                     setCameraPermission("denied");
                 });
         }
-    }, []);
+
+        return () => {
+            if (micStatusRef.current) micStatusRef.current.onchange = null;
+            if (cameraStatusRef.current) cameraStatusRef.current.onchange = null;
+        }
+    }, [localStream, hasPermissionsAPI, isMicOn, isCameraOn])
 
     useEffect(() => {
         if (!videoRef.current || !localStream) return;
@@ -112,24 +131,24 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                     />
                     {!isCameraOn &&
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <h3 className="text-white text-lg">Your camera is off</h3>
+                            <h3 className="text-primary text-lg">Your camera is off</h3>
                         </div>
                     }
 
                     <div className="absolute bottom-5 flex gap-5">
                         <Button
-                            variant={"secondary"}
+                            variant={"default"}
                             size={"icon-lg"}
                             onClick={() => setIsMicOn(c => !c)}
                         >
-                            {isMicOn ? <IoMdMic /> : <IoMdMicOff className="size-5 text-destructive" />}
+                            {isMicOn ? <IoMdMic className="size-5" /> : <IoMdMicOff className="size-5 text-destructive" />}
                         </Button>
                         <Button
-                            variant={"secondary"}
+                            variant={"default"}
                             size={"icon-lg"}
                             onClick={() => setIsCameraOn(c => !c)}
                         >
-                            {isCameraOn ? <BsCameraVideo /> : <BsCameraVideoOff className="size-5 text-destructive" />}
+                            {isCameraOn ? <BsCameraVideo className="size-5" /> : <BsCameraVideoOff className="size-5 text-destructive" />}
                         </Button>
                     </div>
                 </div>
