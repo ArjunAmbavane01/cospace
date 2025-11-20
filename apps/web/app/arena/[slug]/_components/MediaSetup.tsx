@@ -1,7 +1,6 @@
 'use client';
 
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import { CallStatus } from "@/lib/validators/rtc";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { IoCheckmarkCircleOutline, IoWarningOutline } from "react-icons/io5";
@@ -11,12 +10,11 @@ import { toast } from "sonner";
 
 interface MediaSetupProps {
     localStream: MediaStream | null;
-    setCallStatus: Dispatch<SetStateAction<CallStatus>>;
     setLocalStream: Dispatch<SetStateAction<MediaStream | null>>;
     setIsUserMediaReady: Dispatch<SetStateAction<boolean>>;
 }
 
-export default function MediaSetup({ localStream, setCallStatus, setLocalStream, setIsUserMediaReady }: MediaSetupProps) {
+export default function MediaSetup({ localStream, setLocalStream, setIsUserMediaReady }: MediaSetupProps) {
 
     const [cameraPermission, setCameraPermission] = useState<PermissionState | "unknown">("unknown");
     const [micPermission, setMicPermission] = useState<PermissionState | "unknown">("unknown");
@@ -62,7 +60,6 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                     if (track.kind === "audio") track.enabled = isMicOn;
                     else if (track.kind === "video") track.enabled = isCameraOn;
                 })
-                setCallStatus(c => ({ ...c, haveMedia: true, audioEnabled: isMicOn, videoEnabled: isCameraOn }));
                 setLocalStream(stream);
             } catch (err) {
                 toast.error(err instanceof Error ? err.message : "Media error occurred. Please try again.");
@@ -124,6 +121,7 @@ export default function MediaSetup({ localStream, setCallStatus, setLocalStream,
                         ref={videoRef}
                         autoPlay
                         playsInline
+                        muted 
                         className={cn(
                             "size-full object-cover transition",
                             isCameraOn ? "opacity-100" : "opacity-0"

@@ -1,13 +1,5 @@
 export type TypeOfCall = "offer" | "answer";
 
-export interface CallStatus {
-    haveMedia: boolean,
-    videoEnabled: boolean,
-    audioEnabled: boolean,
-    answer: RTCSessionDescriptionInit | null,
-    myRole: TypeOfCall
-}
-
 export interface OfferData {
     offerUserId: string;
     answerUserId: string;

@@ -42,12 +42,13 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         localStream,
         setLocalStream,
         remoteStream,
+        setRemoteStream,
         isUserMediaReady,
         setIsUserMediaReady,
-        setCallStatus,
         offerData,
         setOfferData,
         peerConnection,
+        setPeerConnection,
         setTypeOfCall,
         handleCreateOffer,
         handleCreatePeerConnection
@@ -257,7 +258,6 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         <MediaSetup
             localStream={localStream}
             setLocalStream={setLocalStream}
-            setCallStatus={setCallStatus}
             setIsUserMediaReady={setIsUserMediaReady}
         />
     )
@@ -291,11 +291,13 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                         adminUser={user}
                         webrtcSocket={webrtcSocket}
                         localStream={localStream}
+                        setLocalStream={setLocalStream}
                         remoteStream={remoteStream}
+                        setRemoteStream={setRemoteStream}
                         peerConnection={peerConnection}
+                        setPeerConnection={setPeerConnection}
                         offerData={offerData}
                         setOfferData={setOfferData}
-                        setCallStatus={setCallStatus}
                         handleCreatePeerConnection={handleCreatePeerConnection}
                         handleCreateOffer={handleCreateOffer}
                         setTypeOfCall={setTypeOfCall}
