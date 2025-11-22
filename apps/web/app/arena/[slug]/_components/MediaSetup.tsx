@@ -43,6 +43,7 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
                         getUserStream();
                     }
                 }
+
                 cameraStatusRef.current.onchange = () => {
                     setCameraPermission(cameraStatusRef.current!.state);
                     if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
@@ -56,6 +57,7 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
                     video: true,
                     audio: true
                 });
+
                 stream.getTracks().forEach(track => {
                     if (track.kind === "audio") track.enabled = isMicOn;
                     else if (track.kind === "video") track.enabled = isCameraOn;
@@ -74,6 +76,10 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
             // Safari fallback
             navigator.mediaDevices.getUserMedia({ audio: true, video: true })
                 .then(stream => {
+                    stream.getTracks().forEach(track => {
+                        if (track.kind === "audio") track.enabled = isMicOn;
+                        else if (track.kind === "video") track.enabled = isCameraOn;
+                    })
                     setLocalStream(stream);
                     setMicPermission("granted");
                     setCameraPermission("granted");
@@ -88,7 +94,7 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
             if (micStatusRef.current) micStatusRef.current.onchange = null;
             if (cameraStatusRef.current) cameraStatusRef.current.onchange = null;
         }
-    }, [localStream, hasPermissionsAPI, isMicOn, isCameraOn])
+    }, [localStream, hasPermissionsAPI, isMicOn, isCameraOn,setLocalStream])
 
     useEffect(() => {
         if (!videoRef.current || !localStream) return;
@@ -101,7 +107,7 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
             if (track.kind === "audio") track.enabled = isMicOn;
             else if (track.kind === "video") track.enabled = isCameraOn;
         })
-    }, [isMicOn, isCameraOn]);
+    }, [isMicOn, isCameraOn, localStream]);
 
     const isMicGranted = micPermission === "granted";
     const isCameraGranted = cameraPermission === "granted";
@@ -121,7 +127,7 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
                         ref={videoRef}
                         autoPlay
                         playsInline
-                        muted 
+                        muted
                         className={cn(
                             "size-full object-cover transition",
                             isCameraOn ? "opacity-100" : "opacity-0"
