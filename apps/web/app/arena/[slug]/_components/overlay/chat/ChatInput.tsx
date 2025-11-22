@@ -1,14 +1,13 @@
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createMessage } from "server/actions/chat";
 import { User } from "better-auth";
+import { ChatGroup, ChatGroupParticipant, MessagesInfiniteData } from "@/lib/validators/chat";
 import { Message } from "@repo/schemas/arena-ws-events";
 import TextareaAutosize from "react-textarea-autosize"
-import { ChatGroup, ChatGroupParticipant, MessagesInfiniteData } from "@/lib/validators/chat";
-import { InputGroup, InputGroupAddon, InputGroupButton } from "@/components/ui/input-group"
-import { EmojiPicker, EmojiPickerSearch, EmojiPickerContent, EmojiPickerFooter } from "@/components/ui/emoji-picker";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { BsEmojiSmile } from "react-icons/bs";
 import { LuSendHorizontal } from "react-icons/lu";
@@ -57,7 +56,6 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
                 (oldData) => {
                     if (!oldData || !user) return oldData;
                     const newPages = [...oldData.pages];
-                    console.log(newPages)
                     // Check if there are any pages at all
                     if (newPages[0]) {
                         // Append the optimistic message to end of first page
@@ -130,20 +128,12 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
         },
     })
 
-    const onEmojiSelect = ({ emoji }: { emoji: string }) => {
+    const onEmojiSelect = useCallback(({ emoji }: { emoji: string }) => {
         setMessage(prev => prev + emoji);
         textareaRef.current?.focus();
-    }
+    }, [setMessage]);
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        // new line on Shift+Enter
-        if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            handleMessageInput();
-        }
-    };
-
-    const handleMessageInput = async () => {
+    const handleMessageInput = useCallback(async () => {
         try {
             if (isSending) return;
             if (!message.trim()) {
@@ -155,10 +145,18 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
             console.error(err);
             toast.error(err instanceof Error ? err.message : "Something went wrong");
         }
-    }
+    }, [handleSendMessage, isSending]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        // new line on Shift+Enter
+        if (e.key === "Enter" && !e.shiftKey) {
+            e.preventDefault();
+            handleMessageInput();
+        }
+    }, [handleMessageInput]);
 
     return (
-        <InputGroup>
+        <div className="min-h-24 p-3 mx-3 mb-2 bg-input/30 rounded-xl relative">
             <TextareaAutosize
                 ref={textareaRef}
                 value={message}
@@ -169,39 +167,36 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
                 className="flex field-sizing-content min-h-12 w-full resize-none rounded-xl bg-transparent px-3 py-2.5 text-base transition-[color,box-shadow] outline-none"
                 placeholder={`Message ${chatParticipant.name}`}
             />
-            <InputGroupAddon align="block-end" className="flex items-center justify-end gap-2">
-                <Popover onOpenChange={setOpenEmojiPanel} open={openEmojiPanel}>
-                    <PopoverTrigger asChild>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <InputGroupButton
-                                    size="icon-sm"
-                                    variant="ghost"
-                                    type="button"
-                                    onClick={() => setOpenEmojiPanel(c => !c)}
-                                >
-                                    <BsEmojiSmile />
-                                </InputGroupButton>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                Pick an emoji
-                            </TooltipContent>
-                        </Tooltip>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-fit p-0 -translate-x-8">
+            <div className="flex items-center gap-2 absolute bottom-3 right-3">
+                <div className="relative">
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                size="icon-sm"
+                                variant="ghost"
+                                type="button"
+                                onClick={() => setOpenEmojiPanel(c => !c)}
+                            >
+                                <BsEmojiSmile />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            Pick an emoji
+                        </TooltipContent>
+                    </Tooltip>
+                    {openEmojiPanel && (
                         <EmojiPicker
-                            className="h-[342px]"
-                            onEmojiSelect={onEmojiSelect}
-                        >
-                            <EmojiPickerSearch />
-                            <EmojiPickerContent />
-                            <EmojiPickerFooter />
-                        </EmojiPicker>
-                    </PopoverContent>
-                </Popover>
+                            onEmojiClick={onEmojiSelect}
+                            width={300}
+                            height={350}
+                            theme={"dark" as Theme}
+                            className="!absolute !bottom-full !right-0 z-50"
+                        />
+                    )}
+                </div>
                 <Tooltip>
                     <TooltipTrigger asChild>
-                        <InputGroupButton
+                        <Button
                             size="icon-sm"
                             variant="default"
                             onClick={handleMessageInput}
@@ -209,13 +204,13 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
                             type="button"
                         >
                             <LuSendHorizontal />
-                        </InputGroupButton>
+                        </Button>
                     </TooltipTrigger>
                     <TooltipContent>
                         Send
                     </TooltipContent>
                 </Tooltip>
-            </InputGroupAddon>
-        </InputGroup>
+            </div>
+        </div>
     )
 }

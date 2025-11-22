@@ -99,7 +99,6 @@ export default function ChatGroupsPanel({
                     })
                 }))
                 await queryClient.setQueryData(["chat-groups", slug], updatedGroups)
-                console.log(chatGroups);
             }
         })();
     }, [arenaUsers]);
