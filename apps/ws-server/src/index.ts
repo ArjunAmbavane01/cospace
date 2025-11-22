@@ -50,6 +50,10 @@ try {
                 socket.to(groupPublicId).emit("chat-message", data);
             })
 
+            socket.on("media-toggle", async (data) => {
+                socket.to(socket.data.arenaSlug).emit("media-toggle", data);
+            })
+
             socket.on("disconnect", () => {
                 socket.to(socket.data.arenaSlug).emit("user-left", {
                     userId: socket.data.userId,

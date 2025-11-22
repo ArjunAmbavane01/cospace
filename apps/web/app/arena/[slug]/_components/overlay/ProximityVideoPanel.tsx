@@ -1,96 +1,87 @@
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image'
+import { User } from 'better-auth';
+import { Socket } from 'socket.io-client';
+import { ServerToClientEvents } from '@repo/schemas/ws-arena-events';
+import { ClientToServerEvents } from '@repo/schemas/arena-ws-events';
+import { ArenaUser } from '@/lib/validators/arena';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { BsCameraVideo, BsCameraVideoOff } from 'react-icons/bs';
 import { IoMdMic, IoMdMicOff } from "react-icons/io";
+import { BsCameraVideo, BsCameraVideoOff } from 'react-icons/bs';
 
 interface ProximityVideoPanel {
-    adminName: string;
-    adminImage: string | null | undefined;
-    participantName: string;
-    participantImage: string | null | undefined;
+    admin: User;
+    participant: ArenaUser;
     localStream: MediaStream | null;
     remoteStream: MediaStream | null;
+    socket: Socket<ServerToClientEvents, ClientToServerEvents> | null;
+    handleMediaToggle: (mediaType: "video" | "audio", enabled: boolean, participantId: string) => void;
 }
 
-export default function ProximityVideoPanel({ adminName, adminImage, participantName, participantImage, localStream, remoteStream }: ProximityVideoPanel) {
+export default function ProximityVideoPanel({
+    admin,
+    participant,
+    localStream,
+    remoteStream,
+    socket,
+    handleMediaToggle,
+}: ProximityVideoPanel) {
 
     const [isMicOn, setIsMicOn] = useState<boolean>(true);
     const [isCameraOn, setIsCameraOn] = useState<boolean>(true);
-    const [participantMicOn, setParticipantMicOn] = useState<boolean>(false);
-    const [participantCameraOn, setParticipantCameraOn] = useState<boolean>(false);
+    const [participantMicOn, setParticipantMicOn] = useState<boolean>(true);
+    const [participantCameraOn, setParticipantCameraOn] = useState<boolean>(true);
 
     const localVidRef = useRef<HTMLVideoElement | null>(null);
     const remoteVidRef = useRef<HTMLVideoElement | null>(null);
 
     useEffect(() => {
         if (!localStream) return;
-
-        const audioTrack = localStream.getTracks().find(track => track.kind === "audio");
-        const videoTrack = localStream.getTracks().find(track => track.kind === "video");
-
-        if (audioTrack) setIsMicOn(audioTrack.enabled);
-        if (videoTrack) setIsCameraOn(videoTrack.enabled);
+        setIsMicOn(localStream.getAudioTracks()[0]?.enabled ?? false);
+        setIsCameraOn(localStream.getVideoTracks()[0]?.enabled ?? false);
     }, [localStream]);
 
     useEffect(() => {
         if (!localStream) return;
-        localStream.getTracks().forEach(track => {
-            if (track.kind === "audio") track.enabled = isMicOn;
-            else if (track.kind === "video") track.enabled = isCameraOn;
-        })
-    }, [isMicOn, isCameraOn, localStream]);
+        localStream.getAudioTracks().forEach(t => (t.enabled = isMicOn));
+        handleMediaToggle("audio", isMicOn, participant.id);
+    }, [isMicOn, localStream]);
 
     useEffect(() => {
-        if (localVidRef.current && localStream) {
-            localVidRef.current.srcObject = localStream;
-            // localVidRef.current.play().catch(err => {
-                // console.log('error autoplaying local video :', err);
-            // });
-        }
-        if (remoteVidRef.current && remoteStream) {
-            remoteVidRef.current.srcObject = remoteStream;
-            // remoteVidRef.current.play().catch(err => {
-                // console.log('Remote video autoplay prevented:', err);
-            // });
-
-            const audioTrack = remoteStream.getAudioTracks()[0];
-            const videoTrack = remoteStream.getVideoTracks()[0];
-
-            if (audioTrack) setParticipantMicOn(audioTrack.enabled);
-            if (videoTrack) setParticipantCameraOn(videoTrack.enabled);
-        }
-    }, [localStream, remoteStream])
+        if (!localStream) return;
+        localStream.getVideoTracks().forEach(t => (t.enabled = isCameraOn));
+        handleMediaToggle("video", isCameraOn, participant.id);
+    }, [isCameraOn, localStream]);
 
     useEffect(() => {
-        if (!remoteStream) return;
+        if (localVidRef.current && localStream) localVidRef.current.srcObject = localStream;
+        if (remoteVidRef.current && remoteStream) remoteVidRef.current.srcObject = remoteStream;
+    }, [localStream, remoteStream]);
 
-        const updateRemoteTrackStatus = () => {
-            const audioTrack = remoteStream.getAudioTracks()[0];
-            const videoTrack = remoteStream.getVideoTracks()[0];
+    useEffect(() => {
+        if (!socket) return;
+        const handleRemoteMediaToggle = (data: {
+            userId: string;
+            participantId: string;
+            mediaType: "audio" | "video";
+            enabled: boolean
+        }) => {
+            if (data.userId !== participant.id || data.participantId !== admin.id) return;
+            if (data.mediaType === "audio") setParticipantMicOn(data.enabled);
+            else if (data.mediaType === "video") setParticipantCameraOn(data.enabled);
+        };
 
-            if (audioTrack) setParticipantMicOn(audioTrack.enabled);
-            if (videoTrack) setParticipantCameraOn(videoTrack.enabled);
-        }
-
-        updateRemoteTrackStatus();
-
-        remoteStream.getTracks().forEach(track => {
-            track.addEventListener("mute", updateRemoteTrackStatus);
-            track.addEventListener("unmute", updateRemoteTrackStatus);
-            track.addEventListener("ended", updateRemoteTrackStatus);
-        })
+        socket.on("media-toggle", handleRemoteMediaToggle);
 
         return () => {
-            remoteStream.getTracks().forEach(track => {
-                track.removeEventListener("mute", updateRemoteTrackStatus);
-                track.removeEventListener("unmute", updateRemoteTrackStatus);
-                track.removeEventListener("ended", updateRemoteTrackStatus);
-            })
-        }
-    }, [remoteStream])
+            socket.off("media-toggle", handleRemoteMediaToggle);
+        };
+    }, [socket, participant.id]);
 
+
+    const { name: participantName, image: participantImage } = participant;
+    const { name: adminName, image: adminImage } = admin;
 
     return (
 
@@ -104,19 +95,27 @@ export default function ProximityVideoPanel({ adminName, adminImage, participant
                     muted
                     className={cn(
                         "absolute inset-0 size-full object-cover",
-                        isCameraOn ? "opacity-100 visible" : "opacity-0 invisible"
+                        isCameraOn ? "block" : "hidden"
                     )}
                 />
 
-                {!isCameraOn && adminImage && (
+                {!isCameraOn && (
                     <div className="flex items-center justify-center size-full">
-                        <Image
-                            src={adminImage}
-                            alt='user avatar'
-                            width={40}
-                            height={40}
-                            className='size-10 border-2 border-muted-foreground rounded-full'
-                        />
+                        {adminImage ? (
+                            <Image
+                                src={adminImage}
+                                alt='user avatar'
+                                width={40}
+                                height={40}
+                                className='size-10 border-2 border-muted-foreground rounded-full'
+                            />
+                        ) : (
+                            <div className='flex items-center justify-center size-10 border-2 border-muted-foreground rounded-full bg-muted'>
+                                <h4>
+                                    {adminName.charAt(0).toUpperCase()}
+                                </h4>
+                            </div>
+                        )}
                     </div>
                 )}
 
@@ -129,18 +128,14 @@ export default function ProximityVideoPanel({ adminName, adminImage, participant
                     <Button
                         variant={"default"}
                         size={"icon"}
-                        onClick={() => {
-                            setIsMicOn(c => !c);
-                        }}
+                        onClick={() => setIsMicOn(c => !c)}
                     >
                         {isMicOn ? <IoMdMic className="size-5" /> : <IoMdMicOff className="size-5 text-destructive" />}
                     </Button>
                     <Button
                         variant={"default"}
                         size={"icon"}
-                        onClick={() => {
-                            setIsCameraOn(v => !v);
-                        }}
+                        onClick={() => setIsCameraOn(v => !v)}
                     >
                         {isCameraOn ? <BsCameraVideo className="size-5" /> : <BsCameraVideoOff className="size-5 text-destructive" />}
                     </Button>
@@ -157,20 +152,30 @@ export default function ProximityVideoPanel({ adminName, adminImage, participant
                     playsInline
                     className={cn(
                         "absolute inset-0 size-full object-cover",
-                        participantCameraOn ? "opacity-100 visible" : "opacity-0 invisible"
+                        participantCameraOn ? "block" : "hidden"
                     )}
                 />
-                {!participantCameraOn && participantImage && (
+
+                {!participantCameraOn && (
                     <div className="flex items-center justify-center size-full">
-                        <Image
-                            src={participantImage}
-                            alt='user avatar'
-                            width={40}
-                            height={40}
-                            className='size-10 border-2 border-muted-foreground rounded-full'
-                        />
+                        {participantImage ? (
+                            <Image
+                                src={participantImage}
+                                alt='user avatar'
+                                width={40}
+                                height={40}
+                                className='size-10 border-2 border-muted-foreground rounded-full'
+                            />
+                        ) : (
+                            <div className='size-10 border-2 border-muted-foreground rounded-full bg-muted flex items-center justify-center'>
+                                <h4>
+                                    {participantName.charAt(0).toUpperCase()}
+                                </h4>
+                            </div>
+                        )}
                     </div>
                 )}
+
                 <h6 className='flex items-center gap-1 absolute bottom-1.5 left-1.5 bg-muted rounded-lg p-1 px-2'>
                     {!participantMicOn && <IoMdMicOff size={14} className='text-destructive' />}
                     {participantName}

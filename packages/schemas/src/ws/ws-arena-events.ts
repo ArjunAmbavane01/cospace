@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PlayerPosPayload, ChatMessagePayload } from "./arena-ws-events";
+import { PlayerPosPayload, ChatMessagePayload, MediaTogglePayload } from "./arena-ws-events";
 
 export const WelcomeMsgSchema = z.string();
 export type WelcomeMsgPayload = z.infer<typeof WelcomeMsgSchema>;
@@ -29,4 +29,5 @@ export interface ServerToClientEvents {
     "user-left": (data: UserLeftPayload) => void
     "player-pos": (data: PlayerPosPayload) => void
     "chat-message": (data: ChatMessagePayload) => void
+    "media-toggle": (data: MediaTogglePayload) => void
 }

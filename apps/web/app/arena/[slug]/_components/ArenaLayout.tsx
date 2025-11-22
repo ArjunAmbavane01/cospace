@@ -38,20 +38,13 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [isSocketConnecting, setIsSocketConnecting] = useState<boolean>(false);
 
     const {
-        webrtcSocket,
         localStream,
         setLocalStream,
         remoteStream,
-        setRemoteStream,
         isUserMediaReady,
         setIsUserMediaReady,
-        offerData,
-        setOfferData,
-        peerConnection,
-        setPeerConnection,
-        setTypeOfCall,
         handleCreateOffer,
-        handleCreatePeerConnection
+        handleResetCallSession
     } = useWebRTC(userSession, slug);
 
     const { user, setUser, token, setToken } = useAuthStore();
@@ -68,6 +61,16 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         setIsSocketConnecting(true);
         setSocket(null);
     }, []);
+
+    const handleMediaToggle = useCallback((mediaType: "video" | "audio", enabled: boolean, participantId: string) => {
+        if (!socket || !user) return;
+        socket.emit("media-toggle", {
+            userId: user.id,
+            participantId,
+            mediaType,
+            enabled
+        })
+    }, [socket, user]);
 
     // init auth store
     useEffect(() => {
@@ -152,7 +155,6 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
 
                 ws.on("chat-message", (data) => {
                     const { groupPublicId, message: recievedMsg } = data;
-                    console.log(groupPublicId)
                     // update group message cache and last message
                     queryClient.setQueryData<MessagesInfiniteData>(
                         ["messages", groupPublicId],
@@ -204,7 +206,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                             return [updatedGroup, ...otherGroups];
                         }
                     )
-                })
+                });
 
                 setSocket(ws);
             } catch (err) {
@@ -289,18 +291,12 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                     <ArenaCanvas slug={slug} arenaUsers={arenaUsers} socket={socket} user={user} />
                     <CanvasOverlay
                         adminUser={user}
-                        webrtcSocket={webrtcSocket}
+                        socket={socket}
                         localStream={localStream}
-                        setLocalStream={setLocalStream}
                         remoteStream={remoteStream}
-                        setRemoteStream={setRemoteStream}
-                        peerConnection={peerConnection}
-                        setPeerConnection={setPeerConnection}
-                        offerData={offerData}
-                        setOfferData={setOfferData}
-                        handleCreatePeerConnection={handleCreatePeerConnection}
                         handleCreateOffer={handleCreateOffer}
-                        setTypeOfCall={setTypeOfCall}
+                        handleResetCallSession={handleResetCallSession}
+                        handleMediaToggle={handleMediaToggle}
                     />
                 </div>
             </div>

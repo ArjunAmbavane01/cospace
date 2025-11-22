@@ -28,13 +28,22 @@ export const ChatGroupsSchema = z.object({
     chatGroupIds: z.string().array(),
 });
 
+export const MediaToggleSchema = z.object({
+    userId: z.string(),
+    participantId: z.string(),
+    mediaType: z.enum(["video", "audio"]),
+    enabled: z.boolean(),
+});
+
 export type PlayerPosPayload = z.infer<typeof PlayerPosSchema>;
 export type ChatMessagePayload = z.infer<typeof ChatMessageSchema>;
 export type ChatGroupsPayload = z.infer<typeof ChatGroupsSchema>;
+export type MediaTogglePayload = z.infer<typeof MediaToggleSchema>;
 export type Message = z.infer<typeof MessageSchema>;
 
 export interface ClientToServerEvents {
     "player-pos": (data: PlayerPosPayload) => void
     "chat-message": (data: ChatMessagePayload) => void
     "chat-groups": (data: ChatGroupsPayload) => void
+    "media-toggle": (data: MediaTogglePayload) => void
 }
