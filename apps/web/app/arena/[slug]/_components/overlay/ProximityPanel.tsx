@@ -57,16 +57,26 @@ export default function ProximityPanel({
         const userInProximity = proximityUsers[0];
         if (!userInProximity) return;
         setCurrentVideoParticipant(userInProximity);
+        if (remoteStream) {
+            remoteStream.getTracks().forEach(track => {
+                track.enabled = true;
+            });
+        }
         if (adminUser.id < userInProximity.id) handleCreateOffer(userInProximity.id);
 
-    }, [proximityUsers, handleCreateOffer, adminUser.id]);
+    }, [proximityUsers, handleCreateOffer, adminUser.id, remoteStream]);
 
     useEffect(() => {
         if (proximityUsers.length === 0 && currentVideoParticipant) {
+            if (remoteStream) {
+                remoteStream.getTracks().forEach(track => {
+                    track.enabled = false;
+                });
+            }
             handleResetCallSession();
             setCurrentVideoParticipant(null);
         }
-    }, [proximityUsers, handleResetCallSession]);
+    }, [proximityUsers, handleResetCallSession, remoteStream]);
 
     return (
         <div className='flex justify-center gap-10 absolute top-3 inset-x-0 mx-auto w-full opacity-95'>
