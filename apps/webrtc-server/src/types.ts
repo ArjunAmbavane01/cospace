@@ -1,9 +1,9 @@
-export interface OfferData {
-    offerUserId:string;
-    answerUserId:string;
-    arenaSlug:string;
+export interface CallSession {
+    offererUserId: string;
+    answererUserId: string;
+    arenaSlug: string;
     offer: RTCSessionDescriptionInit | null;
-    offerIceCandidates: RTCIceCandidateInit[];
+    offererIceCandidates: RTCIceCandidateInit[];
     answer: RTCSessionDescriptionInit | null;
-    answerIceCandidates: RTCIceCandidateInit[];
+    answererIceCandidates: RTCIceCandidateInit[];
 } 

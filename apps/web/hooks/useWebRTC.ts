@@ -1,104 +1,231 @@
 import { Dispatch, SetStateAction, useCallback, useEffect, useState } from 'react';
-import { Socket } from "socket.io-client";
+import { io, Socket } from "socket.io-client";
 import { Session, User } from 'better-auth';
-import { connectToSignallingServer } from '@/lib/rtc/signalling';
-import { OfferData, TypeOfCall } from '@/lib/validators/rtc';
-import { rtcManager } from '@/lib/rtc/manager';
+import { CallSession, TypeOfCall } from '@/lib/validators/rtc';
+import { peerConfiguration } from '@/lib/rtc/config';
 
 interface UseWebRTCResult {
     webrtcSocket: Socket | null;
-    remoteStream: MediaStream | null;
-    setRemoteStream: Dispatch<SetStateAction<MediaStream | null>>
-    localStream: MediaStream | null;
-    setLocalStream: Dispatch<SetStateAction<MediaStream | null>>;
+    setWebrtcSocket: Dispatch<SetStateAction<Socket | null>>;
+    typeOfCall: TypeOfCall;
+    setTypeOfCall: Dispatch<SetStateAction<TypeOfCall>>;
     isUserMediaReady: boolean;
     setIsUserMediaReady: Dispatch<SetStateAction<boolean>>;
-    offerData: OfferData | null;
-    setOfferData: Dispatch<SetStateAction<OfferData | null>>;
+    localStream: MediaStream | null;
+    setLocalStream: Dispatch<SetStateAction<MediaStream | null>>;
+    remoteStream: MediaStream | null;
+    setRemoteStream: Dispatch<SetStateAction<MediaStream | null>>
     peerConnection: RTCPeerConnection | null;
     setPeerConnection: Dispatch<SetStateAction<RTCPeerConnection | null>>;
-    setTypeOfCall: Dispatch<SetStateAction<TypeOfCall>>;
-    handleCreateOffer: (peerConnection: RTCPeerConnection, answerUserId: string) => Promise<void>;
-    handleCreatePeerConnection: () => Promise<RTCPeerConnection | undefined>;
+    callSession: CallSession | null;
+    setCallSession: Dispatch<SetStateAction<CallSession | null>>;
+    handleCreateOffer: (answerUserId: string) => Promise<void>;
+    handleResetCallSession: () => void;
 }
 
 export const useWebRTC = (userSession: { user: User; session: Session }, slug: string): UseWebRTCResult => {
 
     const [webrtcSocket, setWebrtcSocket] = useState<Socket | null>(null);
-    const [isWebrtcSocketConnecting, setIsWebrtcSocketConnecting] = useState<boolean>(false);
-    const [typeOfCall, setTypeOfCall] = useState<TypeOfCall>("offer");
+    const [typeOfCall, setTypeOfCall] = useState<TypeOfCall>(undefined);
     const [isUserMediaReady, setIsUserMediaReady] = useState<boolean>(false);
     const [localStream, setLocalStream] = useState<MediaStream | null>(null);
     const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
     const [peerConnection, setPeerConnection] = useState<RTCPeerConnection | null>(null);
-    const [offerData, setOfferData] = useState<OfferData | null>(null);
+    const [callSession, setCallSession] = useState<CallSession | null>(null);
+    const [pendingIce, setPendingIce] = useState<RTCIceCandidateInit[]>([]);
 
-    const handleCreatePeerConnection = useCallback((): Promise<RTCPeerConnection | undefined> => {
-        return new Promise((resolve, reject) => {
+
+    const handleCreateOffer = useCallback((answererUserId: string): Promise<void> => {
+        return new Promise(async (resolve, reject) => {
             try {
-                if (webrtcSocket && !peerConnection) {
-                    const res = rtcManager.createPeerConnection(webrtcSocket, userSession.user.id, typeOfCall)
-                    if (!res) return;
-                    const { peerConnection, remoteStream } = res;
-                    setPeerConnection(peerConnection);
-                    setRemoteStream(remoteStream);
-                    resolve(peerConnection);
-                } else {
-                    resolve(undefined)
+                if (!webrtcSocket || !peerConnection || !webrtcSocket.connected) {
+                    console.error("Socket or PeerConnection not connected.");
+                    return;
                 }
-            } catch (err) {
-                reject(err);
-            }
-        })
-    }, [ webrtcSocket, peerConnection, typeOfCall, userSession.user.id]);
-
-    const handleCreateOffer = useCallback((peerConnection: RTCPeerConnection, answerUserId: string): Promise<void> => {
-        return new Promise((resolve, reject) => {
-            try {
-                if (!webrtcSocket || !peerConnection) return;
-                rtcManager.createOffer(webrtcSocket, peerConnection, slug, answerUserId);
+                setTypeOfCall("offer");
+                const offer = await peerConnection.createOffer();;
+                peerConnection.setLocalDescription(offer);
+                const payload = {
+                    offer,
+                    slug,
+                    answererUserId
+                }
+                webrtcSocket.emit("offer", payload);
+                console.log("offer sent")
+                console.log("offer created");
                 resolve();
             } catch (err) {
                 reject(err);
             }
         })
-    }, [webrtcSocket, peerConnection]);
+    }, [webrtcSocket, peerConnection, slug]);
+
+    const handleResetCallSession = useCallback(() => {
+        // remove tracks from remote stream
+        peerConnection?.setLocalDescription(undefined);
+        setCallSession(null);
+        setTypeOfCall(undefined);
+    }, [peerConnection]);
+
+    // socket listeners 
+    const handleIncomingOffer = useCallback(async (newOffer: CallSession) => {
+
+        try {
+            console.log("offer received");
+
+            if (!webrtcSocket || !peerConnection || !newOffer?.offer) return;
+
+            setTypeOfCall("answer");
+            await peerConnection.setRemoteDescription(newOffer.offer);
+
+            for (const ice of pendingIce) {
+                try {
+                    await peerConnection.addIceCandidate(ice);
+                } catch (err) {
+                    console.error("Error adding buffered ICE:", err);
+                }
+            }
+            setPendingIce([]);
+
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            const newCallSession = { ...newOffer };
+            newCallSession.answer = answer;
+
+            setCallSession(newCallSession);
+            const offererIceCandidates = await webrtcSocket.emitWithAck("answer", newCallSession);
+            console.log("answer sent")
+
+            offererIceCandidates.forEach(async (iceC: RTCIceCandidateInit) => {
+                try {
+                    if (peerConnection.remoteDescription) await peerConnection.addIceCandidate(iceC)
+                } catch (err) {
+                    console.log("Error adding offererIceCandidates ", err)
+                }
+            })
+        } catch (err) {
+            console.error('Error handling incoming offer : ', err);
+        }
+    }, [webrtcSocket, peerConnection, callSession,]);
+
+    const handleIncomingAnswer = useCallback(async (answerAckObj: CallSession) => {
+        try {
+            if (!peerConnection || !answerAckObj.answer) return;
+            console.log("answer received")
+            await peerConnection.setRemoteDescription(answerAckObj.answer)
+        } catch (err) {
+            console.error('Error handling answer ack : ', err);
+        }
+    }, [peerConnection]);
+
+    const handleIncomingIceCandidates = useCallback(async (iceC: RTCIceCandidateInit) => {
+        if (!iceC) return;
+
+        if (!peerConnection?.remoteDescription) {
+            setPendingIce(prev => [...prev, iceC]);
+            return;
+        }
+
+        try {
+            if (!peerConnection?.remoteDescription) return;
+            await peerConnection.addIceCandidate(iceC);
+        } catch (err) {
+            console.error('Error handling incoming ICE candidate:', err);
+        }
+    }, [peerConnection]);
 
     // init connection to signalling server
     useEffect(() => {
 
-        setIsWebrtcSocketConnecting(true);
+        if (!isUserMediaReady || webrtcSocket) return;
 
-        if (webrtcSocket) return; // already connected
-        if (!isUserMediaReady) return;
         try {
-            const ws = connectToSignallingServer(userSession.session.token, slug);
-            if (ws) setWebrtcSocket(ws);
+            const socket = io(`${process.env.NEXT_PUBLIC_WEBRTC_BACKEND_URL}`, {
+                auth: {
+                    userToken: userSession.session.token,
+                    arenaSlug: slug,
+                },
+                reconnection: true,
+                reconnectionDelay: 1000,
+                reconnectionAttempts: 3,
+            });
+            if (!socket) return;
+            setWebrtcSocket(socket);
         } catch (err) {
-            setWebrtcSocket(null);
-            setIsWebrtcSocketConnecting(false);
-            console.error(err instanceof Error ? err.message : err)
+            console.error(err instanceof Error ? err.message : "Something went wrong while connecting to signalling server")
         }
-        return () => {
-            setIsWebrtcSocketConnecting(false);
-            setWebrtcSocket(null);
+    }, [slug, userSession.session.token, isUserMediaReady, webrtcSocket]);
+
+    useEffect(() => {
+        if (!webrtcSocket) return;
+
+        webrtcSocket.off("incomingOffer");
+        webrtcSocket.off("answerAck");
+        webrtcSocket.off("incomingIceCandidates");
+
+        webrtcSocket.on("incomingOffer", handleIncomingOffer);
+        webrtcSocket.on("answerAck", handleIncomingAnswer);
+        webrtcSocket.on("incomingIceCandidates", handleIncomingIceCandidates);
+    }, [webrtcSocket, handleIncomingOffer, handleIncomingAnswer, handleIncomingIceCandidates]);
+
+    // once we have socket and userMedia, create PeerConnection
+    useEffect(() => {
+        const createPeerConnection = async () => {
+
+            if (!webrtcSocket || !localStream || !isUserMediaReady || peerConnection) return;
+
+            try {
+
+                const createdPeerConnection = new RTCPeerConnection(peerConfiguration);
+                const createdRemoteStream = new MediaStream();
+
+                createdPeerConnection.addEventListener("icecandidate", (e) => {
+                    if (e.candidate) {
+                        webrtcSocket.emit("sendIceCToServer", {
+                            iceCandidate: e.candidate,
+                            iceUserId: userSession.user.id,
+                            didIOffer: typeOfCall === "offer"
+                        })
+                    }
+                });
+
+                createdPeerConnection.addEventListener("track", (e) => {
+                    if (!e.streams[0]) return;
+                    e.streams[0].getTracks().forEach(track => createdRemoteStream.addTrack(track))
+                });
+
+                setPeerConnection(createdPeerConnection);
+                setRemoteStream(createdRemoteStream);
+
+                localStream.getTracks().forEach(track => {
+                    createdPeerConnection.addTrack(track, localStream);
+                });
+                console.log("PC created and tracks added")
+            } catch (err) {
+                console.error(err instanceof Error ? err.message : "Something went wrong while creating peerConnection");
+            }
         }
-    }, [slug, userSession?.session?.token, isUserMediaReady]);
+
+        createPeerConnection();
+    }, [webrtcSocket, localStream, peerConnection, isUserMediaReady, typeOfCall]);
 
     return {
         webrtcSocket,
-        remoteStream,
-        setRemoteStream,
-        localStream,
-        setLocalStream,
+        setWebrtcSocket,
+        typeOfCall,
+        setTypeOfCall,
         isUserMediaReady,
         setIsUserMediaReady,
-        offerData,
-        setOfferData,
+        localStream,
+        setLocalStream,
+        remoteStream,
+        setRemoteStream,
         peerConnection,
         setPeerConnection,
-        setTypeOfCall,
+        callSession,
+        setCallSession,
         handleCreateOffer,
-        handleCreatePeerConnection
+        handleResetCallSession,
     }
 }

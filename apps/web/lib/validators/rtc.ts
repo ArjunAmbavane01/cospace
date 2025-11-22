@@ -1,11 +1,11 @@
-export type TypeOfCall = "offer" | "answer";
+export type TypeOfCall = "offer" | "answer" | undefined;
 
-export interface OfferData {
-    offerUserId: string;
-    answerUserId: string;
+export interface CallSession {
+    offererUserId: string;
+    answererUserId: string;
     arenaSlug: string;
     offer: RTCSessionDescriptionInit | null;
-    offerIceCandidates: RTCIceCandidateInit[];
+    offererIceCandidates: RTCIceCandidateInit[];
     answer: RTCSessionDescriptionInit | null;
-    answerIceCandidates: RTCIceCandidateInit[];
+    answererIceCandidates: RTCIceCandidateInit[];
 } 
