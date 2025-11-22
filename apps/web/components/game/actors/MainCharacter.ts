@@ -68,7 +68,7 @@ export class MainCharacter extends Actor {
         this.idleRightAnim = Animation.fromSpriteSheet(spriteSheet, [11 * 9], 100);
 
         this.createNameLabel();
-        setInterval(() => this.sendPlayerCoordinates(), 50);
+        setInterval(() => this.sendPlayerCoordinates(), 100);
     }
 
     private sendPlayerCoordinates(): void {

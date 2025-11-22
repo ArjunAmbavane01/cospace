@@ -62,10 +62,9 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
 
     const handleResetCallSession = useCallback(() => {
         // remove tracks from remote stream
-        peerConnection?.setLocalDescription(undefined);
         setCallSession(null);
         setTypeOfCall(undefined);
-    }, [peerConnection]);
+    }, []);
 
     // socket listeners 
     const handleIncomingOffer = useCallback(async (newOffer: CallSession) => {

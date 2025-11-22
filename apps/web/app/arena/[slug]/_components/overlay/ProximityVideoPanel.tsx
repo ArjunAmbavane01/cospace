@@ -48,18 +48,25 @@ export default function ProximityVideoPanel({
         if (!localStream) return;
         localStream.getAudioTracks().forEach(t => (t.enabled = isMicOn));
         handleMediaToggle("audio", isMicOn, participant.id);
-    }, [isMicOn]);
+    }, [isMicOn, localStream, handleMediaToggle, participant.id]);
 
     useEffect(() => {
         if (!localStream) return;
         localStream.getVideoTracks().forEach(t => (t.enabled = isCameraOn));
         handleMediaToggle("video", isCameraOn, participant.id);
-    }, [isCameraOn]);
+    }, [isCameraOn, localStream, handleMediaToggle, participant.id]);
 
     useEffect(() => {
         if (localVidRef.current && localStream) localVidRef.current.srcObject = localStream;
-        if (remoteVidRef.current && remoteStream) remoteVidRef.current.srcObject = remoteStream;
-    }, [localStream, remoteStream]);
+    }, [localStream]);
+
+    useEffect(() => {
+        if (!remoteVidRef.current || !remoteStream) return;
+
+        if (remoteVidRef.current.srcObject !== remoteStream) {
+            remoteVidRef.current.srcObject = remoteStream;
+        }
+    }, [remoteStream]);
 
     useEffect(() => {
         if (!socket) return;

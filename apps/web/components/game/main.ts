@@ -50,7 +50,10 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
         if (!character) return;
         character.setCurrentDirection(playerPos.direction);
         character.setIsMoving(playerPos.isMoving);
-        character.pos = vec(playerPos.x, playerPos.y);
+        const distance = character.pos.distance(vec(playerPos.x, playerPos.y));
+        if (playerPos.isMoving || distance > 5) {
+            character.setTargetPosition(vec(playerPos.x, playerPos.y));
+        }
     })
 
     // create main character

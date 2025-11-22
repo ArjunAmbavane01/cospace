@@ -1,4 +1,4 @@
-import { Actor, vec, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas, Engine } from "excalibur";
+import { Actor, vec, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas, Engine, Vector } from "excalibur";
 import { PlayerDirection } from "@/lib/validators/game";
 import { ArenaUser } from "@/lib/validators/arena";
 
@@ -17,6 +17,8 @@ export class Character extends Actor {
     private idleRightAnim?: Animation;
     private currentDirection: PlayerDirection = "down";
     private nameActor?: Actor;
+    private targetPosition?: Vector;
+    private interpolationSpeed = 0.3;
     private isMoving = false;
 
     constructor(user: ArenaUser) {
@@ -68,6 +70,19 @@ export class Character extends Actor {
     onPreUpdate(): void {
         if (!this.spriteSheet) return;
 
+        if (this.targetPosition) {
+            const distance = this.pos.distance(this.targetPosition);
+            
+            if (distance > 1) { // Only interpolate if distance is significant
+                const direction = this.targetPosition.sub(this.pos).normalize();
+                const moveAmount = Math.min(distance, distance * this.interpolationSpeed);
+                this.pos = this.pos.add(direction.scale(moveAmount));
+            } else {
+                this.pos = this.targetPosition;
+                this.targetPosition = undefined;
+            }
+        }
+
         if (this.isMoving) {
             switch (this.currentDirection) {
                 case 'up':
@@ -107,6 +122,10 @@ export class Character extends Actor {
 
     setIsMoving(moving: boolean): void {
         this.isMoving = moving;
+    }
+
+    setTargetPosition(pos: Vector): void {
+        this.targetPosition = pos;
     }
 
     private createNameLabel(): void {

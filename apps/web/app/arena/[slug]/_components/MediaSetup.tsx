@@ -31,32 +31,36 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
         if (localStream) return;
         const getUserStream = async () => {
             try {
-                micStatusRef.current = await navigator.permissions.query({ name: "microphone" });
-                cameraStatusRef.current = await navigator.permissions.query({ name: "camera" });
+                if (hasPermissionsAPI) {
 
-                setMicPermission(micStatusRef.current.state);
-                setCameraPermission(cameraStatusRef.current.state);
+                    micStatusRef.current = await navigator.permissions.query({ name: "microphone" });
+                    cameraStatusRef.current = await navigator.permissions.query({ name: "camera" });
 
-                micStatusRef.current.onchange = () => {
-                    setMicPermission(micStatusRef.current!.state);
-                    if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
-                        getUserStream();
+                    setMicPermission(micStatusRef.current.state);
+                    setCameraPermission(cameraStatusRef.current.state);
+
+                    micStatusRef.current.onchange = () => {
+                        setMicPermission(micStatusRef.current!.state);
+                        if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
+                            getUserStream();
+                        }
                     }
-                }
 
-                cameraStatusRef.current.onchange = () => {
-                    setCameraPermission(cameraStatusRef.current!.state);
-                    if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
-                        getUserStream();
+                    cameraStatusRef.current.onchange = () => {
+                        setCameraPermission(cameraStatusRef.current!.state);
+                        if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
+                            getUserStream();
+                        }
                     }
+                    if (micStatusRef.current.state !== "granted" || cameraStatusRef.current.state !== "granted") return;
                 }
-
-                if (micStatusRef.current.state !== "granted" || cameraStatusRef.current.state !== "granted") return;
 
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
                 });
+                setMicPermission("granted");
+                setCameraPermission("granted");
 
                 stream.getTracks().forEach(track => {
                     if (track.kind === "audio") track.enabled = isMicOn;
@@ -70,31 +74,13 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
             }
         }
 
-        if (hasPermissionsAPI) {
-            getUserStream();
-        } else {
-            // Safari fallback
-            navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-                .then(stream => {
-                    stream.getTracks().forEach(track => {
-                        if (track.kind === "audio") track.enabled = isMicOn;
-                        else if (track.kind === "video") track.enabled = isCameraOn;
-                    })
-                    setLocalStream(stream);
-                    setMicPermission("granted");
-                    setCameraPermission("granted");
-                })
-                .catch(() => {
-                    setMicPermission("denied");
-                    setCameraPermission("denied");
-                });
-        }
+        getUserStream();
 
         return () => {
             if (micStatusRef.current) micStatusRef.current.onchange = null;
             if (cameraStatusRef.current) cameraStatusRef.current.onchange = null;
         }
-    }, [localStream, hasPermissionsAPI, isMicOn, isCameraOn,setLocalStream])
+    }, [localStream, hasPermissionsAPI, isMicOn, isCameraOn, setLocalStream])
 
     useEffect(() => {
         if (!videoRef.current || !localStream) return;

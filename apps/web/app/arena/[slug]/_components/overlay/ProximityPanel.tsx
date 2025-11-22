@@ -62,7 +62,7 @@ export default function ProximityPanel({
     }, [proximityUsers, handleCreateOffer, adminUser.id]);
 
     useEffect(() => {
-        if (proximityUsers.length === 0) {
+        if (proximityUsers.length === 0 && currentVideoParticipant) {
             handleResetCallSession();
             setCurrentVideoParticipant(null);
         }
