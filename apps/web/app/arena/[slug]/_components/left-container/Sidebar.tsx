@@ -1,7 +1,6 @@
 import { Dispatch, ReactNode, SetStateAction } from "react"
 import { cn } from "@/lib/utils";
 import { Tabs } from "../ArenaLayout";
-import { Settings } from "lucide-react"
 import { CiMap } from "react-icons/ci"
 import { PiChatsCircle } from "react-icons/pi";
 
@@ -15,7 +14,6 @@ export default function Sidebar({ activeTab, setActiveTab }: SidebarProps) {
         <div className="flex flex-col gap-3 w-fit px-2">
             <NavItem title="map" activeTab={activeTab} setActiveTab={setActiveTab} icon={<CiMap className="size-6" />} />
             <NavItem title="chat" activeTab={activeTab} setActiveTab={setActiveTab} icon={<PiChatsCircle className="size-6" />} />
-            <NavItem title="setting" activeTab={activeTab} setActiveTab={setActiveTab} icon={<Settings className="size-6" />} />
         </div>
     )
 }

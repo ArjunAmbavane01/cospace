@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User } from 'better-auth'
 import { Socket } from 'socket.io-client';
 import { ArenaUser } from '@/lib/validators/arena'
@@ -11,7 +11,7 @@ interface ProximityPanelProps {
     remoteStream: MediaStream | null;
     handleCreateOffer: (answerUserId: string) => Promise<void>;
     handleResetCallSession: () => void;
-    handleMediaToggle: (mediaType: "video" | "audio", enabled: boolean,participantId: string) => void;
+    handleMediaToggle: (mediaType: "video" | "audio", enabled: boolean, participantId: string) => void;
 }
 
 export default function ProximityPanel({
@@ -26,6 +26,7 @@ export default function ProximityPanel({
 
     const [proximityUsers, setProximityUsers] = useState<ArenaUser[]>([]);
     const [currentVideoParticipant, setCurrentVideoParticipant] = useState<ArenaUser | null>(null);
+
 
     useEffect(() => {
         const handleAddProximityUser = (evt: Event) => {
@@ -55,7 +56,6 @@ export default function ProximityPanel({
         if (proximityUsers.length === 0) return;
         const userInProximity = proximityUsers[0];
         if (!userInProximity) return;
-
         setCurrentVideoParticipant(userInProximity);
         if (adminUser.id < userInProximity.id) handleCreateOffer(userInProximity.id);
 

@@ -15,6 +15,7 @@ export default async function ArenaPage({ params }: { params: Promise<{ slug: st
     const isSlugValid = await validateArenaSlug(slug);
     if (isSlugValid.type === "error") return <ArenaNotFound />
 
+    
     const res = await getArenaUsers(slug);
     if (res.type === "error") throw new Error(res.message);
     return <ArenaLayoutWrapper slug={slug} arenaUsers={res.arenaUsers} userSession={userSession} />

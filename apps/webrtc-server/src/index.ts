@@ -21,7 +21,6 @@ try {
     wss.on("connection", async (socket) => {
         try {
             socket.on("offer", async (payload) => {
-                console.log(`📤 Offer received from ${socket.data.userId} for ${payload.answererUserId}`);
                 const newOffer = {
                     offererUserId: socket.data.userId,
                     answererUserId: payload.answererUserId,
@@ -39,7 +38,6 @@ try {
                     console.log("no socket available for answer");
                     return;
                 }
-                console.log(`✅ Forwarding offer to ${answerSocket.data.userId}`);
                 socket.to(answerSocket.id).emit("incomingOffer", newOffer)
             })
 
@@ -72,7 +70,6 @@ try {
             })
 
             socket.on("answer", async (answerData, ackFunction) => {
-                console.log(`📥 Answer received from ${socket.data.userId} for offer from ${answerData.offererUserId}`);
                 const availableSockets = await wss.in(socket.data.arenaSlug).fetchSockets();
                 const offererSocket = availableSockets.find(socket => socket.data.userId === answerData.offererUserId);
                 if (!offererSocket) {
@@ -86,7 +83,6 @@ try {
                 }
                 ackFunction(offerToUpdate.offererIceCandidates);
                 offerToUpdate.answer = answerData.answer;
-                console.log(`✅ Forwarding answer to ${offererSocket.data.userId}`);
                 socket.to(offererSocket.id).emit("answerAck", offerToUpdate);
             })
 

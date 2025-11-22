@@ -19,7 +19,7 @@ export default function MapPanel({ user, arenaUsers, setActiveChatUserId, setAct
 
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    const filteredArenas = useMemo(() => {
+    const filteredArenaUsers = useMemo(() => {
         if (!arenaUsers) return [];
         return arenaUsers.filter((user) => {
             if (!user?.name) return false;
@@ -27,8 +27,8 @@ export default function MapPanel({ user, arenaUsers, setActiveChatUserId, setAct
         })
     }, [searchQuery, arenaUsers]);
 
-    const onlineUsers = useMemo(() => filteredArenas.filter((user) => user.isOnline), [filteredArenas]);
-    const offlineUsers = useMemo(() => filteredArenas.filter((user) => !user.isOnline), [filteredArenas]);
+    const onlineUsers = useMemo(() => filteredArenaUsers.filter((user) => user.isOnline), [filteredArenaUsers]);
+    const offlineUsers = useMemo(() => filteredArenaUsers.filter((user) => !user.isOnline), [filteredArenaUsers]);
     return (
         <div className="flex flex-col gap-5 w-72 p-3 bg-accent rounded-xl">
             <div className="px-1">
@@ -43,12 +43,12 @@ export default function MapPanel({ user, arenaUsers, setActiveChatUserId, setAct
             />
             <div className="flex flex-col gap-3">
                 {
-                    filteredArenas.length === 0 && searchQuery ? (
+                    filteredArenaUsers.length === 0 && searchQuery ? (
                         <div className="flex justify-center items-center h-40 p-5 text-muted-foreground text-center border border-dashed rounded-xl text-wrap break-all whitespace-normal">
                             No results for &quot;{searchQuery.slice(0, 20)}{searchQuery.length > 20 ? "…" : ""}&quot;.
                         </div>
                     ) : (
-                        filteredArenas.length === 0 ? (
+                        filteredArenaUsers.length === 0 ? (
                             <div className="flex justify-center items-center h-40 p-5 text-muted-foreground text-center border border-dashed rounded-xl text-balance">
                                 <h4>
                                     You're alone here. <span className="text-foreground">Invite</span> others to join.

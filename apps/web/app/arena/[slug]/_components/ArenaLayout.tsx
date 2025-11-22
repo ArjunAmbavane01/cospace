@@ -153,6 +153,14 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                     setArenaUsers(prev => prev.map(u => ({ ...u, isOnline: onlineUserIds.includes(u.id) })));
                 });
 
+                ws.on("user-left", (data) => {
+                    const { userId } = data;
+                    setArenaUsers(c => c.map(arenaUser => {
+                        if (arenaUser.id === userId) return { ...arenaUser, isOnline: false };
+                        return arenaUser;
+                    }))
+                });
+
                 ws.on("chat-message", (data) => {
                     const { groupPublicId, message: recievedMsg } = data;
                     // update group message cache and last message
