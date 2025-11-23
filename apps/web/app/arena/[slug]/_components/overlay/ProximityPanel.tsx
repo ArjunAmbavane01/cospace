@@ -55,7 +55,7 @@ export default function ProximityPanel({
     useEffect(() => {
         if (proximityUsers.length === 0) return;
         const userInProximity = proximityUsers[0];
-        if (!userInProximity) return;
+        if (!userInProximity || !userInProximity.isOnline) return;
         setCurrentVideoParticipant(userInProximity);
         if (remoteStream) {
             remoteStream.getTracks().forEach(track => {

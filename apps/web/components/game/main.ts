@@ -1,6 +1,7 @@
 import { Socket } from "socket.io-client";
 import { User } from "better-auth";
 import { ArenaUser } from "@/lib/validators/arena";
+import { PlayerPosPayload } from "@repo/schemas/arena-ws-events";
 import { Color, DisplayMode, Engine, vec, Actor, CollisionType } from "excalibur";
 import { COLLISION_MAP_TILES, ORIGINAL_MAP_WIDTH_PX, ORIGINAL_TILE_SIZE, ORIGINAL_ZOOM } from "./constants";
 import { MainCharacter } from "./actors/MainCharacter";
@@ -8,7 +9,6 @@ import { Island } from "./actors/Island";
 import { Character } from "./actors/Character";
 import { CollisionLayer } from "./actors/Collision";
 import { COLLISION_MAP } from "./CollisionMap";
-import { PlayerPosPayload } from "@repo/schemas/arena-ws-events";
 
 export const USER_PROXIMITY_EVENT = 'user-proximity';
 export const USER_LEFT_PROXIMITY_EVENT = 'user-left-proximity';
@@ -44,12 +44,37 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
     // Store characters with ID
     const otherUsers = new Map<string, ArenaUser>();
 
+    // get or create character for other users
+    const getOrCreateCharacter = (userId: string, playerPos: { x: number; y: number }) => {
+        let userWithCharacter = otherUsers.get(userId);
+
+        if (userWithCharacter) return userWithCharacter.character;
+
+        const userData = arenaUsers.find(u => u.id === userId);
+        if (!userData) return null;
+
+        // Create new character
+        const character = new Character(userData);
+        character.pos = vec(playerPos.x, playerPos.y);
+
+        userWithCharacter = {
+            ...userData,
+            character,
+        };
+
+        otherUsers.set(userId, userWithCharacter);
+        game.add(character);
+    };
+
     socket.on("player-pos", (data: PlayerPosPayload) => {
         const { userId, playerPos } = data;
-        const character = otherUsers.get(userId)?.character;
+
+        const character = getOrCreateCharacter(userId, playerPos);
         if (!character) return;
+
         character.setCurrentDirection(playerPos.direction);
         character.setIsMoving(playerPos.isMoving);
+
         const distance = character.pos.distance(vec(playerPos.x, playerPos.y));
         if (playerPos.isMoving || distance > 5) {
             character.setTargetPosition(vec(playerPos.x, playerPos.y));
@@ -65,26 +90,6 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
     const PROXIMITY_RADIUS = 150; // pixels
     const PROXIMITY_CHECK_INTERVAL = 200; // ms
     const usersInProximity = new Set<string>();
-
-    // create character for other users
-    const createUserCharacter = (user: ArenaUser) => {
-        if (otherUsers.has(user.id)) return;
-
-        const character = new Character(user);
-        const randomX = island.getMapWidth() / 2 - 100;
-        const randomY = island.getMapHeight() / 2 + 100;
-        character.pos = vec(randomX, randomY);
-        const newUser = {
-            ...user,
-            character,
-        }
-        otherUsers.set(user.id, newUser);
-        game.add(character);
-    };
-
-    // init characters for online users
-    const onlineUsers = arenaUsers.filter(user => user.isOnline);
-    onlineUsers.forEach(user => createUserCharacter(user));
 
     // create foreground layer
     const foreground = new Actor({
@@ -108,7 +113,7 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
     // proximity detection
     const checkProximity = () => {
         otherUsers.forEach((user) => {
-            if (!user.character) return;
+            if (!user.character || !user.isOnline) return;
             const distance = mainCharacter.pos.distance(user.character.pos);
             const isNearby = distance <= PROXIMITY_RADIUS;
 
@@ -136,12 +141,20 @@ export const InitGame = async (canvasElement: HTMLCanvasElement, arenaUsers: Are
 
     // listen for game events
     game.on("update-arena-users", (event) => {
-        const updatedArenaUsers = event as unknown as ArenaUser[];
-        const onlineUsers = updatedArenaUsers.filter(user => user.isOnline);
-        onlineUsers.forEach(user => {
-            if (!otherUsers.has(user.id)) createUserCharacter(user);
-        });
+        const updatedArenaUsers = event as ArenaUser[];
 
+        arenaUsers.splice(0, arenaUsers.length, ...updatedArenaUsers);
+
+        const onlineUserIds = new Set(updatedArenaUsers.filter(u => u.isOnline).map(u => u.id));
+        otherUsers.forEach((user, userId) => {
+            if (!onlineUserIds.has(userId)) {
+                if (user.character) {
+                    game.remove(user.character);
+                }
+                otherUsers.delete(userId);
+                usersInProximity.delete(userId);
+            }
+        });
     })
 
     // Cleanup on game stop

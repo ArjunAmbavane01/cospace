@@ -145,7 +145,7 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
             console.error(err);
             toast.error(err instanceof Error ? err.message : "Something went wrong");
         }
-    }, [handleSendMessage, isSending]);
+    }, [handleSendMessage, isSending, message]);
 
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         // new line on Shift+Enter
@@ -172,7 +172,7 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
                     <Tooltip>
                         <TooltipTrigger asChild>
                             <Button
-                                size="icon-sm"
+                                size="icon"
                                 variant="ghost"
                                 type="button"
                                 onClick={() => setOpenEmojiPanel(c => !c)}
@@ -194,22 +194,15 @@ export default function ChatInput({ slug, chatParticipant, user, activeGroup, se
                         />
                     )}
                 </div>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            size="icon-sm"
-                            variant="default"
-                            onClick={handleMessageInput}
-                            disabled={isSending || !message.trim()}
-                            type="button"
-                        >
-                            <LuSendHorizontal />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        Send
-                    </TooltipContent>
-                </Tooltip>
+                <Button
+                    size="icon"
+                    variant="default"
+                    onClick={handleMessageInput}
+                    disabled={isSending || !message.trim()}
+                    type="button"
+                >
+                    <LuSendHorizontal />
+                </Button>
             </div>
         </div>
     )

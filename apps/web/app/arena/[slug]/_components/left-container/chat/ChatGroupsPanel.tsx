@@ -95,13 +95,13 @@ export default function ChatGroupsPanel({
                     ...group,
                     participants: group.participants.map(p => {
                         const user = arenaUsers.find(a => a.id === p.id);
-                        return { ...p, isOnline: user?.isOnline }
+                        return { ...p, isOnline: user?.isOnline ?? false }
                     })
                 }))
                 await queryClient.setQueryData(["chat-groups", slug], updatedGroups)
             }
         })();
-    }, [arenaUsers]);
+    }, [arenaUsers, chatGroups, slug,]);
 
     const filteredGroups = useMemo(() => {
         if (!chatGroups) return [];
