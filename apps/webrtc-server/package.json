@@ -6,8 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -b",
-    "start": "tsx --env-file=.env src/index.ts",
-    "dev": "tsx watch --env-file=.env src/index.ts"
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts"
   },
   "turbo": {
      "env": [
