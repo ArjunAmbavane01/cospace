@@ -7,7 +7,7 @@ import { CallSession } from './types';
 const offers: CallSession[] = [];
 
 try {
-    const wss = new Server(Number(process.env.WEBRTC_PORT), {
+    const wss = new Server(Number(process.env.PORT), {
         cors: {
             origin: [process.env.FRONTEND_URL!],
             methods: ["GET", "POST"],

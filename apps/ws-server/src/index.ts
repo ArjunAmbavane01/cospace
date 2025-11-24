@@ -6,7 +6,7 @@ import { ServerToClientEvents } from "@repo/schemas/ws-arena-events";
 import { handleAuth } from './lib/handleAuth';
 
 try {
-    const wss = new Server<ClientToServerEvents, ServerToClientEvents>(Number(process.env.WS_PORT), {
+    const wss = new Server<ClientToServerEvents, ServerToClientEvents>(Number(process.env.PORT), {
         cors: {
             origin: [process.env.FRONTEND_URL!],
             methods: ["GET", "POST"],
