@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Hanken_Grotesk } from "next/font/google"
 import "./globals.css";
 import Provider from "./providers";
+import ViewportGuard from "@/components/ViewportGuard";
 import { Toaster } from "@/components/ui/sonner";
 import { ErrorIcon, InfoIcon, SuccessIcon, WarningIcon } from "@/components/icons";
 
@@ -24,30 +25,32 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={hankenGrotesk.className}>
         <Provider>
-          {children}
-          <Toaster
-            duration={3000}
-            toastOptions={{
-              classNames: {
-                description: 'group-[.toast]:text-muted-foreground',
-                actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
-                cancelButton: 'group-[.toast]:bg-white group-[.toast]:text-black',
-                error:
-                  'group toast !border-red-100 !bg-red-50 dark:!border-red-900 dark:!bg-red-950 !text-foreground !text-sm !shadow-lg',
-                success:
-                  'group toast !border-emerald-200 !bg-emerald-50 dark:!bg-emerald-950 dark:!border-emerald-900 !text-foreground !text-sm !shadow-lg',
-                warning:
-                  'group toast !bg-yellow !text-yellow-600 dark:!text-foreground !shadow-lg !text-sm',
-                info: 'group toast !bg-blue !text-blue-600 dark:!text-foreground !shadow-lg !text-sm',
-              },
-            }}
-            icons={{
-              success: <SuccessIcon />,
-              info: <InfoIcon />,
-              warning: <WarningIcon />,
-              error: <ErrorIcon />,
-            }}
-          />
+          <ViewportGuard>
+            {children}
+            <Toaster
+              duration={3000}
+              toastOptions={{
+                classNames: {
+                  description: 'group-[.toast]:text-muted-foreground',
+                  actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
+                  cancelButton: 'group-[.toast]:bg-white group-[.toast]:text-black',
+                  error:
+                    'group toast !border-red-100 !bg-red-50 dark:!border-red-900 dark:!bg-red-950 !text-foreground !text-sm !shadow-lg',
+                  success:
+                    'group toast !border-emerald-200 !bg-emerald-50 dark:!bg-emerald-950 dark:!border-emerald-900 !text-foreground !text-sm !shadow-lg',
+                  warning:
+                    'group toast !bg-yellow !text-yellow-600 dark:!text-foreground !shadow-lg !text-sm',
+                  info: 'group toast !bg-blue !text-blue-600 dark:!text-foreground !shadow-lg !text-sm',
+                },
+              }}
+              icons={{
+                success: <SuccessIcon />,
+                info: <InfoIcon />,
+                warning: <WarningIcon />,
+                error: <ErrorIcon />,
+              }}
+            />
+          </ViewportGuard>
         </Provider>
       </body>
     </html>
