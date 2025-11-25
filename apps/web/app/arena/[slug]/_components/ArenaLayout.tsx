@@ -36,6 +36,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
     const [socket, setSocket] = useState<Socket | null>(null);
     const [connectionError, setConnectionError] = useState<string | null>(null);
     const [isSocketConnecting, setIsSocketConnecting] = useState<boolean>(false);
+    const [retryTrigger, setRetryTrigger] = useState(0);
 
     const {
         localStream,
@@ -60,6 +61,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
         setConnectionError(null);
         setIsSocketConnecting(true);
         setSocket(null);
+        setRetryTrigger(prev => prev + 1);
     }, []);
 
     const handleMediaToggle = useCallback((mediaType: "video" | "audio", enabled: boolean, participantId: string) => {
@@ -230,7 +232,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
             setIsSocketConnecting(false);
             setSocket(null);
         }
-    }, [slug, userSession?.session?.token]);
+    }, [slug, userSession?.session?.token, retryTrigger]);
 
     if (isSocketConnecting) return <ArenaLoading />
 

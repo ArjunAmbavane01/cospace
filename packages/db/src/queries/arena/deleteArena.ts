@@ -5,8 +5,8 @@ import { arenas } from "../../schemas";
 export const deleteArena = async (arenaSlug: string, userId: string) => {
     try {
         if (!arenaSlug.trim() || !userId) throw new Error("Invalid arena or user information")
-            
-        // check who is trying to delete arena
+
+        // check if arena exists
         const arenaRecord = await db
             .select({ adminId: arenas.adminId, arenaId: arenas.id })
             .from(arenas)
