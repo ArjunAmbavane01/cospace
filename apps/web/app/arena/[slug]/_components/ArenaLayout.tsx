@@ -218,7 +218,7 @@ export default function ArenaLayout({ slug, arenaUsers: participants, userSessio
                     )
                 });
 
-                setSocket(ws);
+                if (!isCancelled) setSocket(ws);
             } catch (err) {
                 setSocket(null);
                 setIsSocketConnecting(false);

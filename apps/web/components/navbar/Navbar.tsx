@@ -8,7 +8,7 @@ export default function Navbar() {
       <div className='flex justify-between items-center h-16 w-full mx-auto'>
         <div className='flex items-center gap-5'>
           <div className='flex items-center justify-center bg-blue-600 border rounded-lg size-10'>
-            <TbTopologyStar3 className='size-5' />
+            <TbTopologyStar3 className='size-5 text-white' />
           </div>
           <h3>CoSpace</h3>
         </div>

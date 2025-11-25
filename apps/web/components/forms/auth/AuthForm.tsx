@@ -52,7 +52,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 <div className="col-span-1 flex flex-col justify-center items-center gap-6 p-10 h-[550px] w-full rounded-lg">
                     <div className="flex flex-col items-center gap-3 text-center">
                         <div className='flex items-center justify-center bg-blue-600 border rounded-lg size-10'>
-                            <TbTopologyStar3 className='size-5' />
+                            <TbTopologyStar3 className='size-5 text-white' />
                         </div>
                         <h2>
                             {

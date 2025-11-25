@@ -35,7 +35,7 @@ export default function ArenaLoading() {
     return (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-center">
             <div className='flex items-center justify-center bg-blue-600 border rounded-lg size-10'>
-                <TbTopologyStar3 className='size-5' />
+                <TbTopologyStar3 className='size-5 text-white' />
             </div>
             <h3>{tips[tipIndex]}</h3>
             <Progress value={progress} className="w-56" />

@@ -38,10 +38,10 @@ try {
                 return { userId: roomUser.data.userId }
             })
 
-            socket.to(socket.data.arenaSlug).emit("online-users", {
+            socket.emit("online-users", {
                 onlineUserIds: onlineUsers.map(u => u.userId)
-            })
-
+            });
+            
             socket.to(socket.data.arenaSlug).emit("user-joined", {
                 userId: socket.data.userId,
                 userName: socket.data.userName,
