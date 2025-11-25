@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { ClientToServerEvents } from "@repo/schemas/arena-ws-events";
@@ -9,6 +10,10 @@ import { handleAuth } from './lib/handleAuth';
 
 try {
     const app = express();
+    app.use(cors({
+        origin: [process.env.FRONTEND_URL!],
+        credentials: true
+    }));
     app.get("/health", (_, res) => res.send("WS server ok"));
 
     const server = createServer(app);

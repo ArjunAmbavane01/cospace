@@ -36,7 +36,7 @@ export class Character extends Actor {
     }
 
     async onInitialize(): Promise<void> {
-        const characterImage = new ImageSource('/assets/characters/alex.png');
+        const characterImage = new ImageSource('/assets/characters/Alex.png');
         await characterImage.load();
 
         const spriteSheet = SpriteSheet.fromImageSource({

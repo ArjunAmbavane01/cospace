@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
 import express from "express";
+import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
 import { handleAuth } from './lib/handleAuth';
@@ -10,6 +11,10 @@ const offers: CallSession[] = [];
 
 try {
     const app = express();
+    app.use(cors({
+        origin: [process.env.FRONTEND_URL!],
+        credentials: true
+    }));
     app.get("/health", (_, res) => res.send("WebRTC server ok"));
 
     const server = createServer(app);
