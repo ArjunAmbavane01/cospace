@@ -51,7 +51,7 @@ export default function MapPanel({ user, arenaUsers, setActiveChatUserId, setAct
                         filteredArenaUsers.length === 0 ? (
                             <div className="flex justify-center items-center h-40 p-5 text-muted-foreground text-center border border-dashed rounded-xl text-balance">
                                 <h4>
-                                    You're alone here. <span className="text-foreground">Invite</span> others to join.
+                                    You&apos;re alone here. <span className="text-foreground">Invite</span> others to join.
                                 </h4>
                             </div>
                         ) : (

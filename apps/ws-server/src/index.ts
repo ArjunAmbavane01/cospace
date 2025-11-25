@@ -1,12 +1,19 @@
 import dotenv from 'dotenv';
 dotenv.config();
+import express from "express";
+import { createServer } from "http";
 import { Server } from "socket.io";
 import { ClientToServerEvents } from "@repo/schemas/arena-ws-events";
 import { ServerToClientEvents } from "@repo/schemas/ws-arena-events";
 import { handleAuth } from './lib/handleAuth';
 
 try {
-    const wss = new Server<ClientToServerEvents, ServerToClientEvents>(Number(process.env.PORT), {
+    const app = express();
+    app.get("/health", (_, res) => res.send("WS server ok"));
+
+    const server = createServer(app);
+
+    const wss = new Server<ClientToServerEvents, ServerToClientEvents>(server, {
         cors: {
             origin: [process.env.FRONTEND_URL!],
             methods: ["GET", "POST"],
@@ -63,6 +70,10 @@ try {
         } catch (err) {
             console.error(err instanceof Error ? err.message : "Some internal error occurred");
         }
+    });
+
+    server.listen(process.env.PORT, () => {
+        console.log(`Listening on PORT ${process.env.PORT}`);
     });
 } catch (err) {
     console.error("Failed to start server", err);

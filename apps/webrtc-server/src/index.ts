@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 dotenv.config();
+import express from "express";
+import { createServer } from "http";
 import { Server } from "socket.io";
 import { handleAuth } from './lib/handleAuth';
 import { CallSession } from './types';
@@ -7,7 +9,12 @@ import { CallSession } from './types';
 const offers: CallSession[] = [];
 
 try {
-    const wss = new Server(Number(process.env.PORT), {
+    const app = express();
+    app.get("/health", (_, res) => res.send("WebRTC server ok"));
+
+    const server = createServer(app);
+
+    const wss = new Server(server, {
         cors: {
             origin: [process.env.FRONTEND_URL!],
             methods: ["GET", "POST"],
@@ -101,6 +108,9 @@ try {
         }
     });
 
+    server.listen(process.env.PORT, () => {
+        console.log(`Listening on PORT ${process.env.PORT}`);
+    })
 } catch (err) {
     console.error("Failed to start server", err);
 }

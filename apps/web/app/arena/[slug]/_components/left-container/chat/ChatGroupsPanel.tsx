@@ -70,7 +70,7 @@ export default function ChatGroupsPanel({
         socket.emit("chat-groups", {
             chatGroupIds: chatGroups.map((g) => g.publicId)
         })
-    }, [chatGroups]);
+    }, [chatGroups, socket]);
 
     // when user is selected, select its group
     useEffect(() => {

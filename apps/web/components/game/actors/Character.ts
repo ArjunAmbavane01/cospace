@@ -1,4 +1,4 @@
-import { Actor, vec, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas, Engine, Vector } from "excalibur";
+import { Actor, vec, CollisionType, ImageSource, SpriteSheet, Animation, range, Canvas, Vector } from "excalibur";
 import { PlayerDirection } from "@/lib/validators/game";
 import { ArenaUser } from "@/lib/validators/arena";
 

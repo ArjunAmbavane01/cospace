@@ -145,7 +145,7 @@ export default function HubDashboard({ userSession }: HubDashboardProps) {
             setUser(userSession.user);
             setToken(userSession.session.token);
         }
-    }, [user, userSession])
+    }, [user, userSession, setToken, setUser])
 
     // fetching error effect
     useEffect(() => {

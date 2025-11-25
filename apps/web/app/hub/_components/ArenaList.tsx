@@ -20,7 +20,7 @@ export default function ArenaList({
     deleteArena,
     leaveArena,
 }: ArenaListProps) {
-    
+
     if (isError) {
         return (
             <div className="text-destructive text-center p-20 border border-dashed rounded-xl">
@@ -28,7 +28,7 @@ export default function ArenaList({
             </div>
         )
     }
-   
+
     if (filteredArenas.length === 0 && searchQuery) {
         return (
             <div className="text-muted-foreground text-center p-20 border border-dashed rounded-xl break-all whitespace-normal">
@@ -41,7 +41,7 @@ export default function ArenaList({
         return (
             <div className="text-muted-foreground text-center p-20 border border-dashed rounded-xl">
                 <h4>
-                    You don't have any arenas yet.{" "}
+                    You don&apos;t have any arenas yet.{" "}
                     <span className="text-foreground">Create Arena</span> or{" "}
                     <span className="text-foreground">join</span>{" "}
                     one to begin!

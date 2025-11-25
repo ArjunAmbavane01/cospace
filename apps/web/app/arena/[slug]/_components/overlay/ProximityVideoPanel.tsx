@@ -86,7 +86,7 @@ export default function ProximityVideoPanel({
         return () => {
             socket.off("media-toggle", handleRemoteMediaToggle);
         };
-    }, [socket, participant.id]);
+    }, [socket, participant.id, admin.id]);
 
 
     const { name: participantName, image: participantImage } = participant;

@@ -6,11 +6,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -b",
+    "dev": "tsx watch --env-file=.env src/index.ts",
     "start": "tsx src/index.ts",
-    "dev": "tsx watch src/index.ts"
+    "start:local": "tsx --env-file=.env src/index.ts"
   },
   "turbo": {
-     "env": [
+    "env": [
       "DATABASE_URL",
       "UPSTASH_REDIS_REST_URL",
       "UPSTASH_REDIS_REST_TOKEN",
@@ -26,7 +27,9 @@
   "dependencies": {
     "@repo/db": "workspace:*",
     "@repo/schemas": "workspace:*",
+    "@types/express": "^5.0.5",
     "dotenv": "^17.2.3",
+    "express": "^5.1.0",
     "socket.io": "^4.8.1",
     "tsx": "^4.20.6",
     "zod": "^4.1.12"

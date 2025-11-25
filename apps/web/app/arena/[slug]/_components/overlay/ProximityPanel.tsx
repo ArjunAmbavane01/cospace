@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { User } from 'better-auth'
 import { Socket } from 'socket.io-client';
 import { ArenaUser } from '@/lib/validators/arena'
@@ -76,7 +76,7 @@ export default function ProximityPanel({
             handleResetCallSession();
             setCurrentVideoParticipant(null);
         }
-    }, [proximityUsers, handleResetCallSession, remoteStream]);
+    }, [proximityUsers, handleResetCallSession, currentVideoParticipant, remoteStream]);
 
     return (
         <div className='flex justify-center gap-10 absolute top-3 inset-x-0 mx-auto w-full opacity-95'>
