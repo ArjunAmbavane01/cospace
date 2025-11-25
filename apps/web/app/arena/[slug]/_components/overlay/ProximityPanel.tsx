@@ -57,14 +57,21 @@ export default function ProximityPanel({
         const userInProximity = proximityUsers[0];
         if (!userInProximity || !userInProximity.isOnline) return;
         setCurrentVideoParticipant(userInProximity);
-        if (remoteStream) {
+
+        if (adminUser.id < userInProximity.id) {
+            handleCreateOffer(userInProximity.id);
+        }
+
+    }, [proximityUsers, handleCreateOffer, adminUser.id, remoteStream]);
+
+    useEffect(() => {
+        if (remoteStream && currentVideoParticipant) {
+            // Enable all tracks when remote stream is available
             remoteStream.getTracks().forEach(track => {
                 track.enabled = true;
             });
         }
-        if (adminUser.id < userInProximity.id) handleCreateOffer(userInProximity.id);
-
-    }, [proximityUsers, handleCreateOffer, adminUser.id, remoteStream]);
+    }, [remoteStream, currentVideoParticipant]);
 
     useEffect(() => {
         if (proximityUsers.length === 0 && currentVideoParticipant) {

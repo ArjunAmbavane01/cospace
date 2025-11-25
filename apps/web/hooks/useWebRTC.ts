@@ -75,13 +75,10 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
     const handleIncomingOffer = useCallback(async (newOffer: CallSession) => {
 
         try {
-            console.log("offer received");
-
             if (!webrtcSocket || !peerConnection || !newOffer?.offer) return;
 
             setTypeOfCall("answer");
             await peerConnection.setRemoteDescription(newOffer.offer);
-
             for (const ice of pendingIce) {
                 try {
                     await peerConnection.addIceCandidate(ice);
@@ -100,7 +97,6 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
             setCallSession(newCallSession);
             const offererIceCandidates = await webrtcSocket.emitWithAck("answer", newCallSession);
             console.log("answer sent")
-
             offererIceCandidates.forEach(async (iceC: RTCIceCandidateInit) => {
                 try {
                     if (peerConnection.remoteDescription) await peerConnection.addIceCandidate(iceC)
@@ -111,7 +107,7 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
         } catch (err) {
             console.error('Error handling incoming offer : ', err);
         }
-    }, [webrtcSocket, peerConnection, callSession,]);
+    }, [webrtcSocket, peerConnection, callSession, pendingIce]);
 
     const handleIncomingAnswer = useCallback(async (answerAckObj: CallSession) => {
         try {
@@ -196,12 +192,24 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
 
                 createdPeerConnection.addEventListener("track", (e) => {
                     if (!e.streams[0]) return;
+                    e.streams[0].getTracks().forEach(track => {
+                        createdRemoteStream.addTrack(track);
+                    });
+
+                    // set Updated stream with recieved tracks
+                    setRemoteStream(prevStream => {
+                        if (!prevStream) return prevStream;
+                        return new MediaStream(prevStream.getTracks());
+                    });
+                });
+
+                createdPeerConnection.addEventListener("track", (e) => {
+                    if (!e.streams[0]) return;
                     e.streams[0].getTracks().forEach(track => createdRemoteStream.addTrack(track))
                 });
 
                 setPeerConnection(createdPeerConnection);
                 setRemoteStream(createdRemoteStream);
-
                 localStream.getTracks().forEach(track => {
                     createdPeerConnection.addTrack(track, localStream);
                 });

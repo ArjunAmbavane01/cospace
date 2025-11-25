@@ -31,34 +31,12 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
         if (localStream) return;
         const getUserStream = async () => {
             try {
-                if (hasPermissionsAPI) {
-
-                    micStatusRef.current = await navigator.permissions.query({ name: "microphone" });
-                    cameraStatusRef.current = await navigator.permissions.query({ name: "camera" });
-
-                    setMicPermission(micStatusRef.current.state);
-                    setCameraPermission(cameraStatusRef.current.state);
-
-                    micStatusRef.current.onchange = () => {
-                        setMicPermission(micStatusRef.current!.state);
-                        if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
-                            getUserStream();
-                        }
-                    }
-
-                    cameraStatusRef.current.onchange = () => {
-                        setCameraPermission(cameraStatusRef.current!.state);
-                        if (micStatusRef.current!.state === "granted" && cameraStatusRef.current!.state === "granted" && !localStream) {
-                            getUserStream();
-                        }
-                    }
-                    if (micStatusRef.current.state !== "granted" || cameraStatusRef.current.state !== "granted") return;
-                }
 
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
                 });
+
                 setMicPermission("granted");
                 setCameraPermission("granted");
 
@@ -67,6 +45,19 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
                     else if (track.kind === "video") track.enabled = isCameraOn;
                 })
                 setLocalStream(stream);
+
+                if (hasPermissionsAPI) {
+                    micStatusRef.current = await navigator.permissions.query({ name: "microphone" });
+                    cameraStatusRef.current = await navigator.permissions.query({ name: "camera" });
+
+                    micStatusRef.current.onchange = () => {
+                        setMicPermission(micStatusRef.current!.state);
+                    }
+
+                    cameraStatusRef.current.onchange = () => {
+                        setCameraPermission(cameraStatusRef.current!.state);
+                    }
+                }
             } catch (err) {
                 toast.error(err instanceof Error ? err.message : "Media error occurred. Please try again.");
                 setMicPermission("denied");
@@ -174,7 +165,7 @@ export default function MediaSetup({ localStream, setLocalStream, setIsUserMedia
                         onClick={() => setIsUserMediaReady(true)}
                         disabled={!isMicGranted || !isCameraGranted}
                     >
-                        Next
+                        Enter Arena
                     </Button>
                 </div>
             </div>
