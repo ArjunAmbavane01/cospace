@@ -105,12 +105,16 @@ export default function ChatGroupsPanel({
 
     const filteredGroups = useMemo(() => {
         if (!chatGroups) return [];
-        return chatGroups.filter((group) =>
-            group.participants
-                .map((p) => p.name?.toLowerCase())
-                .join(" ")
-                .includes(searchQuery.toLowerCase())
-        );
+        return chatGroups
+            .filter((group) =>
+                group.participants
+                    .map((p) => p.name?.toLowerCase())
+                    .join(" ")
+                    .includes(searchQuery.toLowerCase())
+            )
+            .sort((g1, g2) => {
+                return (g2.lastMessage?.createdAt?.getTime() ?? 0) - (g1.lastMessage?.createdAt?.getTime() ?? 0);
+            });
     }, [chatGroups, searchQuery]);
 
     // sets ActiveGroupId, after checking if group already exists

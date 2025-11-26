@@ -5,12 +5,12 @@ import { useRouter } from "next/navigation";
 import useAuth from "hooks/useAuth";
 import SignInForm from "./SignInForm";
 import SignUpForm from "./SignUpForm";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
+import Logo from "@/components/Logo";
 import { toast } from "sonner";
-import { ArrowLeft, Users } from "lucide-react";
-import { TbTopologyStar3 } from "react-icons/tb";
+import { ArrowLeft } from "lucide-react";
 
 interface AuthFormProps {
     mode: "signin" | "signup";
@@ -51,9 +51,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 </Button>
                 <div className="col-span-1 flex flex-col justify-center items-center gap-6 p-10 h-[550px] w-full rounded-lg">
                     <div className="flex flex-col items-center gap-3 text-center">
-                        <div className='flex items-center justify-center bg-blue-600 border rounded-lg size-10'>
-                            <TbTopologyStar3 className='size-5 text-white' />
-                        </div>
+                        <Logo />
                         <h2>
                             {
                                 mode === "signup" ?
