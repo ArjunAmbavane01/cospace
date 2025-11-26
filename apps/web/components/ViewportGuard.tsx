@@ -7,15 +7,15 @@ export default function ViewportGuard({ children }: { children: React.ReactNode 
   const [isSupported, setIsSupported] = useState(true);
   const MIN_WIDTH = 1024;
 
-  useEffect(() => {
-    const checkViewport = () => {
-      setIsSupported(window.innerWidth >= MIN_WIDTH);
-    };
+  // useEffect(() => {
+  //   const checkViewport = () => {
+  //     setIsSupported(window.innerWidth >= MIN_WIDTH);
+  //   };
 
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    return () => window.removeEventListener('resize', checkViewport);
-  }, []);
+  //   checkViewport();
+  //   window.addEventListener('resize', checkViewport);
+  //   return () => window.removeEventListener('resize', checkViewport);
+  // }, []);
 
   // to start both server and reduce cold start latency
   useEffect(() => {
