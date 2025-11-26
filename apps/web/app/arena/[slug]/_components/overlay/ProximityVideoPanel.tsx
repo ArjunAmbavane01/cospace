@@ -129,7 +129,7 @@ export default function ProximityVideoPanel({
                 )}
 
                 <h6 className='flex items-center gap-1 absolute bottom-1.5 left-1.5 bg-white/40 rounded p-1 px-2'>
-                    {!isMicOn && <IoMdMicOff size={14} className='text-destructive' />}
+                    {!isMicOn && <IoMdMicOff size={12} className='text-destructive' />}
                     You
                 </h6>
 
@@ -186,7 +186,7 @@ export default function ProximityVideoPanel({
                 )}
 
                 <h6 className='flex items-center gap-1 absolute bottom-1.5 left-1.5 bg-white/40 rounded p-1 px-2'>
-                    {!participantMicOn && <IoMdMicOff size={14} className='text-destructive' />}
+                    {!participantMicOn && <IoMdMicOff size={12} className='text-destructive' />}
                     {participantName}
                 </h6>
             </div>

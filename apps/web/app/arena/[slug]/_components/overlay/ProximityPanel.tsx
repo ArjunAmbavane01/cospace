@@ -86,7 +86,7 @@ export default function ProximityPanel({
     }, [proximityUsers, handleResetCallSession, currentVideoParticipant, remoteStream]);
 
     return (
-        <div className='flex justify-center gap-10 absolute top-3 inset-x-0 mx-auto w-full opacity-95'>
+        <div className='flex justify-center gap-10 absolute top-3 inset-x-0 mx-auto w-full'>
             {proximityUsers.length > 0 && currentVideoParticipant &&
                 <ProximityVideoPanel
                     admin={adminUser}

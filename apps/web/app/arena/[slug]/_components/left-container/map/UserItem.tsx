@@ -18,7 +18,7 @@ export default function UserItem({ user, setActiveTab, setActiveChatUserId }: Us
     <div className="flex items-center justify-between gap-3 p-2 rounded-lg hover:bg-accent transition group">
       <div className="flex items-center gap-3">
         <div className="flex justify-center items-center size-7 relative">
-          <div className="absolute size-2.5 bg-accent bottom-0 right-0 rounded-full">
+          <div className="absolute size-2.5 bg-accent bottom-0 right-0 rounded-full z-20">
             <div className={cn(
               "absolute size-[9px] border bottom-0 right-0 rounded-full",
               user.isOnline ? "bg-success" : "bg-muted-foreground"
@@ -28,9 +28,9 @@ export default function UserItem({ user, setActiveTab, setActiveChatUserId }: Us
             user.image ?
               <Image src={user.image} alt="User image" width={40} height={40} className="size-full rounded-full" />
               :
-              <Avatar className="size-full rounded-full">
+              <Avatar className="size-full rounded-full border border-blue-600">
                 <AvatarImage src={user.image ?? undefined} alt="User image" />
-                <AvatarFallback>{userInitials}</AvatarFallback>
+                <AvatarFallback className="bg-blue-500 text-white">{userInitials}</AvatarFallback>
               </Avatar>
           }
         </div>

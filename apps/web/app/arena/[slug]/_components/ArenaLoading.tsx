@@ -37,6 +37,9 @@ export default function ArenaLoading() {
             <Logo />
             <h3>{tips[tipIndex]}</h3>
             <Progress value={progress} className="w-56" />
+            <p className="text-sm text-muted-foreground max-w-xs text-balance">
+                Due to cold start, loading may take longer. If it stalls, please refresh or try again in a minute.
+            </p>
         </div>
     );
 }

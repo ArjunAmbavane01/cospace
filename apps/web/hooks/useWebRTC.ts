@@ -203,11 +203,6 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
                     });
                 });
 
-                createdPeerConnection.addEventListener("track", (e) => {
-                    if (!e.streams[0]) return;
-                    e.streams[0].getTracks().forEach(track => createdRemoteStream.addTrack(track))
-                });
-
                 setPeerConnection(createdPeerConnection);
                 setRemoteStream(createdRemoteStream);
                 localStream.getTracks().forEach(track => {
