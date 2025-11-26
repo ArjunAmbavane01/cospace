@@ -120,7 +120,7 @@ export const useWebRTC = (userSession: { user: User; session: Session }, slug: s
     }, [peerConnection]);
 
     const handleIncomingIceCandidates = useCallback(async (iceC: RTCIceCandidateInit) => {
-        if (!iceC) return;
+        if (!iceC || !iceC.candidate) return;
 
         if (!peerConnection?.remoteDescription) {
             setPendingIce(prev => [...prev, iceC]);
