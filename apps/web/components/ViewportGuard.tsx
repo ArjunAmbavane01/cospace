@@ -1,21 +1,21 @@
 'use client';
 
-import { Laptop } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { Laptop } from 'lucide-react';
 
 export default function ViewportGuard({ children }: { children: React.ReactNode }) {
   const [isSupported, setIsSupported] = useState(true);
   const MIN_WIDTH = 1024;
 
-  // useEffect(() => {
-  //   const checkViewport = () => {
-  //     setIsSupported(window.innerWidth >= MIN_WIDTH);
-  //   };
+  useEffect(() => {
+    const checkViewport = () => {
+      setIsSupported(window.innerWidth >= MIN_WIDTH);
+    };
 
-  //   checkViewport();
-  //   window.addEventListener('resize', checkViewport);
-  //   return () => window.removeEventListener('resize', checkViewport);
-  // }, []);
+    checkViewport();
+    window.addEventListener('resize', checkViewport);
+    return () => window.removeEventListener('resize', checkViewport);
+  }, []);
 
   // to start both server and reduce cold start latency
   useEffect(() => {
@@ -33,7 +33,6 @@ export default function ViewportGuard({ children }: { children: React.ReactNode 
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center p-6">
         <div className="space-y-5 max-w-md w-full p-8 bg-white text-center text-primary-foreground rounded-2xl shadow-xl">
-          {/* Icon */}
           <div className="flex items-center justify-center p-3 mx-auto size-16 bg-blue-500 border border-blue-800 rounded-full">
             <Laptop className='size-10 text-foreground' />
           </div>
@@ -84,7 +83,6 @@ export default function ViewportGuard({ children }: { children: React.ReactNode 
             </ul>
           </div>
 
-          {/* Footer */}
           <div className="pt-4 border-t border-gray-100">
             <p className="text-xs text-gray-500">
               Mobile support is coming soon. Thank you for your understanding.
